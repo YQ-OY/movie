@@ -1,0 +1,39 @@
+server:
+  port: 8888
+
+# MinIO（上传文件走对象存储；请按实际环境修改） minio.exe server D:\minio\data
+minio:
+  endpoint: http://10.168.61.208:9000
+  bucket-name: movie
+  access-key: minioadmin
+  secret-key: minioadmin
+  # true：上传返回「后端代理地址」/api/upload/view?key=… ，桶保持私有也可在页面显示图片
+  # false：返回 MinIO 直链（需桶匿名读或自行配策略）
+  use-proxy-url: true
+  # 须与浏览器访问后端的根地址一致（与 vue 里 config.API_URL 同源或同主机+端口）
+  proxy-base-url: http://127.0.0.1:8888
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      # 默认 1MB 会导致上传稍大图即报 Maximum upload size exceeded
+      max-file-size: 50MB
+      max-request-size: 55MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/movie?characterEncoding=utf8&serverTimezone=UTC
+    username: root
+    password: 123456
+  cache:
+    redis:
+      #使用前缀
+      use-key-prefix: true
+      #redis过期时间
+      time-to-live: 60s
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: ASSIGN_UUID
+      #schema: classpath:/sql/schema.sql
+  type-aliases-package: com.movie.api.model.entity
