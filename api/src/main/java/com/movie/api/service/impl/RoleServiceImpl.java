@@ -20,6 +20,7 @@ public class RoleServiceImpl implements RoleService {
     @Resource
     private RoleMapper roleMapper;
 
+    // 为员工添加权限
     @Override
     public Role create(Role role) throws Exception {
         if (Roles.ROLE_WORKER.equals(role.getValue())) {
@@ -37,6 +38,7 @@ public class RoleServiceImpl implements RoleService {
         return role;
     }
 
+    // 根据ID删除权限（不能删除员工基本权限）
     @Override
     public void deleteById(String id) throws Exception {
         Role role = roleMapper.selectById(id);
@@ -44,6 +46,7 @@ public class RoleServiceImpl implements RoleService {
         roleMapper.deleteById(id);
     }
 
+    // 查询员工的所有权限
     @Override
     public List<Role> listRolesByWorkerId(String wid) {
         QueryWrapper<Role> wrapper = new QueryWrapper<>();
@@ -51,6 +54,7 @@ public class RoleServiceImpl implements RoleService {
         return roleMapper.selectList(wrapper);
     }
 
+    // 删除员工的所有权限
     @Override
     public void deleteWorkerAllRoles(String wid) {
         roleMapper.delete(new QueryWrapper<Role>().in("wid", wid));

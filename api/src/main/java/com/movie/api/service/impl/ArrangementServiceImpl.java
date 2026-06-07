@@ -35,6 +35,7 @@ public class ArrangementServiceImpl implements ArrangementService {
     @Resource
     private FilmService filmService;
 
+    // 保存排片场次（自动计算结束时间并校验场次不重叠）
     @Override
     public void save(Arrangement arrangement) {
         fillEndTimeAndAssertNoOverlap(arrangement, null);
@@ -43,17 +44,20 @@ public class ArrangementServiceImpl implements ArrangementService {
         arrangementMapper.insert(arrangement);
     }
 
+    // 查询所有排片
     @Override
     public List<Arrangement> findAll() {
         return arrangementMapper.selectList(null);
     }
 
+    // 根据电影ID查询排片及电影信息
     @Override
     public ArrangementVO findByFilmId(String fid) {
         List<Arrangement> list = arrangementMapper.selectList(new QueryWrapper<Arrangement>().in("fid", fid));
         return new ArrangementVO(list, filmMapper.selectById(fid));
     }
 
+    // 获取场次已选座位列表
     @Override
     public List<Integer> getSeatsHaveSelected(Long id) {
         List<Order> orders = orderMapper.selectList(new QueryWrapper<Order>().in("aid", id));
@@ -67,16 +71,19 @@ public class ArrangementServiceImpl implements ArrangementService {
         return seats;
     }
 
+    // 根据ID查询排片
     @Override
     public Arrangement findById(Long id) {
         return arrangementMapper.selectById(id);
     }
 
+    // 根据ID删除排片
     @Override
     public void deleteById(Long id) {
         arrangementMapper.deleteById(id);
     }
 
+    // 更新排片信息（自动重新计算结束时间并校验不重叠）
     @Override
     public Arrangement Update(Arrangement arrangement) {
         fillEndTimeAndAssertNoOverlap(arrangement, arrangement.getId());
@@ -84,9 +91,7 @@ public class ArrangementServiceImpl implements ArrangementService {
         return arrangement;
     }
 
-    /**
-     * 按影片时长写入结束时间，并校验同一电影下场次区间 [开始, 结束) 互不重叠。
-     */
+    // 按影片时长计算结束时间，并校验同一电影下场次区间不重叠
     private void fillEndTimeAndAssertNoOverlap(Arrangement a, Long excludeId) {
         if (a.getFid() == null || a.getFid().trim().isEmpty()) {
             throw new IllegalArgumentException("请选择电影");

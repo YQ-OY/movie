@@ -26,17 +26,20 @@ public class LeavingMessageServiceImpl implements LeavingMessageService {
     @Resource
     private UserMapper userMapper;
 
+    // 保存留言
     @Override
     public void save(LeavingMessage leavingMessage) {
         leavingMessage.setCreateAt(DataTimeUtil.getNowTimeString());
         leavingMessageMapper.insert(leavingMessage);
     }
 
+    // 回复留言
     @Override
     public void reply(LeavingMessage leavingMessage) {
         leavingMessageMapper.updateById(leavingMessage);
     }
 
+    // 查询所有留言（含用户信息）
     @Override
     public List<LeavingMessageVO> findAll() {
         List<LeavingMessage> list = leavingMessageMapper.selectList(null);
@@ -48,6 +51,7 @@ public class LeavingMessageServiceImpl implements LeavingMessageService {
         return result;
     }
 
+    // 查询活跃用户（按留言数量降序排列）
     @Override
     public List<ActiveUserVO> findActiveUsers() {
         List<ActiveUserVO> result = new ArrayList<>();

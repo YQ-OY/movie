@@ -21,6 +21,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Resource
     private ActivityMapper activityMapper;
 
+    // 报名参加活动（校验活动状态、防重复报名）
     @Override
     public void create(Registration registration) throws Exception {
         //获取要参加的活动id
@@ -50,16 +51,19 @@ public class RegistrationServiceImpl implements RegistrationService {
         registrationMapper.insert(registration);
     }
 
+    // 根据ID查询报名记录
     @Override
     public Registration findById(String id) {
         return registrationMapper.selectById(id);
     }
 
+    // 查询所有报名记录
     @Override
     public List<Registration> findAll() {
         return registrationMapper.selectList(null);
     }
 
+    // 根据ID删除报名记录
     @Override
     public void deleteById(String id) {
         registrationMapper.deleteById(id);

@@ -9,6 +9,9 @@ import '@/styles/table-expand-detail.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
+// iconfont引入
+import '@/assets/iconfont/iconfont.css'
+
 const app = createApp(App)
 app.use(router)
 app.use(ElementPlus, { locale: zhCn })

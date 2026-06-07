@@ -38,6 +38,7 @@ public class CartServiceImpl implements CartService {
     @Resource
     private FilmMapper filmMapper;
 
+    // 添加商品到购物车
     @Override
     public void save(Cart cart) throws Exception {
         ValidationUtil.requireValidMobileCN(cart.getPhone(), "手机号码");
@@ -51,18 +52,21 @@ public class CartServiceImpl implements CartService {
         cartMapper.insert(cart);
     }
 
+    // 根据ID删除购物车项
     @Override
     @CacheEvict
     public void deleteById(String id) {
         cartMapper.deleteById(id);
     }
 
+    // 清空用户所有购物车项
     @Override
     @CacheEvict
     public void deleteAllByUserId(String uid) {
         cartMapper.delete(new QueryWrapper<Cart>().in("uid", uid));
     }
 
+    // 查询用户的所有购物车项（含电影和场次详情）
     @Override
     @Cacheable
     public List<CartVO> findAllByUserId(String uid) {
@@ -77,6 +81,7 @@ public class CartServiceImpl implements CartService {
         return result;
     }
 
+    // 批量删除购物车项
     @Override
     public void deleteCarts(List<Cart> carts) {
         for (Cart c : carts) {
@@ -84,6 +89,7 @@ public class CartServiceImpl implements CartService {
         }
     }
 
+    // 结算购物车（将购物车项转为订单）
     @Override
     public void settleCarts(List<Cart> carts) throws Exception {
         for (Cart c : carts) {

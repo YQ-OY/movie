@@ -1,5 +1,6 @@
 import service from "../utils/request";
 
+// 获取所有电影
 export function ListAllFilm() {
     return service({
         url: '/film',
@@ -7,6 +8,16 @@ export function ListAllFilm() {
     })
 }
 
+// 电影分页查询
+export function listFilmPage(params) {
+  return service({
+    url: '/film/page',
+    method: 'get',
+    params
+  })
+}
+
+// 根据id删除电影
 export function DeleteById(id){
     return service({
         url: '/film/' + id,
@@ -14,6 +25,7 @@ export function DeleteById(id){
     })
 }
 
+// 添加电影
 export function AddFilm(data){
     return service({
         url: '/film',
@@ -22,6 +34,7 @@ export function AddFilm(data){
     })
 }
 
+// 更新电影
 export function UpdateFilm(data){
     return service({
         url: '/film',
@@ -30,6 +43,7 @@ export function UpdateFilm(data){
     })
 }
 
+// 添加电影排片
 export function AddArrangement(data){
     return service({
         url: '/arrangement',
@@ -38,6 +52,7 @@ export function AddArrangement(data){
     })
 }
 
+// 更新电影排片
 export function UpdateArrangement(data){
     return service({
         url: '/arrangement',
@@ -46,6 +61,7 @@ export function UpdateArrangement(data){
     })
 }
 
+// 获取所有电影排片
 export function FindAllArrangement(){
     return service({
         url: '/arrangement',
@@ -53,6 +69,7 @@ export function FindAllArrangement(){
     })
 }
 
+// 根据id删除电影排片
 export function DeleteArrangement(id){
     return service({
         url: '/arrangement?id=' + id,
@@ -60,6 +77,7 @@ export function DeleteArrangement(id){
     })
 }
 
+// 添加电影海报
 export function AddPoster(data){
     return service({
         url: '/poster',
@@ -68,6 +86,7 @@ export function AddPoster(data){
     })
 }
 
+// 获取所有电影海报
 export function ListAllPoster(){
     return service({
         url: "/poster",
@@ -75,6 +94,7 @@ export function ListAllPoster(){
     })
 }
 
+// 删除所有电影海报
 export function DeleteAllPoster(){
     return service({
         url: "/poster",
@@ -82,6 +102,7 @@ export function DeleteAllPoster(){
     })
 }
 
+// 根据id删除电影海报
 export function DeletePosterById(id){
     return service({
         url: "/poster/" + id,
@@ -89,6 +110,7 @@ export function DeletePosterById(id){
     })
 }
 
+// 更新电影海报
 export function UpdatePoster(data){
     return service({
         url: "/poster",

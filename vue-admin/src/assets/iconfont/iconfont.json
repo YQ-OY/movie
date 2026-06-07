@@ -1,0 +1,142 @@
+{
+  "id": "5191290",
+  "name": "movie",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "5985623",
+      "name": "注意",
+      "font_class": "zhuyi",
+      "unicode": "e61e",
+      "unicode_decimal": 58910
+    },
+    {
+      "icon_id": "8412376",
+      "name": "修改",
+      "font_class": "xiugai",
+      "unicode": "e700",
+      "unicode_decimal": 59136
+    },
+    {
+      "icon_id": "9306187",
+      "name": "搜索",
+      "font_class": "sousuo",
+      "unicode": "e619",
+      "unicode_decimal": 58905
+    },
+    {
+      "icon_id": "10487570",
+      "name": "通知",
+      "font_class": "tongzhi",
+      "unicode": "e69b",
+      "unicode_decimal": 59035
+    },
+    {
+      "icon_id": "16421532",
+      "name": "新增-线性",
+      "font_class": "xinzeng-xianxing",
+      "unicode": "e633",
+      "unicode_decimal": 58931
+    },
+    {
+      "icon_id": "24737052",
+      "name": "删除",
+      "font_class": "shanchu",
+      "unicode": "ed1b",
+      "unicode_decimal": 60699
+    },
+    {
+      "icon_id": "37507643",
+      "name": "刷新-F",
+      "font_class": "shuaxin-F",
+      "unicode": "e616",
+      "unicode_decimal": 58902
+    },
+    {
+      "icon_id": "1306575",
+      "name": "员工管理",
+      "font_class": "yuangongguanli",
+      "unicode": "e6be",
+      "unicode_decimal": 59070
+    },
+    {
+      "icon_id": "3187232",
+      "name": "新增员工",
+      "font_class": "xinzengyuangong",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "4608981",
+      "name": "电影，视频",
+      "font_class": "dianyingshipin",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "6176596",
+      "name": "运营分析",
+      "font_class": "yunyingfenxi",
+      "unicode": "e632",
+      "unicode_decimal": 58930
+    },
+    {
+      "icon_id": "6246304",
+      "name": "用户",
+      "font_class": "yonghu",
+      "unicode": "e64e",
+      "unicode_decimal": 58958
+    },
+    {
+      "icon_id": "10378735",
+      "name": "xs_异常订单",
+      "font_class": "xs_yichangdingdan",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "11125228",
+      "name": "订单",
+      "font_class": "6",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "11453464",
+      "name": "排片",
+      "font_class": "paipian",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "15085885",
+      "name": "海报分享",
+      "font_class": "haibaofenxiang",
+      "unicode": "e63b",
+      "unicode_decimal": 58939
+    },
+    {
+      "icon_id": "26398311",
+      "name": "电影列表",
+      "font_class": "dianyingliebiao",
+      "unicode": "e647",
+      "unicode_decimal": 58951
+    },
+    {
+      "icon_id": "26841829",
+      "name": "员工",
+      "font_class": "yuangong",
+      "unicode": "ea3f",
+      "unicode_decimal": 59967
+    },
+    {
+      "icon_id": "28682292",
+      "name": "每日工作",
+      "font_class": "meirigongzuo",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    }
+  ]
+}

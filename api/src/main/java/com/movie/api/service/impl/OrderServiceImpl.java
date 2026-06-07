@@ -38,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     @Resource
     private FilmMapper filmMapper;
 
+    // 创建订单（从购物车生成订单，同时增加电影热度）
     @Override
     public Order create(Cart cart) throws Exception {
         Arrangement arrangement = arrangementService.findById(cart.getAid());
@@ -76,6 +77,7 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
+    // 支付订单（校验超时和场次状态）
     @Override
     public Order pay(String id) throws Exception {
         Order order = orderMapper.selectById(id);
@@ -99,16 +101,19 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
+    // 更新订单信息
     @Override
     public void update(Order order) {
         orderMapper.updateById(order);
     }
 
+    // 查询所有订单（含用户、电影、场次关联信息）
     @Override
     public List<OrderVO> findAll() {
         return findByWrapper(new QueryWrapper<>());
     }
 
+    // 根据用户ID查询订单
     @Override
     public List<OrderVO> findByUser(String uid) {
         QueryWrapper<Order> wrapper = new QueryWrapper<>();
@@ -116,6 +121,7 @@ public class OrderServiceImpl implements OrderService {
         return findByWrapper(wrapper);
     }
 
+    // 根据条件查询订单并组装VO
     private List<OrderVO> findByWrapper(QueryWrapper<Order> wrapper) {
         List<Order> orders = orderMapper.selectList(wrapper);
         List<OrderVO> result = new ArrayList<>();

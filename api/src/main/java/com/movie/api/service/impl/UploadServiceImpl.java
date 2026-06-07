@@ -19,6 +19,7 @@ public class UploadServiceImpl implements UploadService {
     @Resource
     private UploadMapper uploadMapper;
 
+    // 检查并保存上传文件（MD5去重，相同文件不重复存储）
     @Override
     public String checkAndSaveUpload(MultipartFile file) {
         try {
@@ -44,6 +45,7 @@ public class UploadServiceImpl implements UploadService {
         return null;
     }
 
+    // 根据ID删除上传文件
     @Override
     public void deleteById(String id) {
         uploadMapper.deleteById(id);

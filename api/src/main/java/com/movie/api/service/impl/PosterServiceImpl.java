@@ -17,6 +17,7 @@ public class PosterServiceImpl implements PosterService {
     @Resource
     private PosterMapper posterMapper;
 
+    // 保存海报
     @Override
     public void save(Poster poster) {
         poster.setId(UUID.randomUUID().toString());
@@ -24,16 +25,19 @@ public class PosterServiceImpl implements PosterService {
         posterMapper.insert(poster);
     }
 
+    // 更新海报
     @Override
     public void update(Poster poster) {
         posterMapper.updateById(poster);
     }
 
+    // 查询所有海报
     @Override
     public List<Poster> findAll() {
         return posterMapper.selectList(null);
     }
 
+    // 根据状态查询海报
     @Override
     public List<Poster> findByStatus(boolean status) {
         QueryWrapper<Poster> wrapper = new QueryWrapper<>();
@@ -41,11 +45,13 @@ public class PosterServiceImpl implements PosterService {
         return posterMapper.selectList(wrapper);
     }
 
+    // 根据ID删除海报
     @Override
     public void deleteById(String id) {
         posterMapper.deleteById(id);
     }
 
+    // 删除所有海报
     @Override
     public void deleteAll() {
         posterMapper.delete(null);

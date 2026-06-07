@@ -19,6 +19,7 @@ public class AdminServiceImpl implements AdminService {
     @Resource
     private AdminMapper adminMapper;
 
+    // 管理员登录验证，返回JWT令牌
     @Override
     public String login(LoginDto loginDto) throws Exception {
         QueryWrapper<Admin> wrapper = new QueryWrapper<>();
@@ -32,5 +33,13 @@ public class AdminServiceImpl implements AdminService {
         roles.add(Roles.ROLE_ADMIN);
         return JwtTokenUtil.createToken(loginDto.getUsername(), roles, exp);
     }
+
+    // 更新管理员信息
+    @Override
+    public Admin update(Admin admin) {
+        adminMapper.updateById(admin);
+        return admin;
+    }
+
 
 }

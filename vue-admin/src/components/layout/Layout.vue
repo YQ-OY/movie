@@ -1,15 +1,15 @@
 <template>
   <el-container class="layout-root">
-    <el-aside width="250px" class="app-aside">
-      <Aside/>
+    <el-aside :width="isCollapse ? '64px' : '250px'" class="app-aside" :class="{ 'is-collapse': isCollapse }">
+      <Aside :is-collapse="isCollapse" />
     </el-aside>
     <el-container class="layout-main-column">
       <el-header shadow="always" class="app-header">
-        <Header/>
+        <Header :is-collapse="isCollapse" @toggle-collapse="toggleCollapse" />
       </el-header>
       <el-main class="app-main">
         <div class="content">
-          <router-view/>
+          <router-view />
         </div>
       </el-main>
     </el-container>
@@ -26,7 +26,17 @@ export default {
     Header,
     Aside
   },
-}
+  data() {
+    return {
+      isCollapse: false   // 侧边栏折叠状态
+    };
+  },
+  methods: {
+    toggleCollapse() {
+      this.isCollapse = !this.isCollapse;
+    }
+  }
+};
 </script>
 
 <style scoped>
@@ -41,14 +51,14 @@ export default {
 }
 
 .app-aside {
-  width: 250px !important;
-  min-width: 250px !important;
-  max-width: 250px !important;
   flex-shrink: 0 !important;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: #242930;
+  background: #ffffff;
+  /* 侧边栏背景改为白色，与之前改造一致 */
+  border-right: 1px solid #eaeef2;
+  transition: width 0.3s ease;
   box-sizing: border-box;
 }
 
@@ -64,17 +74,19 @@ export default {
 .app-header {
   flex-shrink: 0;
   height: 60px !important;
-  padding: 0 20px;
+  padding: 0;
   box-sizing: border-box;
+  background: #ffffff;
+  border-bottom: 1px solid #eaeef2;
 }
 
 .app-main {
   flex: 1;
-  min-height: 0;
+  height: 0;
   overflow: hidden;
-  padding: 20px;
+  padding: 0px;
   box-sizing: border-box;
-  background: #f5f6f7;
+  background: #f5f7fa;
   display: flex;
   flex-direction: column;
 }
@@ -84,10 +96,10 @@ export default {
   min-height: 0;
   width: 100%;
   background: #ffffff;
-  border-radius: 4px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  overflow: auto;
 }
 </style>

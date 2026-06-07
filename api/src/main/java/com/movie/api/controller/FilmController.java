@@ -1,6 +1,7 @@
 package com.movie.api.controller;
 
 import com.movie.api.model.entity.Film;
+import com.movie.api.model.vo.PageResult;
 import com.movie.api.service.FilmService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +33,18 @@ public class FilmController {
             return filmService.findByRegionAndType(region, type);
         }
         return filmService.findAll();
+    }
+
+    @GetMapping("/page")
+    @Operation(summary = "分页查询电影（支持名称模糊、类型多选、地区多选、状态筛选）")
+    public PageResult<Film> page(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "5") Integer size,
+            @RequestParam(required = false) String name,                 // 电影名称模糊搜索
+            @RequestParam(required = false) List<String> type,          // 类型多选
+            @RequestParam(required = false) List<String> region,        // 地区多选
+            @RequestParam(required = false) Boolean status) {           // 上架状态
+        return filmService.findByPage(page, size, name, type, region, status);
     }
 
     @GetMapping("/scheduled")

@@ -35,6 +35,7 @@ public class WorkerServiceImpl implements WorkerService {
     @Resource
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    // 创建员工（含默认权限ROLE_WORKER）
     @Override
     public Worker create(Worker worker) throws Exception {
         ValidationUtil.requireValidMobileCN(worker.getPhone(), "联系电话");
@@ -53,6 +54,7 @@ public class WorkerServiceImpl implements WorkerService {
         return worker;
     }
 
+    // 员工登录验证
     @Override
     public Worker login(LoginDto dto) throws Exception {
         QueryWrapper<Worker> wrapper = new QueryWrapper<>();
@@ -63,6 +65,7 @@ public class WorkerServiceImpl implements WorkerService {
         return worker;
     }
 
+    // 更新员工信息
     @Override
     public void update(Worker worker) throws Exception {
         ValidationUtil.requireValidMobileCN(worker.getPhone(), "联系电话");
@@ -75,11 +78,13 @@ public class WorkerServiceImpl implements WorkerService {
         workerMapper.updateById(worker);
     }
 
+    // 查询所有员工
     @Override
     public List<Worker> findAll() {
         return workerMapper.selectList(null);
     }
 
+    // 查询在职员工公开信息（用于前端展示）
     @Override
     public List<WorkerPublicVO> listPublicShowcase() {
         QueryWrapper<Worker> q = new QueryWrapper<>();
@@ -89,11 +94,13 @@ public class WorkerServiceImpl implements WorkerService {
                 .collect(Collectors.toList());
     }
 
+    // 根据ID查询员工
     @Override
     public Worker findById(String id) {
         return workerMapper.selectById(id);
     }
 
+    // 根据ID删除员工及所有权限
     @Override
     public void deleteById(String id) {
         workerMapper.deleteById(id);

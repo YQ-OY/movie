@@ -19,6 +19,7 @@ public class OrderExceptionServiceImpl implements OrderExceptionService {
     @Resource
     private OrderExceptionMapper orderExceptionMapper;
 
+    // 创建订单异常记录
     @Override
     public OrderException create(OrderException orderException) {
         orderException.setStatus(false);
@@ -28,11 +29,13 @@ public class OrderExceptionServiceImpl implements OrderExceptionService {
         return orderException;
     }
 
+    // 查询所有订单异常
     @Override
     public List<OrderException> findAll() {
         return orderExceptionMapper.selectList(null);
     }
 
+    // 处理订单异常（记录处理结束时间）
     @Override
     public void handleException(OrderException orderException) {
         orderException.setEndAt(DataTimeUtil.getNowTimeString());

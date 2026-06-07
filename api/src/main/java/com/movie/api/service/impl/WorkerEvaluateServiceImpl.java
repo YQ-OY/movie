@@ -20,6 +20,7 @@ public class WorkerEvaluateServiceImpl implements WorkerEvaluateService {
     @Resource
     private WorkerEvaluateMapper workerEvaluateMapper;
 
+    // 保存员工评价
     @Override
     public void save(WorkerEvaluate workerEvaluate) {
         workerEvaluate.setCreateAt(DataTimeUtil.getNowTimeString());
@@ -27,18 +28,21 @@ public class WorkerEvaluateServiceImpl implements WorkerEvaluateService {
         workerEvaluateMapper.insert(workerEvaluate);
     }
 
-    @CacheEvict
+    // 根据ID删除评价
     @Override
+    @CacheEvict
     public void deleteById(String id) {
         workerEvaluateMapper.deleteById(id);
     }
 
-    @CacheEvict
+    // 删除员工的所有评价
     @Override
+    @CacheEvict
     public void deleteAllByWid(String wid) {
         workerEvaluateMapper.delete(new QueryWrapper<WorkerEvaluate>().in("wid", wid));
     }
 
+    // 根据员工ID查询评价
     @Override
     public List<WorkerEvaluate> findByWorkerId(String wid) {
         return workerEvaluateMapper.selectList(new QueryWrapper<WorkerEvaluate>().in("wid", wid));

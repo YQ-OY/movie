@@ -33,6 +33,7 @@ public class StatsServiceImpl implements StatsService {
     @Resource
     private FilmMapper filmMapper;
 
+    // 构建仪表盘统计数据（订单统计、营收、影片排行、每日订单趋势）
     @Override
     public DashboardStatsVO buildDashboard() {
         DashboardStatsVO vo = new DashboardStatsVO();
@@ -98,6 +99,7 @@ public class StatsServiceImpl implements StatsService {
         return vo;
     }
 
+    // 统计指定状态的订单数量
     private static long countStatus(List<Order> orders, Integer status) {
         return orders.stream().filter(o -> o.getStatus() != null && o.getStatus().equals(status)).count();
     }

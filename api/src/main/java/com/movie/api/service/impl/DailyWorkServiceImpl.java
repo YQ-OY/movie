@@ -16,6 +16,7 @@ public class DailyWorkServiceImpl implements DailyWorkService {
     @Resource
     private DailyWorkMapper dailyWorkMapper;
 
+    // 保存工作日志
     @Override
     public void save(DailyWork dailyWork) {
         dailyWork.setId(UUID.randomUUID().toString());
@@ -23,11 +24,13 @@ public class DailyWorkServiceImpl implements DailyWorkService {
         dailyWorkMapper.insert(dailyWork);
     }
 
+    // 查询所有工作日志
     @Override
     public List<DailyWork> findAll() {
         return dailyWorkMapper.selectList(null);
     }
 
+    // 根据ID删除工作日志
     @Override
     public void deleteById(String id) {
         dailyWorkMapper.deleteById(id);

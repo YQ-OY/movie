@@ -1,6 +1,7 @@
 package com.movie.api.service;
 
 import com.movie.api.model.entity.Film;
+import com.movie.api.model.vo.PageResult;
 
 import java.util.List;
 
@@ -27,4 +28,5 @@ public interface FilmService {
 
     Film update(Film film);
 
+    PageResult<Film> findByPage(Integer page, Integer size, String name, List<String> type, List<String> region, Boolean status);
 }

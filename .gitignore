@@ -27,6 +27,7 @@
 **/*.local
 **/.env.local
 **/.env.*.local
+**/.npm-cache/
 
 # ====================
 # 日志文件

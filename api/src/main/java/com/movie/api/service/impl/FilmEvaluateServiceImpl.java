@@ -32,6 +32,7 @@ public class FilmEvaluateServiceImpl implements FilmEvaluateService {
     @Resource
     private UserMapper userMapper;
 
+    // 保存电影评价（同时增加电影热度）
     @Override
     public void save(FilmEvaluate filmEvaluate) throws Exception {
         QueryWrapper<FilmEvaluate> wrapper = new QueryWrapper<>();
@@ -49,6 +50,7 @@ public class FilmEvaluateServiceImpl implements FilmEvaluateService {
         filmMapper.updateById(film);
     }
 
+    // 根据电影ID查询所有评价（含用户信息）
     @Override
     public List<FilmEvaluateVO> findAllByFilmId(String fid) {
         List<FilmEvaluateVO> result = new ArrayList<>();
@@ -63,16 +65,19 @@ public class FilmEvaluateServiceImpl implements FilmEvaluateService {
         return result;
     }
 
+    // 删除电影的所有评价
     @Override
     public void deleteAllByFilmId(String fid) {
         filmEvaluateMapper.delete(new QueryWrapper<FilmEvaluate>().in("fid", fid));
     }
 
+    // 根据ID删除评价
     @Override
     public void deleteById(String id) {
         filmEvaluateMapper.deleteById(id);
     }
 
+    // 计算电影平均星级（四舍五入到最近的0.5）
     @Override
     public Double averageStarRoundedHalf(String fid) {
         if (fid == null || fid.trim().isEmpty()) {
@@ -89,6 +94,7 @@ public class FilmEvaluateServiceImpl implements FilmEvaluateService {
         return Math.round(v * 2.0) / 2.0;
     }
 
+    // 批量查询所有电影的平均星级（fid → 平均星级）
     @Override
     public Map<String, Double> mapAvgStarsRoundedHalfByFid() {
         List<Map<String, Object>> rows = filmEvaluateMapper.selectAvgStarGroupedByFid();
