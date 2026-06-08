@@ -23,8 +23,8 @@ public class OrderController {
     @PostMapping("")
     @Operation(summary = "创建订单")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    public void save(@RequestBody Cart cart) throws Exception {
-        orderService.create(cart);
+    public Order save(@RequestBody Cart cart) throws Exception {
+        return orderService.create(cart);
     }
 
     @GetMapping("")

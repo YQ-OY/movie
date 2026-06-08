@@ -13,6 +13,8 @@ function allowRuntimeErrorInOverlay(error) {
 
 module.exports = defineConfig({
   devServer: {
+    port: 8080,
+    historyApiFallback: true,
     client: {
       overlay: {
         runtimeErrors: allowRuntimeErrorInOverlay,

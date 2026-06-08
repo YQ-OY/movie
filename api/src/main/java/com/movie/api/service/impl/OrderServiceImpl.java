@@ -1,6 +1,7 @@
 package com.movie.api.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.movie.api.model.entity.User;
 import com.movie.api.constant.OrderStatus;
 import com.movie.api.mapper.FilmMapper;
 import com.movie.api.mapper.OrderMapper;
@@ -75,6 +76,78 @@ public class OrderServiceImpl implements OrderService {
         film.setHot(film.getHot() + split.length);
         filmMapper.updateById(film);
         return order;
+    }
+
+    @Override
+    public Order validateForAlipayPay(String orderId, String username) throws Exception {
+        Order order = validateOrderForAlipayPay(orderId);
+
+        QueryWrapper<User> userWrapper = new QueryWrapper<>();
+        userWrapper.eq("username", username);
+        User user = userMapper.selectOne(userWrapper);
+        if (user == null || !user.getId().equals(order.getUid())) {
+            throw new Exception("无权支付该订单");
+        }
+
+        return order;
+    }
+
+    @Override
+    public Order validateOrderForAlipayPay(String orderId) throws Exception {
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new Exception("订单不存在");
+        }
+
+        if (!OrderStatus.PAYMENT_WAITING.equals(order.getStatus())) {
+            throw new Exception("订单状态不允许支付");
+        }
+
+        Arrangement arrangement = arrangementService.findById(order.getAid());
+        if (arrangement != null && !ArrangementScheduleUtil.isTicketSaleAllowed(arrangement)) {
+            throw new Exception("开场前" + ArrangementScheduleUtil.TICKET_SALES_CLOSE_BEFORE_MINUTES + "分钟停止售票");
+        }
+
+        if (DataTimeUtil.parseTimeStamp(order.getCreateAt()) + OrderStatus.EXPIRATION_TIME
+                < System.currentTimeMillis()) {
+            order.setStatus(OrderStatus.PAYMENT_FAILED);
+            orderMapper.updateById(order);
+            throw new Exception("订单支付超时");
+        }
+
+        return order;
+    }
+
+    @Override
+    public void completeAlipayPayment(String orderId, String payAt) throws Exception {
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new Exception("订单不存在");
+        }
+        if (OrderStatus.PAYMENT_SUCCESSFUL.equals(order.getStatus())) {
+            return;
+        }
+        if (!OrderStatus.PAYMENT_WAITING.equals(order.getStatus())) {
+            return;
+        }
+        order.setStatus(OrderStatus.PAYMENT_SUCCESSFUL);
+        order.setPayAt(payAt != null && !payAt.isEmpty() ? payAt : DataTimeUtil.getNowTimeString());
+        orderMapper.updateById(order);
+    }
+
+    @Override
+    public String buildPaySubject(String orderId) throws Exception {
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new Exception("订单不存在");
+        }
+        Arrangement arrangement = arrangementService.findById(order.getAid());
+        if (arrangement == null) {
+            return "电影票订单-" + orderId.substring(0, 8);
+        }
+        Film film = filmMapper.selectById(arrangement.getFid());
+        String filmName = film != null ? film.getName().trim() : "电影票";
+        return filmName + " - " + order.getSeats().trim();
     }
 
     // 支付订单（校验超时和场次状态）

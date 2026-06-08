@@ -12,6 +12,14 @@ public interface OrderService {
 
     Order pay(String id) throws Exception;
 
+    Order validateForAlipayPay(String orderId, String username) throws Exception;
+
+    Order validateOrderForAlipayPay(String orderId) throws Exception;
+
+    void completeAlipayPayment(String orderId, String payAt) throws Exception;
+
+    String buildPaySubject(String orderId) throws Exception;
+
     void update(Order order);
 
     List<OrderVO> findAll();

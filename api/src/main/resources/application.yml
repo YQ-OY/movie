@@ -1,19 +1,23 @@
 server:
   port: 8888
 
+# MinIO（上传文件走对象存储；请按实际环境修改） minio.exe server D:\minio\data
 minio:
   endpoint: http://172.26.192.208:9000
-#  endpoint: http://localhost:9000
   bucket-name: movie
   access-key: minioadmin
   secret-key: minioadmin
+  # true：上传返回「后端代理地址」/api/upload/view?key=… ，桶保持私有也可在页面显示图片
+  # false：返回 MinIO 直链（需桶匿名读或自行配策略）
   use-proxy-url: true
+  # 须与浏览器访问后端的根地址一致（与 vue 里 config.API_URL 同源或同主机+端口）
   proxy-base-url: http://127.0.0.1:8888
 
 spring:
   servlet:
     multipart:
       enabled: true
+      # 默认 1MB 会导致上传稍大图即报 Maximum upload size exceeded
       max-file-size: 50MB
       max-request-size: 55MB
   datasource:
@@ -23,7 +27,9 @@ spring:
     password: 123456
   cache:
     redis:
+      #使用前缀
       use-key-prefix: true
+      #redis过期时间
       time-to-live: 60s
 mybatis-plus:
   global-config:
@@ -31,3 +37,16 @@ mybatis-plus:
       id-type: ASSIGN_UUID
       #schema: classpath:/sql/schema.sql
   type-aliases-package: com.movie.api.model.entity
+
+alipay:
+  appId: 9021000164652731
+  appPrivateKey: MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCIwdnD/HbjELGJp8uJdUVc37iW7Fz1oMESlx07St6fgO5O5xEpOoVcv6xPuItpOtj3ko25OX+UMw/0nzncLnZCz/pOzOnhtkmpV3OOM4ttFJXLeWbr6yRk7LioWE8u1I5CWz42poTLKHSmnuqCcBLwrHXp6qxbUAcnKt8htziMK/uKdwfFBVOFSqCGzfvNR5lnD05NNins6hs/RF3nYBWo6mCOhoBrLYwGMrVMbNuKs+h9VfUrFGpoc/5GEci//BRnwDJSYU4JQQJCxtWN2b/VWrfY5fa5dS+jazLJKoKfV0Hhg/m7z4g3kwUGFiGy+FWSQgqcrblr/TruZzrnV/09AgMBAAECggEAam5TSA/nhnerc/I+mU/HF6yVP//bqN3e5NTuTwLJl2EEFiwGUwvUVoZlV/XLqa2+xY4s9gYln/TNahexNAaEyyKJL2KScrMnSL9ikzzSOaZXne9xhhGOVW1VmM6BcXTC8imIlYequWFWx4XOBI2sb9oIOnAEi1wQ9Q6McPTi8VL1qiOc+v2k75ux9eRnsxNuJuzu8wCvp/7HZY48PSdmjxzXOYFzuu1oLoM0Y8Aua4HBcATCTu0sQLELwDnJk6aclXnsrpxIx2EdgkDfGIZD7UYM8W+Apce9+71dQ6WmtOcYnLKmJucYbRtO2Bvnx92aDT52g4SqGTTxfh+8t8agEQKBgQDHqmiEZU4vhDfNhjHrbQinmG3sfrc9ce1aa2GueOVgO6m7QtA5ej4nNj1REPGkckd5cELEC+gTxKBEVaMBY5xeH/F0wtGcWiyzE5mPk+P/JCGTsdHLdy/RzCnAa201kOKD5GPhPAtfKe8pG4ECv6RsEMtxJUjy8qfOXCnpZXh80wKBgQCvV6Xqy/oJfxfBWMueOLgKwDhFMopk9U2qgCMApUA0yB+WYw7ZmcaaIwooETd3CrCrmA5XeFtxX3qaWhbp01kvlZzmHQSazEgaZ8gZazoNSa1LdzkuJLxnR5Gg8HyU28sGXetreAzsGVN92/Pnf9a5Kpuz5czn5H0aPaEldg0TrwKBgQCHcwACSOM4ct6US2QUDNyhLVPs6q2OPnpBK7WRcaxRk0f6pEGzrEz7ttzz4KW85FW+eTyh2F3xAyOiF+JD7/pFFDBuADfIdJf8R+CVuUMjc7RfiHMFL26+SV1NjtMAUrCHvulPA7fHMCBxZ5ombjGxqdcJg7ywK5NQ987q6Y5KRwKBgG5L2yGkZ8dbfAzylzsTAKo6merlTOsO52kOK3Z3fLj2/e+yph+5PJWu3u+vTM2EGvgFsVfSbOsXHV9Etk8l1F87ZLPXoxLg16ZMjDF5Is5C/1COUZi2IRFykqfDPwrAa6i4oaM7pB1MHRn5pyaDYwWdSM5UCp4AO7Wq+NhAtx8fAoGAWuAth56jOkFwmfuobsTeCBtSLbPZHXcqnNgaWSmIfJ16hd/mUhaM/CaRdVSQQNNBrs9PCu35LoaSBndGUVxSwOwQxB6H5YI8W0VL6yeqVOQfmxI37N+fBwj/Od8e9K2PKJGmB5D/A5PA89TkaS/OBcx/TCl0Fm8tEolPmDHSJYM=
+  alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo+LBIxAKwKXww07alnOTUeZ79ZSlJCn8bFE2+l6MlOiUHBqglljvpYWBVfOC5hgvEZaHtqrKgtBTFal8UnGCshy3YJ34jRZNagSbGVYjmiESj0HSbcdtdLHzKEx3Zo8Ny94P5mOPxhZ8hVj6QLJZIG9UTLxxtRLRR72C+rhN05NolJwU6irvzXv99lwzI0/VW58d0Z9rMmLYHZAyG7KTqSUVBX4wZXrC8GR70vAG8lyS4lFUfUUmnvAZNbruwpiE2/7y5eo9UABWETK4/+j5H9YzukCdOdJ7kSGgrQYURp3Zf7knwtMriemcvkhoQYQuq3SkhNe5POVPhvC3pMUQAQIDAQAB
+  notifyUrl: http://tc96627a.natappfree.cc/api/alipay/notify
+  # 须与 vue-app 开发服务器端口一致（vue-cli 默认 8080）
+  returnUrl: http://localhost:8080/pay/success
+  signType: RSA2
+  charset: UTF-8
+  format: json
+  # 我的支付宝网关地址
+  gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do

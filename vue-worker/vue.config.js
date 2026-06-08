@@ -13,6 +13,7 @@ function allowRuntimeErrorInOverlay(error) {
 
 module.exports = defineConfig({
   devServer: {
+    port: 8082,
     client: {
       overlay: {
         runtimeErrors: allowRuntimeErrorInOverlay,

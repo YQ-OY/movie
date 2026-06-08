@@ -17,6 +17,18 @@ const routes = [
     },
 
     {
+        path: '/pay',
+        name: 'PayJump',
+        component: () => import("@/views/pay/PayJump")
+    },
+
+    {
+        path: '/pay/success',
+        name: 'PaySuccess',
+        component: () => import("@/views/pay/PaySuccess")
+    },
+
+    {
         path: '/',
         component: Layout,
         children: [

@@ -40,22 +40,6 @@
       </div>
     </div>
 
-    <el-dialog
-        title="扫码支付"
-        :show-close="false"
-        width="30%"
-        v-model="centerDialogVisible"
-    >
-      <div>
-        <img class="c-img" src="../../assets/img/c.jpeg" alt="">
-      </div>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button type="primary" @click="submitPay">支 付 成 功</el-button>
-        </span>
-      </template>
-    </el-dialog>
-
   </div>
 </template>
 
@@ -68,9 +52,6 @@ export default {
   components: { Delete },
   data() {
     return {
-      i: 0,
-      success: false,
-      centerDialogVisible: false,
       loading: false,
       price: 0,
       selectList: [],
@@ -91,6 +72,7 @@ export default {
       ListCarts(this.uid).then(res => {
         setTimeout(() => {
           this.cartList = res.data
+          this.selectList = []
           for (let i = 0; i < this.cartList.length; i++) {
             this.selectList[i] = {checked: false, cart: this.cartList[i].cart}
           }
@@ -130,59 +112,55 @@ export default {
 
     handleDelete(index) {
       DeleteCartById(this.cartList[index].cart.id).then(res => {
-        console.log(res)
         if (res.success) {
           this.cartList.splice(index, 1)
+          this.selectList.splice(index, 1)
+          this.checkOut()
         }
       })
     },
 
     submitCart() {
-      this.$confirm('请您仔细确认订单金额为' + this.price + '元, 是否继续?', '提示', {
+      const checkedItems = this.selectList.filter(item => item.checked)
+      if (checkedItems.length === 0) {
+        this.$message.warning('请先选择要结算的商品')
+        return
+      }
+
+      this.$confirm('请您仔细确认订单金额为' + this.price + '元, 确认后将跳转至支付宝沙箱完成支付', '提示', {
         confirmButtonText: '确认支付',
         cancelButtonText: '取消支付',
         type: 'success',
         center: true
-      }).then(() => {
-        for (let i = 0; i < this.selectList.length; i++) {
-          if (this.selectList[i].checked) {
-            this.selectList[i].cart.status = 2
-            this.centerDialogVisible = true
-            this.i = i
+      }).then(async () => {
+        this.loading = true
+        const orderIds = []
+        try {
+          for (const item of checkedItems) {
+            item.cart.status = 0
+            const res = await CreateOrder(item.cart)
+            if (res.success && res.data && res.data.id) {
+              orderIds.push(res.data.id)
+              await DeleteCartById(item.cart.id)
+            }
           }
+          if (orderIds.length === 0) {
+            this.$message.error('创建订单失败，请稍后重试')
+            return
+          }
+          if (orderIds.length > 1) {
+            this.$message.success('已生成 ' + orderIds.length + ' 个订单，其余订单可在「我的订单」中继续支付')
+          }
+          this.$router.push({ path: '/pay', query: { orderId: orderIds[0] } })
+        } finally {
+          this.loading = false
         }
       }).catch(() => {
-        for (let i = 0; i < this.selectList.length; i++) {
-          if (this.selectList[i].checked) {
-            this.selectList[i].cart.status = 0
-            CreateOrder(this.selectList[i].cart).then(res => {
-              if (res.success) {
-                DeleteCartById(this.selectList[i].cart.id)
-                this.$message({
-                  type: 'warning',
-                  message: '用户已取消支付, 请您前往我的订单进行支付'
-                });
-                this.loadCarts()
-              }
-            })
-          }
-        }
+        this.$message({
+          type: 'warning',
+          message: '用户已取消支付'
+        });
       });
-    },
-
-    submitPay() {
-      const i = this.i
-      CreateOrder(this.selectList[i].cart).then(res => {
-        if (res.success) {
-          this.centerDialogVisible = false
-          DeleteCartById(this.selectList[i].cart.id)
-          this.$message({
-            type: 'success',
-            message: '恭喜你支付成功!'
-          });
-          this.loadCarts()
-        }
-      })
     },
 
   },
@@ -229,11 +207,6 @@ export default {
   padding-left: 10px;
   letter-spacing: 1px;
   color: #91949c;
-}
-
-.c-img {
-  width: 100%;
-  height: 100%;
 }
 
 .sub-btn {

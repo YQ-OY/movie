@@ -29,37 +29,19 @@
       </el-card>
     </div>
 
-    <el-dialog
-        title="扫码支付"
-        :show-close="false"
-        width="30%"
-        v-model="centerDialogVisible"
-    >
-      <div>
-        <img class="c-img" src="../../assets/img/c.jpeg" alt="">
-      </div>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button type="primary" @click="submitPay">支 付 成 功</el-button>
-        </span>
-      </template>
-    </el-dialog>
-
   </div>
 </template>
 
 <script>
-import {FindOrderByUser, PayForOrder} from "@/api/order";
+import {FindOrderByUser} from "@/api/order";
 
 export default {
   name: "Order",
 
   data() {
     return {
-      centerDialogVisible: false,
       loading: false,
       orderList: [],
-      payOrderId: '',
     }
   },
 
@@ -79,39 +61,20 @@ export default {
       })
     },
 
-    handlePay(order, index) {
-      this.open(order, index);
-    },
-
-    open(order, index) {
-      this.$confirm('请您仔细确认订单金额为' + order.price + '元, 是否继续?', '提示', {
+    handlePay(order) {
+      this.$confirm('请您仔细确认订单金额为' + order.price + '元, 确认后将跳转至支付宝沙箱完成支付', '提示', {
         confirmButtonText: '确认支付',
         cancelButtonText: '取消支付',
         type: 'success',
         center: true
       }).then(() => {
-        this.loading = true
-        this.centerDialogVisible = true
-        this.payOrderId = order.id
+        this.$router.push({ path: '/pay', query: { orderId: order.id } })
       }).catch(() => {
         this.$message({
           type: 'warning',
           message: '用户已取消支付'
         });
       });
-    },
-
-    submitPay() {
-      PayForOrder(this.payOrderId).then(res => {
-        this.loadOrder();
-        this.centerDialogVisible = false
-        if (res.success) {
-          this.$message({
-            type: 'success',
-            message: '恭喜你支付成功!'
-          });
-        }
-      })
     },
 
   },
@@ -143,11 +106,6 @@ export default {
   font-size: 18px;
   padding-bottom: 15px;
   padding-top: 1px;
-}
-
-.c-img {
-  width: 100%;
-  height: 100%;
 }
 
 .item-film-seat {
