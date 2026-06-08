@@ -2,6 +2,8 @@ package com.movie.api.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.movie.api.model.entity.User;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.movie.api.constant.OrderStatus;
 import com.movie.api.mapper.FilmMapper;
 import com.movie.api.mapper.OrderMapper;
@@ -11,6 +13,7 @@ import com.movie.api.model.entity.Cart;
 import com.movie.api.model.entity.Film;
 import com.movie.api.model.entity.Order;
 import com.movie.api.model.vo.OrderVO;
+import com.movie.api.model.vo.PageResult;
 import com.movie.api.service.ArrangementService;
 import com.movie.api.service.OrderService;
 import com.movie.api.utils.ArrangementScheduleUtil;
@@ -184,6 +187,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderVO> findAll() {
         return findByWrapper(new QueryWrapper<>());
+    }
+
+    @Override
+    public PageResult<OrderVO> findByPage(Integer page, Integer size, String keyword) {
+        Page<OrderVO> pageParam = new Page<>(page, size);
+        IPage<OrderVO> iPage = orderMapper.selectOrderDetailPage(pageParam, keyword);
+        List<OrderVO> records = iPage.getRecords();
+        long total = iPage.getTotal();
+        return new PageResult<>(total, (int) iPage.getCurrent(), (int) iPage.getSize(), records);
     }
 
     // 根据用户ID查询订单

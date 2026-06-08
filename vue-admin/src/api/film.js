@@ -69,6 +69,15 @@ export function FindAllArrangement(){
     })
 }
 
+// 排片分页查询
+export function listArrangementPage(params) {
+  return service({
+    url: '/arrangement/page',
+    method: 'get',
+    params
+  })
+}
+
 // 根据id删除电影排片
 export function DeleteArrangement(id){
     return service({

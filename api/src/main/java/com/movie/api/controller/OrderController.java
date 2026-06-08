@@ -3,6 +3,7 @@ package com.movie.api.controller;
 import com.movie.api.model.entity.Cart;
 import com.movie.api.model.entity.Order;
 import com.movie.api.model.vo.OrderVO;
+import com.movie.api.model.vo.PageResult;
 import com.movie.api.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +33,15 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_ORDER_MANAGE','ROLE_WORKER')")
     public List<OrderVO> findAll() {
         return orderService.findAll();
+    }
+
+    @GetMapping("/page")
+    @Operation(summary = "分页查询订单（支持订单ID/用户ID模糊搜索）")
+    public PageResult<OrderVO> page(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String keyword) {
+        return orderService.findByPage(page, size, keyword);
     }
 
     @PutMapping("")

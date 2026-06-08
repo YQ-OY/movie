@@ -7,6 +7,23 @@ export function FindAllOrder() {
     })
 }
 
+// 分页查询订单
+export function listOrderPage(params) {
+  return service({
+    url: '/order/page',
+    method: 'get',
+    params
+  })
+}
+
+export function listOrderExceptionPage(params) {
+  return service({
+    url: '/oe/page',
+    method: 'get',
+    params
+  })
+}
+
 export function UpdateOrder(data) {
     return service({
         url: '/order',

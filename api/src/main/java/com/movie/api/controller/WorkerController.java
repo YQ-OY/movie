@@ -4,6 +4,7 @@ import com.movie.api.constant.Roles;
 import com.movie.api.model.dto.LoginDto;
 import com.movie.api.model.entity.Role;
 import com.movie.api.model.entity.Worker;
+import com.movie.api.model.vo.PageResult;
 import com.movie.api.model.vo.WorkerPublicVO;
 import com.movie.api.service.RoleService;
 import com.movie.api.service.WorkerService;
@@ -64,6 +65,15 @@ public class WorkerController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<Worker> list(){
         return workerService.findAll();
+    }
+
+    @GetMapping("/page")
+    @Operation(summary = "分页查询员工，支持按用户名/部门搜索")
+    public PageResult<Worker> page(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String keyword) {
+        return workerService.findByPage(page, size, keyword);
     }
 
     /**

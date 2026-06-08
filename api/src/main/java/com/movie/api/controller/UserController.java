@@ -3,6 +3,7 @@ package com.movie.api.controller;
 import com.movie.api.constant.Roles;
 import com.movie.api.model.dto.LoginDto;
 import com.movie.api.model.entity.User;
+import com.movie.api.model.vo.PageResult;
 import com.movie.api.service.UserService;
 import com.movie.api.utils.JwtTokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,6 +47,16 @@ public class UserController {
     public List<User> findAll() {
         return userService.findAll();
     }
+
+    @GetMapping("/page")
+    @Operation(summary = "分页查询用户，支持按用户名/昵称模糊搜索")
+    public PageResult<User> page(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String keyword) {
+        return userService.findByPage(page, size, keyword);
+    }
+
 
     @PutMapping("")
     @Operation(summary = "更新用户")

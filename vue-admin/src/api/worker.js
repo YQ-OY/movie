@@ -29,6 +29,15 @@ export function FindAllWorker() {
     })
 }
 
+// 分页查询员工
+export function listWorkerPage(params) {
+  return service({
+    url: '/worker/page',
+    method: 'get',
+    params
+  })
+}
+
 export function UpdateWorker(data) {
     return service({
         url: "/worker",
@@ -50,6 +59,14 @@ export function ListDailyWork() {
         url: "/daily",
         method: "get"
     })
+}
+
+export function ListDailyWorkPage(params) {
+  return service({
+    url: '/daily/page',
+    method: 'get',
+    params
+  })
 }
 
 export function DeleteDailyWork(id) {
@@ -87,3 +104,4 @@ export function DeleteRoleByWorkerId(id) {
         method: "delete"
     })
 }
+

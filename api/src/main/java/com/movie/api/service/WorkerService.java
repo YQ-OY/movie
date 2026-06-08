@@ -2,6 +2,7 @@ package com.movie.api.service;
 
 import com.movie.api.model.dto.LoginDto;
 import com.movie.api.model.entity.Worker;
+import com.movie.api.model.vo.PageResult;
 import com.movie.api.model.vo.WorkerPublicVO;
 
 import java.util.List;
@@ -23,4 +24,5 @@ public interface WorkerService {
 
     void deleteById(String id);
 
+    PageResult<Worker> findByPage(Integer page, Integer size, String keyword);
 }

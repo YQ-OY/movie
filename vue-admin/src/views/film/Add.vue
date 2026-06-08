@@ -4,16 +4,12 @@
     <el-form ref="form" :model="form" label-width="80px">
 
       <el-form-item label="电影封面">
-        <el-upload
-            class="upload-demo"
-            drag
-            accept=".png,.jpg"
-            :headers="header"
-            :action="uploadAction"
-            :on-success="handleUploadSuccess"
-            multiple>
-          <el-icon class="el-icon--upload"><Upload /></el-icon>
-            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <el-upload class="upload-demo" drag accept=".png,.jpg" :headers="header" :action="uploadAction"
+          :on-success="handleUploadSuccess" multiple>
+          <el-icon class="el-icon--upload">
+            <Upload />
+          </el-icon>
+          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
           <template #tip>
             <div class="el-upload__tip">只能上传jpg/png文件，且不超过50mb</div>
           </template>
@@ -47,7 +43,7 @@
       <el-form-item label="上映时间">
         <el-col :span="11">
           <el-date-picker type="date" placeholder="选择日期" value-format="YYYY-MM-DD" v-model="form.releaseTime"
-                          style="width: 100%;"></el-date-picker>
+            style="width: 100%;"></el-date-picker>
         </el-col>
       </el-form-item>
 
@@ -93,7 +89,7 @@
 </template>
 
 <script>
-import {AddFilm} from "@/api/film";
+import { AddFilm } from "@/api/film";
 import config from "@/config";
 import { Upload } from '@element-plus/icons-vue'
 
@@ -142,7 +138,16 @@ export default {
 
 <style scoped>
 .film-list {
-  padding: 50px;
+  height: 100vh;
+  /* 固定高度为视口高度，而非最小高度 */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+  /* 禁止整个页面滚动，让内部表格滚动 */
+  padding: 20px;
+  box-sizing: border-box;
+  background: rgb(250, 251, 252);
 }
 
 /* 多行单选项：统一换行起点与圆点、文字垂直对齐 */

@@ -3,6 +3,7 @@ package com.movie.api.service;
 import com.movie.api.model.entity.Cart;
 import com.movie.api.model.entity.Order;
 import com.movie.api.model.vo.OrderVO;
+import com.movie.api.model.vo.PageResult;
 
 import java.util.List;
 
@@ -26,4 +27,5 @@ public interface OrderService {
 
     List<OrderVO> findByUser(String uid);
 
+    PageResult<OrderVO> findByPage(Integer page, Integer size, String keyword);
 }
