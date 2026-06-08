@@ -58,7 +58,13 @@
           <div class="arrange-layout__body">
             <div class="arrange-form-grid">
               <el-form-item label="开放座位">
-                <el-input-number class="full-width-input " v-model="arrangement.seatNumber" :min="10" :max="100" />
+                <el-select v-model="arrangement.seatNumber" placeholder="请选择座位数" class="full-width-input">
+                  <el-option label="60" :value="60" />
+                  <el-option label="80" :value="80" />
+                  <el-option label="100" :value="100" />
+                  <el-option label="120" :value="120" />
+                  <el-option label="140" :value="140" />
+                </el-select>
               </el-form-item>
 
               <el-form-item label="放映类型">

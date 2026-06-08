@@ -16,41 +16,10 @@ export function listOrderPage(params) {
   })
 }
 
-export function listOrderExceptionPage(params) {
-  return service({
-    url: '/oe/page',
-    method: 'get',
-    params
-  })
-}
-
 export function UpdateOrder(data) {
     return service({
         url: '/order',
         method: 'put',
         data: data
-    })
-}
-
-export function CreateOrderException(data) {
-    return service({
-        url: '/oe',
-        method: 'post',
-        data: data
-    })
-}
-
-export function HandleOrderException(data) {
-    return service({
-        url: '/oe',
-        method: 'put',
-        data: data
-    })
-}
-
-export function ListOrderException() {
-    return service({
-        url: '/oe',
-        method: 'get'
     })
 }

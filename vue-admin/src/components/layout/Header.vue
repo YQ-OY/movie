@@ -1,4 +1,5 @@
 <template>
+
   <div class="header">
     <div class="header-left">
       <button class="header-icon icon-button" @click="toggleCollapse" type="button" aria-label="切换侧边栏">
@@ -46,61 +47,63 @@
   <el-drawer v-model="drawerVisible" direction="rtl" size="530px" :with-header="false" class="profile-drawer"
     :class-name="'my-drawer'">
     <div class="drawer-content">
-      <div class="drawer-header">
-        <el-upload class="avatar-uploader" :show-file-list="false" :before-upload="beforeAvatarUpload"
-          :on-success="handleAvatarSuccess" :action="uploadAction" :headers="uploadHeaders">
-          <el-avatar class="drawer-avatar" :size="72" :src="adminInfo.avatar || defaultAvatar" />
-          <div class="avatar-upload-tip">点击更换头像</div>
-        </el-upload>
-        <div class="drawer-user">
-          <div class="drawer-name">{{ adminInfo.username || userName }}</div>
-          <div class="drawer-role">{{ userRoleText }}</div>
+      <div class="drawer-main">
+        <div class="drawer-header">
+          <el-upload class="avatar-uploader" :show-file-list="false" :before-upload="beforeAvatarUpload"
+            :on-success="handleAvatarSuccess" :action="uploadAction" :headers="uploadHeaders">
+            <el-avatar class="drawer-avatar" :size="72" :src="adminInfo.avatar || defaultAvatar" />
+            <div class="avatar-upload-tip">点击更换头像</div>
+          </el-upload>
+          <div class="drawer-user">
+            <div class="drawer-name">{{ adminInfo.username || userName }}</div>
+            <div class="drawer-role">{{ userRoleText }}</div>
+          </div>
         </div>
-      </div>
 
-      <el-form :model="adminInfo" label-width="80px" class="drawer-form">
-        <el-form-item>
-          <template #label>
-            <span><i class="iconfont icon-nicheng"></i> 昵称</span>
-          </template>
-          <el-input v-model="adminInfo.nickname" placeholder="请输入昵称" />
-        </el-form-item>
-        <el-form-item>
-          <template #label>
-            <span><i class="iconfont icon-shoujihao"></i> 手机号</span>
-          </template>
-          <el-input v-model="adminInfo.phone" placeholder="请输入手机号" />
-        </el-form-item>
-        <el-form-item>
-          <template #label>
-            <span><i class="iconfont icon-youxiang"></i> 邮箱</span>
-          </template>
-          <el-input v-model="adminInfo.email" placeholder="请输入邮箱" />
-        </el-form-item>
-        <el-form-item>
-          <template #label>
-            <span><i class="iconfont icon-shengri"></i> 生日</span>
-          </template>
-          <el-date-picker v-model="adminInfo.birthday" type="date" value-format="YYYY-MM-DD" placeholder="选择生日"
-            style="width: 100%" />
-        </el-form-item>
-        <el-form-item>
-          <template #label>
-            <span><i class="iconfont icon-xingbie"></i> 性别</span>
-          </template>
-          <el-select v-model="adminInfo.gender" placeholder="请选择性别" style="width: 100%">
-            <el-option label="男" value="男" />
-            <el-option label="女" value="女" />
-            <el-option label="保密" value="保密" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <template #label>
-            <span><i class="iconfont icon-gerenjianjiexiao"></i> 个人简介</span>
-          </template>
-          <el-input v-model="adminInfo.info" type="textarea" :rows="3" placeholder="介绍一下自己" />
-        </el-form-item>
-      </el-form>
+        <el-form :model="adminInfo" label-width="48px" class="drawer-form">
+          <el-form-item>
+            <template #label>
+              <i class="iconfont icon-nicheng drawer-icon-nickname" />
+            </template>
+            <el-input v-model="adminInfo.nickname" placeholder="请输入昵称" />
+          </el-form-item>
+          <el-form-item>
+            <template #label>
+              <i class="iconfont icon-shoujihao" />
+            </template>
+            <el-input v-model="adminInfo.phone" placeholder="请输入手机号" />
+          </el-form-item>
+          <el-form-item>
+            <template #label>
+              <i class="iconfont icon-youxiang" />
+            </template>
+            <el-input v-model="adminInfo.email" placeholder="请输入邮箱" />
+          </el-form-item>
+          <el-form-item>
+            <template #label>
+              <i class="iconfont icon-shengri" />
+            </template>
+            <el-date-picker v-model="adminInfo.birthday" type="date" value-format="YYYY-MM-DD" placeholder="选择生日"
+              style="width: 100%" />
+          </el-form-item>
+          <el-form-item>
+            <template #label>
+              <i class="iconfont icon-xingbie" />
+            </template>
+            <el-select v-model="adminInfo.gender" placeholder="请选择性别" style="width: 100%">
+              <el-option label="男" value="男" />
+              <el-option label="女" value="女" />
+              <el-option label="保密" value="保密" />
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <template #label>
+              <i class="iconfont icon-gerenjianjiexiao" />
+            </template>
+            <el-input v-model="adminInfo.info" type="textarea" :rows="3" placeholder="介绍一下自己" />
+          </el-form-item>
+        </el-form>
+      </div>
 
       <div class="drawer-actions">
         <el-button type="primary" class="drawer-save-button" @click="saveProfile">保存资料</el-button>
@@ -382,9 +385,10 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  justify-content: center;
+  padding: 22px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(248, 250, 252, 0.5) 100%),
+    linear-gradient(180deg, rgba(248, 251, 255, 0.58) 0%, rgba(238, 242, 247, 0.72) 100%),
     url('@/assets/img/background.png') center/cover no-repeat;
   overflow: hidden;
 }
@@ -394,8 +398,9 @@ export default {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.14), transparent 38%),
-    radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.12), transparent 34%);
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 34%),
+    radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.12), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 34%);
   pointer-events: none;
 }
 
@@ -404,79 +409,29 @@ export default {
   z-index: 1;
 }
 
+.drawer-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  min-height: 0;
+}
+
 .drawer-header {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 18px;
-  margin-bottom: 18px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  padding: 18px 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
   background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
 }
 
-.drawer-name {
-  font-size: 22px;
-  font-weight: 700;
-  color: #101828;
-}
-
-.drawer-role {
-  margin-top: 6px;
-  color: #667085;
-  font-size: 13px;
-}
-
-.drawer-info {
-  padding: 20px 0;
-  display: grid;
-  gap: 14px;
-}
-
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: #fff;
-  border: 1px solid #eef2f7;
-}
-
-.info-label {
-  color: #667085;
-  font-size: 14px;
-}
-
-.info-value {
-  color: #101828;
-  font-weight: 500;
-  word-break: break-all;
-  text-align: right;
-  margin-left: 14px;
-}
-
-.drawer-actions {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.drawer-save-button,
-.drawer-logout-button {
-  width: 100%;
-  height: 44px;
-}
-
-.drawer-logout-button {
-  color: #d92d20;
-}
-
-:deep(.el-button + .el-button) {
-  margin-left: 0;
+.drawer-avatar {
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.18);
 }
 
 .avatar-uploader {
@@ -486,42 +441,109 @@ export default {
 
 .avatar-upload-tip {
   position: absolute;
-  bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
+  bottom: 0;
+  padding: 5px 0;
+  border-radius: 0 0 36px 36px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.72) 100%);
+  color: #fff;
   font-size: 12px;
   text-align: center;
-  border-radius: 0 0 36px 36px;
-  padding: 4px 0;
   opacity: 0;
-  transition: opacity 0.2s;
+  transform: translateY(4px);
+  transition: all 0.2s ease;
 }
 
 .avatar-uploader:hover .avatar-upload-tip {
   opacity: 1;
+  transform: translateY(0);
+}
+
+.drawer-user {
+  min-width: 0;
+}
+
+.drawer-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #101828;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.drawer-role {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .drawer-form {
-  margin: 20px 0;
+  margin: 0;
+  padding: 18px 18px 10px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
   max-height: calc(100vh - 360px);
   overflow-y: auto;
-  padding-right: 8px;
-
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  scrollbar-width: thin;
 }
 
 .drawer-form :deep(.el-form-item) {
   margin-bottom: 18px;
+  align-items: center;
+}
+
+.drawer-form :deep(.el-form-item__label) {
+  color: #344054;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: normal;
+  text-align: center;
+  padding-right: 0;
+}
+
+.drawer-form :deep(.el-form-item__label .iconfont) {
+  color: #3b82f6;
+  flex-shrink: 0;
+  font-size: 18px;
+  width: 18px;
+  text-align: center;
+}
+
+.drawer-form :deep(.drawer-icon-nickname) {
+  margin-left: -20px;
+}
+
+.drawer-form :deep(.el-form-item__content) {
+  min-width: 0;
+  margin-left: 0 !important;
+}
+
+.drawer-form :deep(.el-input__wrapper),
+.drawer-form :deep(.el-select__wrapper),
+.drawer-form :deep(.el-textarea__inner) {
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.drawer-form :deep(.el-textarea__inner) {
+  min-height: 92px !important;
+  resize: none;
 }
 
 .drawer-actions {
-  margin-top: auto;
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -530,17 +552,19 @@ export default {
 .drawer-save-button,
 .drawer-logout-button {
   width: 100%;
-  height: 44px;
+  height: 46px;
+  border-radius: 14px;
+  font-weight: 600;
 }
 
 .drawer-save-button {
-  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 12px 26px rgba(59, 130, 246, 0.24);
 }
 
 .drawer-logout-button {
   color: #d92d20;
   border-color: rgba(217, 45, 32, 0.2);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
 }
 
 .drawer-logout-button:hover {
@@ -552,16 +576,14 @@ export default {
 :deep(.el-button + .el-button) {
   margin-left: 0;
 }
+
+:deep(.profile-drawer .el-drawer__body) {
+  padding: 0 !important;
+}
 </style>
 
 <style>
-/* 全局样式，用于覆盖抽屉的内边距 */
 .profile-drawer {
   --el-drawer-padding-primary: 0px !important;
-}
-
-/* 或者直接针对 body 设置（备选） */
-.profile-drawer .el-drawer__body {
-  padding: 0 !important;
 }
 </style>

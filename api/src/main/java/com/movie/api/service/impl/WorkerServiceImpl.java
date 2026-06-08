@@ -64,9 +64,9 @@ public class WorkerServiceImpl implements WorkerService {
         QueryWrapper<Worker> wrapper = new QueryWrapper<>();
         wrapper.in("username", dto.getUsername());
         Worker worker = workerMapper.selectOne(wrapper);
-        if (worker == null) throw new Exception("用户名或密码错误");
+        if (worker == null) throw new Exception("用户不存在");
         if (!bCryptPasswordEncoder.matches(dto.getPassword(), worker.getPassword()))
-            throw new Exception("用户名或密码错误");
+            throw new Exception("密码错误");
         return worker;
     }
 

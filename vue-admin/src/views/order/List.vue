@@ -104,10 +104,6 @@
                 @click="handleRevokeOrder(scope.$index, scope.row.order)">
                 撤销订单
               </el-button>
-              <el-button size="small" type="danger" plain :icon="CircleClose"
-                @click="handleReportException(scope.$index, scope.row.order)">
-                上报异常
-              </el-button>
             </div>
           </template>
         </el-table-column>
@@ -120,29 +116,11 @@
           @current-change="handleCurrentChange" :pager-count="5" />
       </div>
     </div>
-
-    <!-- 上报异常对话框（统一风格） -->
-    <el-dialog title="上报异常" v-model="dialogFormVisible" width="40%" align-center class="film-dialog film-dialog--edit">
-      <el-form :model="exceptionForm" label-width="100px" class="film-dialog__form">
-        <el-form-item label="上报人">
-          <el-input v-model="exceptionForm.reviewer" placeholder="请输入上报人姓名" />
-        </el-form-item>
-        <el-form-item label="上报原因">
-          <el-input v-model="exceptionForm.reason" placeholder="请输入异常原因" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitException">确定</el-button>
-        </span>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listOrderPage, UpdateOrder, CreateOrderException } from "@/api/order";
+import { listOrderPage, UpdateOrder } from "@/api/order";
 import { RefreshRight, CircleClose, Search, Refresh } from '@element-plus/icons-vue'
 
 export default {
@@ -238,24 +216,6 @@ export default {
       }
       this.dialogFormVisible = true
     },
-    async submitException() {
-      if (!this.exceptionForm.reviewer) {
-        this.$message.warning('请填写上报人')
-        return
-      }
-      if (!this.exceptionForm.reason) {
-        this.$message.warning('请填写上报原因')
-        return
-      }
-      try {
-        await CreateOrderException(this.exceptionForm)
-        this.$message.success('异常上报成功')
-        this.dialogFormVisible = false
-        // 上报成功后不影响当前订单列表，无需刷新
-      } catch (error) {
-        this.$message.error('上报失败')
-      }
-    }
   }
 }
 </script>

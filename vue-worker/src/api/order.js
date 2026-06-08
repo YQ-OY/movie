@@ -37,3 +37,12 @@ export function ListOrderException() {
         method: 'get'
     })
 }
+
+// 分页查询订单
+export function listOrderPage(params) {
+  return service({
+    url: '/order/page',
+    method: 'get',
+    params
+  })
+}

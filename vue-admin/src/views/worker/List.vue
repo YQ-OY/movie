@@ -33,16 +33,16 @@
       <el-table v-loading="loading" :data="workerList" class="film-table" stripe
         :header-cell-style="{ background: '#f8fafc', color: '#64748b', fontWeight: 700, fontSize: '15px', textAlign: 'center', height: '58px' }"
         :row-style="{ height: '72px' }" style="width: 100%">
-        <el-table-column label="员工 ID" min-width="220" show-overflow-tooltip prop="id" />
-        <el-table-column label="用户名" min-width="150" prop="username" />
-        <el-table-column label="所在部门" min-width="150">
+        <el-table-column label="员工 ID" min-width="200" show-overflow-tooltip prop="id" />
+        <el-table-column label="用户名" min-width="80" prop="username" />
+        <el-table-column label="所在部门" min-width="80">
           <template #default="scope">
             <el-tag v-if="scope.row.department" type="primary" effect="plain">{{ scope.row.department }}</el-tag>
             <span v-else>—</span>
           </template>
         </el-table-column>
-        <el-table-column label="联系电话" min-width="150" prop="phone" />
-        <el-table-column label="入职时间" min-width="180" prop="createAt" />
+        <el-table-column label="联系电话" min-width="80" prop="phone" />
+        <el-table-column label="入职时间" min-width="100" prop="createAt" />
         <el-table-column label="状态" min-width="100" align="center">
           <template #default="scope">
             <el-switch v-model="scope.row.entry" active-text="在职" inactive-text="离职"
@@ -55,10 +55,12 @@
               <el-button size="small" type="primary" plain @click="openEditDialog(scope.row)">
                 <el-icon>
                   <Edit />
-                </el-icon>编辑信息
+                </el-icon>编辑
               </el-button>
               <el-button v-if="!scope.row.entry" size="small" type="danger" plain @click="handleDeleteWork(scope.row)">
-                删除
+                <el-icon>
+                  <Delete />
+                </el-icon>删除
               </el-button>
             </div>
           </template>
@@ -893,5 +895,32 @@ export default {
 
 .full-width-input {
   width: 100%;
+}
+
+/* 操作按钮组 - 完全对齐 List.vue */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.action-buttons .el-button {
+  border-radius: 10px;
+  min-width: 72px;
+  height: 34px;
+  font-size: 13px;
+  padding: 0 12px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* 确保图标和文字间距 */
+.action-buttons .el-button .el-icon {
+  font-size: 16px;
+  margin-right: 4px;
 }
 </style>

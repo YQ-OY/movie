@@ -61,10 +61,6 @@
               <i class="iconfont icon-6" style="margin-right: 8px; font-size: 18px;"></i>
               <template #title>订单列表</template>
             </el-menu-item>
-            <el-menu-item index="/order/exception" @click="navigate('/order/exception')">
-              <i class="iconfont icon-xs_yichangdingdan" style="margin-right: 8px; font-size: 18px;"></i>
-              <template #title>异常订单</template>
-            </el-menu-item>
           </el-sub-menu>
 
           <!-- 数据统计 -->
@@ -165,10 +161,6 @@
             <el-menu-item index="/order/list" @click="navigate('/order/list')">
               <i class="iconfont icon-6" style="margin-right: 8px; font-size: 18px;"></i>
               <template #title>订单列表</template>
-            </el-menu-item>
-            <el-menu-item index="/order/exception" @click="navigate('/order/exception')">
-              <i class="iconfont icon-xs_yichangdingdan" style="margin-right: 8px; font-size: 18px;"></i>
-              <template #title>异常订单</template>
             </el-menu-item>
             <el-menu-item index="/stats/dashboard" @click="navigate('/stats/dashboard')">
               <i class="iconfont icon-yunyingfenxi" style="margin-right: 8px; font-size: 18px;"></i>
