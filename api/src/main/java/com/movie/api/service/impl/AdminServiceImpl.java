@@ -41,5 +41,16 @@ public class AdminServiceImpl implements AdminService {
         return admin;
     }
 
+    // 获取当前登录管理员信息
+    @Override
+    public Admin getCurrent(String token) {
+        // 去除 "Bearer " 前缀
+        String jwt = token.replace("Bearer ", "");
+        String username = JwtTokenUtil.getUsername(jwt);
+        QueryWrapper<Admin> wrapper = new QueryWrapper<>();
+        wrapper.eq("username", username);
+        return adminMapper.selectOne(wrapper);
+    }
+
 
 }

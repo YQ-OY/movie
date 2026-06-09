@@ -35,4 +35,11 @@ public class AdminController {
         return adminService.update(admin);
     }
 
+    // 获取当前登录管理员信息
+    @GetMapping("/current")
+    @Operation(summary = "获取当前登录管理员信息")
+    public Admin getCurrent(@RequestHeader("Authorization") String token) {
+        return adminService.getCurrent(token);
+    }
+
 }

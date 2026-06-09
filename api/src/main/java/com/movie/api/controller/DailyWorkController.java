@@ -1,6 +1,7 @@
 package com.movie.api.controller;
 
 import com.movie.api.model.entity.DailyWork;
+import com.movie.api.model.vo.PageResult;
 import com.movie.api.service.DailyWorkService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +34,15 @@ public class DailyWorkController {
     @Operation(summary = "查询所有")
     public List<DailyWork> findAll(){
         return dailyWorkService.findAll();
+    }
+
+    @GetMapping("/page")
+    @Operation(summary = "分页查询每日工作，支持按内容模糊搜索")
+    public PageResult<DailyWork> page(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String keyword) {
+        return dailyWorkService.findByPage(page, size, keyword);
     }
 
 }

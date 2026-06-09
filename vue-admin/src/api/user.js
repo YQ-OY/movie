@@ -22,3 +22,12 @@ export function UpdateUser(data) {
         data: data
     })
 }
+
+// 分页查询用户
+export function listUserPage(params) {
+  return service({
+    url: '/user/page',
+    method: 'get',
+    params
+  })
+}

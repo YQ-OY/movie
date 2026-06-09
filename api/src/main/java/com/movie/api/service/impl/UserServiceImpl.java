@@ -1,14 +1,18 @@
 package com.movie.api.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.movie.api.mapper.UserMapper;
 import com.movie.api.model.dto.LoginDto;
 import com.movie.api.model.entity.User;
+import com.movie.api.model.vo.PageResult;
 import com.movie.api.service.UserService;
 import com.movie.api.utils.DataTimeUtil;
 import com.movie.api.utils.ValidationUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -38,6 +42,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findAll() {
         return userMapper.selectList(null);
+    }
+
+    // 分页查询用户，支持按用户名/昵称模糊搜索
+    @Override
+    public PageResult<User> findByPage(Integer page, Integer size, String keyword) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.hasText(keyword)) {
+            wrapper.and(w -> w.like(User::getUsername, keyword)
+                    .or()
+                    .like(User::getNickname, keyword));
+        }
+        wrapper.orderByDesc(User::getCreateAt);
+        Page<User> pageParam = new Page<>(page, size);
+        Page<User> userPage = userMapper.selectPage(pageParam, wrapper);
+        return new PageResult<>(
+                userPage.getTotal(),
+                (int) userPage.getCurrent(),
+                (int) userPage.getSize(),
+                userPage.getRecords()
+        );
     }
 
     // 根据ID查询用户

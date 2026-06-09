@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.api.mapper.OrderMapper">
+
+    <resultMap id="OrderDetailVOMap" type="com.movie.api.model.vo.OrderVO">
+        <!-- 订单信息 -->
+        <association property="order" javaType="com.movie.api.model.entity.Order">
+            <id column="order_id" property="id"/>
+            <result column="order_uid" property="uid"/>
+            <result column="order_phone" property="phone"/>
+            <result column="order_aid" property="aid"/>
+            <result column="order_seats" property="seats"/>
+            <result column="order_price" property="price"/>
+            <result column="order_status" property="status"/>
+            <result column="order_create_at" property="createAt"/>
+            <result column="order_pay_at" property="payAt"/>
+        </association>
+        <!-- 用户信息 -->
+        <association property="user" javaType="com.movie.api.model.entity.User">
+            <id column="user_id" property="id"/>
+            <result column="user_username" property="username"/>
+            <result column="user_nickname" property="nickname"/>
+            <result column="user_avatar" property="avatar"/>
+            <result column="user_phone" property="phone"/>
+        </association>
+        <!-- 电影信息 -->
+        <association property="film" javaType="com.movie.api.model.entity.Film">
+            <id column="film_id" property="id"/>
+            <result column="film_name" property="name"/>
+            <!-- 可根据需要添加其他字段 -->
+        </association>
+        <!-- 场次信息 -->
+        <association property="arrangement" javaType="com.movie.api.model.entity.Arrangement">
+            <id column="arrangement_id" property="id"/>
+            <result column="arrangement_fid" property="fid"/>
+            <result column="arrangement_name" property="name"/>
+            <result column="arrangement_date" property="date"/>
+            <result column="arrangement_start_time" property="startTime"/>
+            <result column="arrangement_end_time" property="endTime"/>
+            <result column="arrangement_price" property="price"/>
+            <result column="arrangement_type" property="type"/>
+        </association>
+    </resultMap>
+
+    <select id="selectOrderDetailPage" resultMap="OrderDetailVOMap">
+        SELECT
+        o.id AS order_id,
+        o.uid AS order_uid,
+        o.phone AS order_phone,
+        o.aid AS order_aid,
+        o.seats AS order_seats,
+        o.price AS order_price,
+        o.status AS order_status,
+        o.create_at AS order_create_at,
+        o.pay_at AS order_pay_at,
+        u.id AS user_id,
+        u.username AS user_username,
+        u.nickname AS user_nickname,
+        u.avatar AS user_avatar,
+        u.phone AS user_phone,
+        f.id AS film_id,
+        f.name AS film_name,
+        a.id AS arrangement_id,
+        a.fid AS arrangement_fid,
+        a.name AS arrangement_name,
+        a.date AS arrangement_date,
+        a.start_time AS arrangement_start_time,
+        a.end_time AS arrangement_end_time,
+        a.price AS arrangement_price,
+        a.type AS arrangement_type
+        FROM t_order o
+        LEFT JOIN t_user u ON o.uid = u.id
+        LEFT JOIN t_arrangement a ON o.aid = a.id
+        LEFT JOIN t_film f ON a.fid = f.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (o.id LIKE CONCAT('%', #{keyword}, '%') OR u.id LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY o.create_at DESC
+    </select>
+
+</mapper>

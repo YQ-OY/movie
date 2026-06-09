@@ -31,10 +31,6 @@ const routes = [
                 component: () => import("@/views/Phone")
             },
             {
-                path: '/setting',
-                component: () => import("@/views/Setting")
-            },
-            {
                 path: '/info',
                 component: () => import("@/views/Info")
             },

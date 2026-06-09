@@ -1,6 +1,8 @@
 package com.movie.api.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.movie.api.constant.OrderStatus;
 import com.movie.api.mapper.ArrangementMapper;
 import com.movie.api.mapper.CartMapper;
@@ -11,6 +13,7 @@ import com.movie.api.model.entity.Cart;
 import com.movie.api.model.entity.Film;
 import com.movie.api.model.entity.Order;
 import com.movie.api.model.vo.ArrangementVO;
+import com.movie.api.model.vo.PageResult;
 import com.movie.api.model.vo.SeatStatusVO;
 import com.movie.api.service.ArrangementService;
 import com.movie.api.service.FilmService;
@@ -18,6 +21,7 @@ import com.movie.api.utils.ArrangementScheduleUtil;
 import com.movie.api.utils.DataTimeUtil;
 import com.movie.api.utils.SeatUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -174,5 +178,34 @@ public class ArrangementServiceImpl implements ArrangementService {
                 throw new IllegalArgumentException("同一电影下场次时间不能重叠，请调整放映日期或开始时间");
             }
         }
+    }
+
+    @Override
+    public PageResult<Arrangement> findByPage(Integer page, Integer size, String name, String startDate, String endDate) {
+        LambdaQueryWrapper<Arrangement> wrapper = new LambdaQueryWrapper<>();
+
+        // 电影名称模糊查询
+        if (StringUtils.hasText(name)) {
+            wrapper.like(Arrangement::getName, name);
+        }
+        // 放映日期区间查询
+        if (StringUtils.hasText(startDate)) {
+            wrapper.ge(Arrangement::getDate, startDate);
+        }
+        if (StringUtils.hasText(endDate)) {
+            wrapper.le(Arrangement::getDate, endDate);
+        }
+        // 按放映日期 + 开始时间排序
+        wrapper.orderByAsc(Arrangement::getDate, Arrangement::getStartTime);
+
+        Page<Arrangement> pageParam = new Page<>(page, size);
+        Page<Arrangement> arrangementPage = arrangementMapper.selectPage(pageParam, wrapper);
+
+        return new PageResult<>(
+                arrangementPage.getTotal(),
+                (int) arrangementPage.getCurrent(),
+                (int) arrangementPage.getSize(),
+                arrangementPage.getRecords()
+        );
     }
 }

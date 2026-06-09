@@ -11,4 +11,5 @@ public interface AdminService {
 
     Admin update(Admin admin);
 
+    Admin getCurrent(String token);
 }

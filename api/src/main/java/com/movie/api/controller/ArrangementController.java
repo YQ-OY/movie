@@ -1,8 +1,8 @@
 package com.movie.api.controller;
-
+import com.movie.api.model.vo.PageResult;
+import com.movie.api.model.vo.SeatStatusVO;
 import com.movie.api.model.entity.Arrangement;
 import com.movie.api.model.vo.ArrangementVO;
-import com.movie.api.model.vo.SeatStatusVO;
 import com.movie.api.service.ArrangementService;
 import com.movie.api.service.FilmService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -76,4 +76,15 @@ public class ArrangementController {
         return arrangementService.findByFilmId(fid);
     }
 
+    @GetMapping("/page")
+    @Operation(summary = "分页查询排片（支持电影名称模糊搜索、日期区间）")
+    public PageResult<Arrangement> page(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "5") Integer size,
+            @RequestParam(required = false) String name,       // 电影名称模糊搜索
+            @RequestParam(required = false) String startDate,  // 起始日期 YYYY-MM-DD
+            @RequestParam(required = false) String endDate) {  // 结束日期 YYYY-MM-DD
+        return arrangementService.findByPage(page, size, name, startDate, endDate);
+    }
+    
 }

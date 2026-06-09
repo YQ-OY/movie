@@ -1,6 +1,8 @@
 package com.movie.api.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.movie.api.constant.Roles;
 import com.movie.api.mapper.RoleMapper;
 import com.movie.api.mapper.WorkerMapper;
@@ -13,7 +15,9 @@ import com.movie.api.service.WorkerService;
 import com.movie.api.utils.DataTimeUtil;
 import com.movie.api.utils.ValidationUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.movie.api.model.vo.PageResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -60,8 +64,9 @@ public class WorkerServiceImpl implements WorkerService {
         QueryWrapper<Worker> wrapper = new QueryWrapper<>();
         wrapper.in("username", dto.getUsername());
         Worker worker = workerMapper.selectOne(wrapper);
-        if (worker == null) throw new Exception("用户名或密码错误");
-        if (!bCryptPasswordEncoder.matches(dto.getPassword(), worker.getPassword())) throw new Exception("用户名或密码错误");
+        if (worker == null) throw new Exception("用户不存在");
+        if (!bCryptPasswordEncoder.matches(dto.getPassword(), worker.getPassword()))
+            throw new Exception("密码错误");
         return worker;
     }
 
@@ -82,6 +87,25 @@ public class WorkerServiceImpl implements WorkerService {
     @Override
     public List<Worker> findAll() {
         return workerMapper.selectList(null);
+    }
+
+    @Override
+    public PageResult<Worker> findByPage(Integer page, Integer size, String keyword) {
+        LambdaQueryWrapper<Worker> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.hasText(keyword)) {
+            wrapper.and(w -> w.like(Worker::getUsername, keyword)
+                    .or()
+                    .like(Worker::getDepartment, keyword));
+        }
+        wrapper.orderByDesc(Worker::getCreateAt);
+        Page<Worker> pageParam = new Page<>(page, size);
+        Page<Worker> workerPage = workerMapper.selectPage(pageParam, wrapper);
+        return new PageResult<>(
+                workerPage.getTotal(),
+                (int) workerPage.getCurrent(),
+                (int) workerPage.getSize(),
+                workerPage.getRecords()
+        );
     }
 
     // 查询在职员工公开信息（用于前端展示）

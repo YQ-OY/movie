@@ -1,66 +1,64 @@
 <template>
-  <div class="stats-dashboard">
-    <div class="page-head">
-      <h2>运营概览</h2>
-      <p class="page-head__sub">影院售票关键指标与趋势（数据来自订单、影片、用户汇总）</p>
+  <div class="film-list">
+
+    <!-- 页面头部（与电影管理页面完全一致） -->
+    <div class="page-header">
+      <div class="page-search-bar">
+        <div class="page-search-bar__title">
+          <div class="page-title">运营概览</div>
+          <div class="page-subtitle">影院售票关键指标与趋势（数据来自订单、影片、用户汇总）</div>
+        </div>
+      </div>
     </div>
 
-    <el-row v-if="stats" :gutter="16" class="kpi-row">
-      <el-col :xs="12" :sm="6">
-        <el-card shadow="hover" class="kpi-card kpi-card--blue">
+    <!-- 关键指标卡片区域 -->
+    <div class="stats-grid">
+      <div v-if="stats" class="kpi-wrapper">
+        <div class="kpi-item kpi-item--blue">
           <div class="kpi-label">订单总数</div>
           <div class="kpi-value">{{ stats.orderTotal }}</div>
-        </el-card>
-      </el-col>
-      <el-col :xs="12" :sm="6">
-        <el-card shadow="hover" class="kpi-card kpi-card--green">
+        </div>
+        <div class="kpi-item kpi-item--green">
           <div class="kpi-label">已支付订单</div>
           <div class="kpi-value">{{ stats.orderPaid }}</div>
-        </el-card>
-      </el-col>
-      <el-col :xs="12" :sm="6">
-        <el-card shadow="hover" class="kpi-card kpi-card--orange">
+        </div>
+        <div class="kpi-item kpi-item--orange">
           <div class="kpi-label">累计票房（元）</div>
           <div class="kpi-value">{{ stats.revenueTotal }}</div>
-        </el-card>
-      </el-col>
-      <el-col :xs="12" :sm="6">
-        <el-card shadow="hover" class="kpi-card kpi-card--purple">
+        </div>
+        <div class="kpi-item kpi-item--purple">
           <div class="kpi-label">用户 / 影片</div>
           <div class="kpi-value kpi-value--sm">{{ stats.userTotal }} / {{ stats.filmTotal }}</div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </div>
+    </div>
 
-    <el-row :gutter="16" class="chart-row">
-      <el-col :xs="24" :lg="10">
-        <el-card shadow="never" class="chart-card">
-          <template #header>
-            <span class="chart-card__title">订单状态分布</span>
-          </template>
-          <div ref="pieRef" class="chart-box"/>
-        </el-card>
-      </el-col>
-      <el-col :xs="24" :lg="14">
-        <el-card shadow="never" class="chart-card">
-          <template #header>
-            <span class="chart-card__title">影片已支付票房 TOP（元）</span>
-          </template>
-          <div ref="barRef" class="chart-box chart-box--tall"/>
-        </el-card>
-      </el-col>
-    </el-row>
+    <!-- 图表卡片区域 -->
+    <div class="table-card">
+      <el-row :gutter="20" class="chart-row">
+        <el-col :xs="24" :lg="10">
+          <div class="chart-card">
+            <div class="chart-card__header">订单状态分布</div>
+            <div ref="pieRef" class="chart-box" />
+          </div>
+        </el-col>
+        <el-col :xs="24" :lg="14">
+          <div class="chart-card">
+            <div class="chart-card__header">影片已支付票房 TOP（元）</div>
+            <div ref="barRef" class="chart-box chart-box--tall" />
+          </div>
+        </el-col>
+      </el-row>
 
-    <el-row :gutter="16" class="chart-row">
-      <el-col :span="24">
-        <el-card shadow="never" class="chart-card">
-          <template #header>
-            <span class="chart-card__title">近 14 日下单量趋势</span>
-          </template>
-          <div ref="lineRef" class="chart-box chart-box--wide"/>
-        </el-card>
-      </el-col>
-    </el-row>
+      <el-row :gutter="20" class="chart-row">
+        <el-col :span="24">
+          <div class="chart-card">
+            <div class="chart-card__header">近 14 日下单量趋势</div>
+            <div ref="lineRef" class="chart-box chart-box--wide" />
+          </div>
+        </el-col>
+      </el-row>
+    </div>
   </div>
 </template>
 
@@ -95,7 +93,7 @@ export default {
             this.$nextTick(() => this.initCharts())
           }
         })
-        .catch(() => {})
+        .catch(() => { })
     },
     resizeCharts() {
       this.pieChart?.resize()
@@ -112,11 +110,12 @@ export default {
       if (!this.stats) return
       this.disposeCharts()
 
+      // 饼图
       const pie = echarts.init(this.$refs.pieRef)
       pie.setOption({
         tooltip: { trigger: 'item' },
-        legend: { bottom: 0 },
-        color: ['#909399', '#F56C6C', '#67C23A', '#E6A23C'],
+        legend: { bottom: 0, itemWidth: 12, itemHeight: 12 },
+        color: ['#67C23A', '#F56C6C', '#E6A23C', '#909399'],
         series: [{
           type: 'pie',
           radius: ['42%', '68%'],
@@ -128,6 +127,7 @@ export default {
       })
       this.pieChart = pie
 
+      // 条形图
       const names = (this.stats.topFilmsByRevenue || []).map((x) => x.name)
       const vals = (this.stats.topFilmsByRevenue || []).map((x) => Number(x.value))
       const bar = echarts.init(this.$refs.barRef)
@@ -144,8 +144,13 @@ export default {
         bar.setOption({
           tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
           grid: { left: 12, right: 24, top: 16, bottom: 8, containLabel: true },
-          xAxis: { type: 'value', name: '元' },
-          yAxis: { type: 'category', data: names, inverse: true, axisLabel: { width: 100, overflow: 'truncate' } },
+          xAxis: { type: 'value', name: '元', nameLocation: 'middle', nameGap: 30 },
+          yAxis: {
+            type: 'category',
+            data: names,
+            inverse: true,
+            axisLabel: { width: 100, overflow: 'truncate', fontSize: 12 },
+          },
           series: [{
             type: 'bar',
             data: vals,
@@ -162,18 +167,13 @@ export default {
       }
       this.barChart = bar
 
+      // 折线图
       const days = (this.stats.ordersByDay || []).map((x) => x.name)
       const counts = (this.stats.ordersByDay || []).map((x) => Number(x.value))
       const line = echarts.init(this.$refs.lineRef)
       line.setOption({
         tooltip: { trigger: 'axis' },
-        grid: {
-          left: 56,
-          right: 28,
-          top: 40,
-          bottom: 24,
-          containLabel: true,
-        },
+        grid: { left: 56, right: 28, top: 40, bottom: 28, containLabel: true },
         xAxis: {
           type: 'category',
           data: days,
@@ -213,90 +213,144 @@ export default {
 </script>
 
 <style scoped>
-.stats-dashboard {
-  padding: 8px 4px 32px;
+/* ===== 全局复用 List.vue 的布局样式 ===== */
+.film-list {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+  padding: 20px;
+  box-sizing: border-box;
+  background: rgb(250, 251, 252);
 }
 
-.page-head {
-  margin-bottom: 20px;
+.page-header {
+  flex: 0 0 auto;
+  padding: 20px 22px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.12);
 }
 
-.page-head h2 {
-  margin: 0 0 8px;
+.page-search-bar__title {
+  min-width: 220px;
+}
+
+.page-title {
   font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: #303133;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.2px;
 }
 
-.page-head__sub {
-  margin: 0;
+.page-subtitle {
+  margin-top: 6px;
   font-size: 13px;
-  color: #909399;
+  color: #64748b;
 }
 
-.kpi-row {
-  margin-bottom: 16px;
+/* 关键指标卡片网格 */
+.stats-grid {
+  flex: 0 0 auto;
 }
 
-.kpi-card {
-  text-align: center;
-  border-radius: 10px;
-  border: none;
+.kpi-wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
-.kpi-card :deep(.el-card__body) {
+.kpi-item {
+  background: #ffffff;
+  border-radius: 18px;
   padding: 18px 12px;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  transition: transform 0.2s;
+}
+
+.kpi-item:hover {
+  transform: translateY(-2px);
 }
 
 .kpi-label {
   font-size: 13px;
-  color: #909399;
+  color: #64748b;
   margin-bottom: 8px;
+  font-weight: 600;
 }
 
 .kpi-value {
   font-size: 26px;
-  font-weight: 700;
-  color: #303133;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .kpi-value--sm {
   font-size: 22px;
 }
 
-.kpi-card--blue {
-  background: linear-gradient(135deg, #ecf5ff 0%, #fff 60%);
+/* 不同卡片的渐变背景（保持与原有风格一致） */
+.kpi-item--blue {
+  background: linear-gradient(135deg, #ecf5ff 0%, #ffffff 80%);
 }
 
-.kpi-card--green {
-  background: linear-gradient(135deg, #f0f9eb 0%, #fff 60%);
+.kpi-item--green {
+  background: linear-gradient(135deg, #f0f9eb 0%, #ffffff 80%);
 }
 
-.kpi-card--orange {
-  background: linear-gradient(135deg, #fdf6ec 0%, #fff 60%);
+.kpi-item--orange {
+  background: linear-gradient(135deg, #fdf6ec 0%, #ffffff 80%);
 }
 
-.kpi-card--purple {
-  background: linear-gradient(135deg, #f4f1ff 0%, #fff 60%);
+.kpi-item--purple {
+  background: linear-gradient(135deg, #f4f1ff 0%, #ffffff 80%);
+}
+
+/* 图表卡片容器（复用 table-card 风格） */
+.table-card {
+  flex: 1;
+  min-height: 0;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border-radius: 18px;
+  padding: 20px 20px 8px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .chart-row {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .chart-card {
-  border-radius: 10px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #eef2f7;
+  padding: 12px;
+  transition: box-shadow 0.2s;
 }
 
-.chart-card__title {
-  font-weight: 600;
+.chart-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.chart-card__header {
   font-size: 15px;
-  color: #303133;
+  font-weight: 700;
+  color: #1e293b;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eef2f7;
+  margin-bottom: 12px;
 }
 
 .chart-box {
-  height: 300px;
+  height: 280px;
   width: 100%;
 }
 
@@ -306,5 +360,29 @@ export default {
 
 .chart-box--wide {
   height: 340px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .film-list {
+    padding: 12px;
+  }
+
+  .kpi-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .chart-box {
+    height: 240px;
+  }
+
+  .chart-box--tall {
+    height: 280px;
+  }
+
+  .chart-box--wide {
+    height: 280px;
+  }
 }
 </style>
