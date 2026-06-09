@@ -32,4 +32,7 @@ public class Cart implements Serializable {
     //金额
     private double price;
 
+    //加入购物车时间（10 分钟锁座）
+    private String createAt;
+
 }

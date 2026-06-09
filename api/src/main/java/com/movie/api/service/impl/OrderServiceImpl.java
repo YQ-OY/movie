@@ -13,8 +13,12 @@ import com.movie.api.model.entity.Order;
 import com.movie.api.model.vo.OrderVO;
 import com.movie.api.service.ArrangementService;
 import com.movie.api.service.OrderService;
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.movie.api.utils.ArrangementScheduleUtil;
 import com.movie.api.utils.DataTimeUtil;
+import com.movie.api.utils.PayUtil;
+import com.movie.api.utils.SeatUtil;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +43,9 @@ public class OrderServiceImpl implements OrderService {
     @Resource
     private FilmMapper filmMapper;
 
+    @Resource
+    private PayUtil payUtil;
+
     // 创建订单（从购物车生成订单，同时增加电影热度）
     @Override
     public Order create(Cart cart) throws Exception {
@@ -49,10 +56,15 @@ public class OrderServiceImpl implements OrderService {
         if (!ArrangementScheduleUtil.isTicketSaleAllowed(arrangement)) {
             throw new Exception("开场前" + ArrangementScheduleUtil.TICKET_SALES_CLOSE_BEFORE_MINUTES + "分钟停止售票");
         }
-        List<Integer> seats = arrangementService.getSeatsHaveSelected(cart.getAid());
-        String[] split = cart.getSeats().split("号");
-        for (String s : split) {
-            if (seats.contains(Integer.parseInt(s))) throw new Exception("影片在购物车中躺了太长时间了，座位已被其他用户预订并支付了");
+        boolean cartLockActive = SeatUtil.isCartLockActive(cart.getCreateAt());
+        String excludeCartId = cartLockActive ? cart.getId() : null;
+        try {
+            arrangementService.validateSeatsAvailable(cart.getAid(), cart.getSeats(), excludeCartId);
+        } catch (Exception e) {
+            if (!cartLockActive) {
+                throw new Exception("放置购物车时间过长，座位已被他人选走，请重新选座");
+            }
+            throw e;
         }
         Order order = new Order();
         //生成订单id
@@ -64,14 +76,14 @@ public class OrderServiceImpl implements OrderService {
         //写入场次id
         order.setAid(cart.getAid());
         //写入座位信息
-        order.setStatus(cart.getStatus());
+        order.setStatus(OrderStatus.PAYMENT_WAITING);
         order.setSeats(cart.getSeats());
-        if (cart.getStatus() == 2) order.setPayAt(DataTimeUtil.getNowTimeString());
         order.setPrice(cart.getPrice());
+        // 结算时重新计时，支付窗口 5 分钟
         order.setCreateAt(DataTimeUtil.getNowTimeString());
         orderMapper.insert(order);
 
-        //订了几个座位就添加多少热度
+        String[] split = cart.getSeats().split("号");
         Film film = filmMapper.selectById(arrangement.getFid());
         film.setHot(film.getHot() + split.length);
         filmMapper.updateById(film);
@@ -108,11 +120,11 @@ public class OrderServiceImpl implements OrderService {
             throw new Exception("开场前" + ArrangementScheduleUtil.TICKET_SALES_CLOSE_BEFORE_MINUTES + "分钟停止售票");
         }
 
-        if (DataTimeUtil.parseTimeStamp(order.getCreateAt()) + OrderStatus.EXPIRATION_TIME
+        if (DataTimeUtil.parseTimeStamp(order.getCreateAt()) + OrderStatus.PAYMENT_EXPIRATION_TIME
                 < System.currentTimeMillis()) {
             order.setStatus(OrderStatus.PAYMENT_FAILED);
             orderMapper.updateById(order);
-            throw new Exception("订单支付超时");
+            throw new Exception("订单支付超时，请重新选座");
         }
 
         return order;
@@ -161,16 +173,64 @@ public class OrderServiceImpl implements OrderService {
             throw new Exception("开场前" + ArrangementScheduleUtil.TICKET_SALES_CLOSE_BEFORE_MINUTES + "分钟停止售票");
         }
 
-        if (DataTimeUtil.parseTimeStamp(order.getCreateAt()) + OrderStatus.EXPIRATION_TIME
+        if (DataTimeUtil.parseTimeStamp(order.getCreateAt()) + OrderStatus.PAYMENT_EXPIRATION_TIME
                 < System.currentTimeMillis()) {
             order.setStatus(OrderStatus.PAYMENT_FAILED);
             orderMapper.updateById(order);
-            throw new Exception("订单支付超时");
+            throw new Exception("订单支付超时，请重新选座");
         }
 
         order.setStatus(OrderStatus.PAYMENT_SUCCESSFUL);
         order.setPayAt(DataTimeUtil.getNowTimeString());
         orderMapper.updateById(order);
+        return order;
+    }
+
+    @Override
+    public Order refund(String id, String uid) throws Exception {
+        Order order = orderMapper.selectById(id);
+        if (order == null) {
+            throw new Exception("订单不存在");
+        }
+        if (uid == null || !uid.equals(order.getUid())) {
+            throw new Exception("无权操作该订单");
+        }
+        if (!OrderStatus.PAYMENT_SUCCESSFUL.equals(order.getStatus())) {
+            throw new Exception("仅支付成功的订单可申请退款");
+        }
+
+        Arrangement arrangement = arrangementService.findById(order.getAid());
+        if (arrangement == null) {
+            throw new Exception("场次不存在");
+        }
+        if (!ArrangementScheduleUtil.isBeforeShowStart(arrangement)) {
+            throw new Exception("电影已开场或放映时间已过，无法退款");
+        }
+
+        String refundAmount = String.format("%.2f", order.getPrice());
+        String outRequestNo = order.getId() + "_refund";
+        try {
+            // 本地已校验支付成功，直接调用退款接口（避免沙箱 trade.query 频繁 504）
+            AlipayTradeRefundResponse refundResponse = payUtil.refund(order.getId(), refundAmount, outRequestNo);
+            if (!refundResponse.isSuccess()) {
+                String msg = refundResponse.getSubMsg() != null ? refundResponse.getSubMsg() : refundResponse.getMsg();
+                throw new Exception("支付宝退款失败：" + msg);
+            }
+        } catch (AlipayApiException e) {
+            throw new Exception("支付宝退款失败：" + PayUtil.friendlyMessage(e));
+        }
+
+        order.setStatus(OrderStatus.REFUNDED);
+        orderMapper.updateById(order);
+
+        if (arrangement != null) {
+            Film film = filmMapper.selectById(arrangement.getFid());
+            if (film != null) {
+                int seatCount = SeatUtil.parseSeatNumbers(order.getSeats()).size();
+                film.setHot(Math.max(0, film.getHot() - seatCount));
+                filmMapper.updateById(film);
+            }
+        }
         return order;
     }
 

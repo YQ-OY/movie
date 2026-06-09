@@ -1,0 +1,203 @@
+/* 订单 / 购物车 */
+.ticket-page {
+  width: 100%;
+}
+
+.ticket-page__title {
+  margin: 0 0 20px;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: #303133;
+}
+
+.ticket-page__tip {
+  margin-bottom: 16px;
+}
+
+.ticket-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ticket-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #ebeef5;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  padding: 16px 18px;
+}
+
+.ticket-card__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.ticket-card__check {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ticket-card__poster {
+  flex-shrink: 0;
+  width: 98px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef1f6;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ticket-card__cover {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.ticket-card__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.info-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #606266;
+  letter-spacing: 0.3px;
+}
+
+.info-text--title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.info-text--status-waiting { color: #65a6f1; }
+.info-text--status-success { color: #67c23a; font-weight: 500; }
+.info-text--status-danger  { color: #f56c6c; font-weight: 500; }
+.info-text--status-warning { color: #e6a23c; font-weight: 500; }
+.info-text--status-refunded { color: #909399; }
+
+.info-text--accent {
+  color: #606266;
+}
+
+.info-text--pay {
+  color: #606266;
+}
+
+.info-text--price-row {
+  text-align: right;
+  margin: 2px 0 0;
+}
+
+.info-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #e85d4c;
+  letter-spacing: 0.5px;
+}
+
+.info-action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 2px;
+}
+
+.info-action-btn {
+  min-width: 100px;
+  height: 34px !important;
+  padding: 0 20px !important;
+  font-size: 13px !important;
+  font-weight: 500;
+  letter-spacing: 1px;
+  border-radius: 4px !important;
+}
+
+.info-action-hint {
+  font-size: 12px;
+  color: #c0c4cc;
+  line-height: 34px;
+}
+
+/* 购物车结算栏 */
+.ticket-checkout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 6px;
+  padding: 14px 20px;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.ticket-checkout__left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.ticket-checkout__total {
+  font-size: 15px;
+  color: #606266;
+}
+
+.ticket-checkout__total em {
+  font-style: normal;
+  font-size: 22px;
+  font-weight: 700;
+  color: #e85d4c;
+  margin-left: 4px;
+}
+
+.ticket-checkout__submit {
+  min-width: 130px;
+  height: 40px !important;
+  font-size: 15px !important;
+  font-weight: 600;
+  letter-spacing: 2px;
+  border-radius: 4px !important;
+}
+
+.ticket-empty {
+  padding: 48px 0;
+  text-align: center;
+  color: #909399;
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .ticket-card {
+    padding: 14px;
+  }
+
+  .ticket-card__poster {
+    width: 88px;
+    height: 140px;
+  }
+
+  .info-text--title {
+    font-size: 15px;
+  }
+
+  .info-price {
+    font-size: 18px;
+  }
+}

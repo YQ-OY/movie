@@ -69,6 +69,7 @@
           <el-tag v-if="scope.row.order.status === 0" type="info">等待支付</el-tag>
           <el-tag v-if="scope.row.order.status === 3" type="warning">已被撤销</el-tag>
           <el-tag v-if="scope.row.order.status === 1" type="danger">支付失败</el-tag>
+          <el-tag v-if="scope.row.order.status === 4" type="info">已退款</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="250">

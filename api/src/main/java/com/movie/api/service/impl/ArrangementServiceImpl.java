@@ -1,24 +1,31 @@
 package com.movie.api.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.movie.api.constant.OrderStatus;
 import com.movie.api.mapper.ArrangementMapper;
+import com.movie.api.mapper.CartMapper;
 import com.movie.api.mapper.FilmMapper;
 import com.movie.api.mapper.OrderMapper;
 import com.movie.api.model.entity.Arrangement;
+import com.movie.api.model.entity.Cart;
 import com.movie.api.model.entity.Film;
 import com.movie.api.model.entity.Order;
 import com.movie.api.model.vo.ArrangementVO;
+import com.movie.api.model.vo.SeatStatusVO;
 import com.movie.api.service.ArrangementService;
 import com.movie.api.service.FilmService;
 import com.movie.api.utils.ArrangementScheduleUtil;
 import com.movie.api.utils.DataTimeUtil;
+import com.movie.api.utils.SeatUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class ArrangementServiceImpl implements ArrangementService {
@@ -33,9 +40,11 @@ public class ArrangementServiceImpl implements ArrangementService {
     private OrderMapper orderMapper;
 
     @Resource
+    private CartMapper cartMapper;
+
+    @Resource
     private FilmService filmService;
 
-    // 保存排片场次（自动计算结束时间并校验场次不重叠）
     @Override
     public void save(Arrangement arrangement) {
         fillEndTimeAndAssertNoOverlap(arrangement, null);
@@ -44,46 +53,87 @@ public class ArrangementServiceImpl implements ArrangementService {
         arrangementMapper.insert(arrangement);
     }
 
-    // 查询所有排片
     @Override
     public List<Arrangement> findAll() {
         return arrangementMapper.selectList(null);
     }
 
-    // 根据电影ID查询排片及电影信息
     @Override
     public ArrangementVO findByFilmId(String fid) {
         List<Arrangement> list = arrangementMapper.selectList(new QueryWrapper<Arrangement>().in("fid", fid));
         return new ArrangementVO(list, filmMapper.selectById(fid));
     }
 
-    // 获取场次已选座位列表
     @Override
     public List<Integer> getSeatsHaveSelected(Long id) {
-        List<Order> orders = orderMapper.selectList(new QueryWrapper<Order>().in("aid", id));
-        List<Integer> seats = new ArrayList<>();
-        for (Order o : orders) {
-            String[] split = o.getSeats().split("号");
-            for (String s : split) {
-                seats.add(Integer.parseInt(s));
-            }
-        }
-        return seats;
+        return getSeatStatus(id).getSoldSeats();
     }
 
-    // 根据ID查询排片
+    @Override
+    public SeatStatusVO getSeatStatus(Long id) {
+        Set<Integer> sold = new HashSet<>();
+        QueryWrapper<Order> paidWrapper = new QueryWrapper<>();
+        paidWrapper.eq("aid", id).eq("status", OrderStatus.PAYMENT_SUCCESSFUL);
+        for (Order order : orderMapper.selectList(paidWrapper)) {
+            sold.addAll(SeatUtil.parseSeatNumbers(order.getSeats()));
+        }
+
+        Set<Integer> locked = new HashSet<>();
+        QueryWrapper<Cart> cartWrapper = new QueryWrapper<>();
+        cartWrapper.eq("aid", id);
+        for (Cart cart : cartMapper.selectList(cartWrapper)) {
+            if (SeatUtil.isCartLockActive(cart.getCreateAt())) {
+                locked.addAll(SeatUtil.parseSeatNumbers(cart.getSeats()));
+            }
+        }
+
+        QueryWrapper<Order> pendingWrapper = new QueryWrapper<>();
+        pendingWrapper.eq("aid", id).eq("status", OrderStatus.PAYMENT_WAITING);
+        for (Order order : orderMapper.selectList(pendingWrapper)) {
+            if (SeatUtil.isOrderLockActive(order.getCreateAt())) {
+                locked.addAll(SeatUtil.parseSeatNumbers(order.getSeats()));
+            }
+        }
+
+        locked.removeAll(sold);
+
+        SeatStatusVO vo = new SeatStatusVO();
+        vo.setSoldSeats(new ArrayList<>(sold));
+        vo.setLockedSeats(new ArrayList<>(locked));
+        return vo;
+    }
+
+    @Override
+    public void validateSeatsAvailable(Long arrangementId, String seats, String excludeCartId) throws Exception {
+        SeatStatusVO status = getSeatStatus(arrangementId);
+        Set<Integer> unavailable = new HashSet<>();
+        unavailable.addAll(status.getSoldSeats());
+        unavailable.addAll(status.getLockedSeats());
+
+        if (excludeCartId != null && !excludeCartId.isEmpty()) {
+            Cart cart = cartMapper.selectById(excludeCartId);
+            if (cart != null && Objects.equals(cart.getAid(), arrangementId)) {
+                unavailable.removeAll(SeatUtil.parseSeatNumbers(cart.getSeats()));
+            }
+        }
+
+        for (Integer seat : SeatUtil.parseSeatNumbers(seats)) {
+            if (unavailable.contains(seat)) {
+                throw new Exception("座位 " + seat + " 号已被预订或锁座中，请选择其他座位");
+            }
+        }
+    }
+
     @Override
     public Arrangement findById(Long id) {
         return arrangementMapper.selectById(id);
     }
 
-    // 根据ID删除排片
     @Override
     public void deleteById(Long id) {
         arrangementMapper.deleteById(id);
     }
 
-    // 更新排片信息（自动重新计算结束时间并校验不重叠）
     @Override
     public Arrangement Update(Arrangement arrangement) {
         fillEndTimeAndAssertNoOverlap(arrangement, arrangement.getId());
@@ -91,7 +141,6 @@ public class ArrangementServiceImpl implements ArrangementService {
         return arrangement;
     }
 
-    // 按影片时长计算结束时间，并校验同一电影下场次区间不重叠
     private void fillEndTimeAndAssertNoOverlap(Arrangement a, Long excludeId) {
         if (a.getFid() == null || a.getFid().trim().isEmpty()) {
             throw new IllegalArgumentException("请选择电影");
@@ -126,5 +175,4 @@ public class ArrangementServiceImpl implements ArrangementService {
             }
         }
     }
-
 }

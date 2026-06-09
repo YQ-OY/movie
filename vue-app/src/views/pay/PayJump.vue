@@ -1,5 +1,12 @@
 <template>
   <div class="pay-jump">
+    <el-alert
+        title="请在 5 分钟内完成支付，超时后订单将失效且座位会被释放"
+        type="warning"
+        :closable="false"
+        show-icon
+        class="pay-alert"
+    />
     <el-result
         icon="info"
         title="正在跳转支付宝沙箱"
@@ -39,8 +46,16 @@ onMounted(() => {
 .pay-jump {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background: #f5f7fa;
+  padding: 24px;
+}
+
+.pay-alert {
+  max-width: 480px;
+  width: 100%;
+  margin-bottom: 16px;
 }
 </style>

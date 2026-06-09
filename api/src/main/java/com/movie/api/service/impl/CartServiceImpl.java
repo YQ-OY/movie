@@ -7,11 +7,12 @@ import com.movie.api.mapper.FilmMapper;
 import com.movie.api.model.entity.Arrangement;
 import com.movie.api.model.entity.Cart;
 import com.movie.api.model.entity.Film;
-import com.movie.api.model.entity.Order;
 import com.movie.api.model.vo.CartVO;
+import com.movie.api.service.ArrangementService;
 import com.movie.api.service.CartService;
 import com.movie.api.service.OrderService;
 import com.movie.api.utils.ArrangementScheduleUtil;
+import com.movie.api.utils.DataTimeUtil;
 import com.movie.api.utils.ValidationUtil;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -38,6 +39,9 @@ public class CartServiceImpl implements CartService {
     @Resource
     private FilmMapper filmMapper;
 
+    @Resource
+    private ArrangementService arrangementService;
+
     // 添加商品到购物车
     @Override
     public void save(Cart cart) throws Exception {
@@ -49,6 +53,8 @@ public class CartServiceImpl implements CartService {
         if (!ArrangementScheduleUtil.isTicketSaleAllowed(ar)) {
             throw new Exception("开场前" + ArrangementScheduleUtil.TICKET_SALES_CLOSE_BEFORE_MINUTES + "分钟停止售票");
         }
+        arrangementService.validateSeatsAvailable(cart.getAid(), cart.getSeats(), null);
+        cart.setCreateAt(DataTimeUtil.getNowTimeString());
         cartMapper.insert(cart);
     }
 

@@ -20,3 +20,22 @@ export function isTicketSaleAllowed(dateStr, startHms) {
   const stopSalesAt = startMs - TICKET_CLOSE_BEFORE_MINUTES * 60 * 1000
   return Date.now() < stopSalesAt
 }
+
+/**
+ * 是否尚未开场（放映开始前才可退款）
+ * @param {string} dateStr YYYY-MM-DD
+ * @param {string} startHms HH:mm:ss
+ */
+export function isBeforeShowStart(dateStr, startHms) {
+  if (!dateStr || !startHms) return false
+  const parts = String(startHms).split(':')
+  const h = Number(parts[0])
+  const m = Number(parts[1] ?? 0)
+  const s = Number(parts[2] ?? 0)
+  if (Number.isNaN(h) || Number.isNaN(m) || Number.isNaN(s)) return false
+  const pad = (n) => String(n).padStart(2, '0')
+  const iso = `${String(dateStr).trim()}T${pad(h)}:${pad(m)}:${pad(s)}`
+  const startMs = new Date(iso).getTime()
+  if (Number.isNaN(startMs)) return false
+  return Date.now() < startMs
+}

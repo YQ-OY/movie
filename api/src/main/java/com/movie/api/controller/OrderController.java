@@ -55,4 +55,11 @@ public class OrderController {
         return orderService.pay(id);
     }
 
+    @PostMapping("/refund")
+    @Operation(summary = "用户申请退款")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    public Order refund(@RequestParam String id, @RequestParam String uid) throws Exception {
+        return orderService.refund(id, uid);
+    }
+
 }

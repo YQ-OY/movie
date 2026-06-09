@@ -75,4 +75,17 @@ public final class ArrangementScheduleUtil {
             return false;
         }
     }
+
+    /** 是否尚未开场（当前时间严格早于放映开始时刻，方可退款） */
+    public static boolean isBeforeShowStart(Arrangement a) {
+        if (a == null || a.getDate() == null || a.getStartTime() == null) {
+            return false;
+        }
+        try {
+            LocalDateTime start = startDateTime(a.getDate(), a.getStartTime());
+            return LocalDateTime.now().isBefore(start);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.movie.api.service;
 
 import com.movie.api.model.entity.Arrangement;
 import com.movie.api.model.vo.ArrangementVO;
+import com.movie.api.model.vo.SeatStatusVO;
 
 import java.util.List;
 
@@ -14,6 +15,10 @@ public interface ArrangementService {
     ArrangementVO findByFilmId(String fid);
 
     List<Integer> getSeatsHaveSelected(Long id);
+
+    SeatStatusVO getSeatStatus(Long id);
+
+    void validateSeatsAvailable(Long arrangementId, String seats, String excludeCartId) throws Exception;
 
     Arrangement findById(Long id);
 

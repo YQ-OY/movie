@@ -21,3 +21,10 @@ export function PayForOrder(id) {
         method: "get"
     })
 }
+
+export function RefundOrder(id, uid) {
+    return service({
+        url: '/order/refund?id=' + id + '&uid=' + uid,
+        method: "post"
+    })
+}

@@ -34,7 +34,7 @@ public class Order implements Serializable {
     private double price;
 
     //状态
-    private Integer status;  //0.待支付；1.支付失败；2.支付成功；3.订单已被管理员撤销
+    private Integer status;  //0.待支付；1.支付失败；2.支付成功；3.订单已被管理员撤销；4.已退款
 
     //创建时间
     private String createAt;

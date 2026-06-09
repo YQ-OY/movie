@@ -1,55 +1,76 @@
 <template>
-  <div style="width: 100%">
-    <h3 style="letter-spacing: 1px;font-weight: 400;padding-bottom: 20px">购物车</h3>
+  <div class="ticket-page">
+    <h3 class="ticket-page__title">购物车</h3>
 
-    <div v-loading="loading">
+    <el-alert
+        v-if="cartList.length !== 0"
+        class="ticket-page__tip"
+        title="加入购物车后 10 分钟内座位为您保留；超时后锁座解除，他人可选。结算后请在 5 分钟内完成支付。"
+        type="info"
+        :closable="false"
+        show-icon
+    />
 
-      <el-card v-for="(item, index) in cartList" :key="index" class="box-card">
-        <div>
-          <div style="float: left;line-height: 100px;padding-right: 20px">
-            <el-checkbox @change="handleCheck" v-model="selectList[index].checked"></el-checkbox>
+    <div v-loading="loading" class="ticket-list">
+      <div v-for="(item, index) in cartList" :key="index" class="ticket-card">
+        <div class="ticket-card__main">
+          <div class="ticket-card__check">
+            <el-checkbox @change="handleCheck" v-model="selectList[index].checked"/>
           </div>
-          <img class="item-film-img" alt="" src="../../assets/img/film.png"/>
-          <div style="float: left;">
-            <div class="item-film-name">《{{ item.film.name }}》</div>
-            <div class="item-film-seat">座位 : {{ item.cart.seats }}</div>
-            <div class="item-film-seat">手机号码 : {{ item.cart.phone }}</div>
-            <div class="item-film-time">开场时间 :
-              <span style="color: red">{{ item.arrangement.date }} - {{ item.arrangement.startTime }}</span>
+          <div class="ticket-card__poster">
+            <img class="ticket-card__cover" alt="" :src="item.film.cover"/>
+          </div>
+
+          <div class="ticket-card__info">
+            <div>
+              <p class="info-text info-text--title">《{{ item.film.name }}》</p>
+              <p class="info-text">座位：{{ item.cart.seats }}</p>
+              <p class="info-text">手机号码：{{ item.cart.phone }}</p>
+              <p class="info-text info-text--accent">
+                放映时间：{{ item.arrangement.date }} {{ item.arrangement.startTime }}
+              </p>
+              <p class="info-text info-text--price-row">
+                <span class="info-price">￥{{ formatPrice(item.cart.price) }}</span>
+              </p>
+            </div>
+
+            <div class="info-action-row">
+              <el-button
+                  class="info-action-btn"
+                  type="danger"
+                  plain
+                  @click="handleDelete(index)">
+                删除
+              </el-button>
             </div>
           </div>
-          <div style="float: right;color: #f34d41;letter-spacing: 2px; line-height: 100px;padding-right: 5px">
-            ￥{{ item.cart.price }}
-            <el-button @click="handleDelete(index)"
-                       link
-                       style="color: red;padding-left: 50px"
-                       :icon="Delete">删除
-            </el-button>
-          </div>
         </div>
-      </el-card>
+      </div>
 
-      <div v-if="cartList.length !==0" style="height: 60px;background: #91949c">
-        <div>
-          <div style="float: left;line-height: 60px;padding: 0 20px;font-size: 14px">
-            <el-checkbox @change="handleCheckAll" v-model="checkAll">全 选</el-checkbox>
-          </div>
-          <el-button @click="submitCart" link class="sub-btn">全部结算</el-button>
-          <div class="order-footer1">合计 : ￥{{ price }}</div>
-        </div>
+      <div v-if="!loading && cartList.length === 0" class="ticket-empty">
+        购物车是空的，去选座吧
       </div>
     </div>
 
+    <div v-if="cartList.length !== 0" class="ticket-checkout">
+      <div class="ticket-checkout__left">
+        <el-checkbox @change="handleCheckAll" v-model="checkAll">全选</el-checkbox>
+        <div class="ticket-checkout__total">
+          合计<em>￥{{ formatPrice(price) }}</em>
+        </div>
+      </div>
+      <el-button class="ticket-checkout__submit" type="danger" @click="submitCart">
+        全部结算
+      </el-button>
+    </div>
   </div>
 </template>
 
 <script>
 import {DeleteCartById, ListCarts} from "@/api/cart"
 import {CreateOrder} from "@/api/order";
-import { Delete } from '@element-plus/icons-vue'
 
 export default {
-  components: { Delete },
   data() {
     return {
       loading: false,
@@ -66,6 +87,11 @@ export default {
   },
 
   methods: {
+
+    formatPrice(price) {
+      const n = Number(price)
+      return Number.isNaN(n) ? price : n.toFixed(2).replace(/\.00$/, '')
+    },
 
     loadCarts() {
       this.loading = true;
@@ -127,19 +153,26 @@ export default {
         return
       }
 
-      this.$confirm('请您仔细确认订单金额为' + this.price + '元, 确认后将跳转至支付宝沙箱完成支付', '提示', {
-        confirmButtonText: '确认支付',
-        cancelButtonText: '取消支付',
-        type: 'success',
-        center: true
-      }).then(async () => {
+      this.$confirm(
+          `请您仔细确认订单金额为 ${this.price} 元。订单生成后请在 5 分钟内完成支付，超时订单将失效且座位会被释放。`,
+          '提示',
+          {
+            confirmButtonText: '确认支付',
+            cancelButtonText: '取消支付',
+            type: 'warning',
+            center: true
+          }
+      ).then(async () => {
         this.loading = true
         const orderIds = []
         try {
           for (const item of checkedItems) {
-            item.cart.status = 0
             const res = await CreateOrder(item.cart)
-            if (res.success && res.data && res.data.id) {
+            if (!res.success) {
+              this.loadCarts()
+              return
+            }
+            if (res.data && res.data.id) {
               orderIds.push(res.data.id)
               await DeleteCartById(item.cart.id)
             }
@@ -148,6 +181,7 @@ export default {
             this.$message.error('创建订单失败，请稍后重试')
             return
           }
+          this.$message.warning('请在 5 分钟内完成支付')
           if (orderIds.length > 1) {
             this.$message.success('已生成 ' + orderIds.length + ' 个订单，其余订单可在「我的订单」中继续支付')
           }
@@ -156,10 +190,7 @@ export default {
           this.loading = false
         }
       }).catch(() => {
-        this.$message({
-          type: 'warning',
-          message: '用户已取消支付'
-        });
+        this.$message.warning('用户已取消支付')
       });
     },
 
@@ -169,74 +200,5 @@ export default {
 </script>
 
 <style scoped>
-
-.box-card {
-  margin-bottom: 5px;
-}
-
-:deep(.el-card__header) {
-  background: #C0C4CC;
-}
-
-.item-film-img {
-  float: left;
-  width: 80px;
-  height: 100px;
-  padding-bottom: 20px;
-  padding-right: 10px;
-}
-
-.item-film-name {
-  letter-spacing: 2px;
-  font-weight: 500;
-  font-size: 18px;
-  padding-bottom: 13px;
-}
-
-.item-film-seat {
-  letter-spacing: 1px;
-  font-size: 12px;
-  padding-bottom: 8px;
-  padding-left: 10px;
-  color: #91949c;
-}
-
-
-.item-film-time {
-  font-size: 12px;
-  padding-left: 10px;
-  letter-spacing: 1px;
-  color: #91949c;
-}
-
-.sub-btn {
-  float: right;
-  color: #000000;
-  height: 60px;
-  width: 120px;
-  background: #f34d41;
-  letter-spacing: 2px;
-  line-height: 33px;
-  text-align: center;
-  font-weight: 500;
-  font-size: 18px;
-}
-
-.order-footer1 {
-  float: right;
-  line-height: 60px;
-  padding-right: 40px;
-}
-
-a {
-  color: #333333;
-}
-
-.di {
-  text-align: center;
-  font-size: 20px;
-  letter-spacing: 3px;
-  font-weight: bold;
-  padding-top: 10px;
-}
+@import "../../assets/css/ticket-item.css";
 </style>

@@ -2,6 +2,7 @@ package com.movie.api.controller;
 
 import com.movie.api.model.entity.Arrangement;
 import com.movie.api.model.vo.ArrangementVO;
+import com.movie.api.model.vo.SeatStatusVO;
 import com.movie.api.service.ArrangementService;
 import com.movie.api.service.FilmService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,9 +65,9 @@ public class ArrangementController {
     }
 
     @GetMapping("/getSeats")
-    @Operation(summary = "获取座位情况")
-    public List<Integer> getSeats(Long id) {
-        return arrangementService.getSeatsHaveSelected(id);
+    @Operation(summary = "获取座位情况（已售/锁座）")
+    public SeatStatusVO getSeats(Long id) {
+        return arrangementService.getSeatStatus(id);
     }
 
     @GetMapping("/film/{fid}")

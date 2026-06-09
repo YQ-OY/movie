@@ -26,4 +26,6 @@ public interface OrderService {
 
     List<OrderVO> findByUser(String uid);
 
+    Order refund(String id, String uid) throws Exception;
+
 }
