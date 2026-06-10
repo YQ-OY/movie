@@ -297,15 +297,12 @@ export default {
           keyword: this.searchKeyword || null,
         }
         const res = await listWorkerPage(params)
-        if (res.success) {
-          this.workerList = res.data.rows || []
-          this.totalCount = res.data.total || 0
-          this.currentPage = res.data.page || this.currentPage
-        } else {
-          this.$message.error(res.msg || '加载失败')
-        }
-      } catch (error) {
-        this.$message.error('加载员工列表失败')
+        if (!res?.success) return
+        this.workerList = res.data.rows || []
+        this.totalCount = res.data.total || 0
+        this.currentPage = res.data.page || this.currentPage
+      } catch {
+        // 全局 request 拦截器已提示
       } finally {
         this.loading = false
       }
@@ -332,12 +329,12 @@ export default {
     // 状态切换（使用el-switch时触发）
     async handleStatusChange(worker) {
       try {
-        await UpdateWorker(worker)
+        const res = await UpdateWorker(worker)
+        if (!res?.success) return
         this.$message.success('状态已更新')
-        // 刷新当前页
         this.loadWorkers()
       } catch {
-        this.$message.error('更新失败')
+        // 全局 request 拦截器已提示
       }
     },
     // 打开编辑对话框
@@ -377,12 +374,13 @@ export default {
     // 编辑提交后刷新
     async submitEdit() {
       try {
-        await UpdateWorker(this.editForm)
+        const res = await UpdateWorker(this.editForm)
+        if (!res?.success) return
         this.$message.success('信息修改成功')
         this.dialogEditVisible = false
         this.loadWorkers()
       } catch {
-        this.$message.error('修改失败')
+        // 全局 request 拦截器已提示
       }
     },
     // 修改密码相关
@@ -398,12 +396,13 @@ export default {
       }
       const updated = { ...this.editForm, password: this.passwordForm.newPassword }
       try {
-        await UpdateWorker(updated)
+        const res = await UpdateWorker(updated)
+        if (!res?.success) return
         this.$message.success('密码修改成功')
         this.passwordDialogVisible = false
         this.loadWorkers()
       } catch {
-        this.$message.error('修改失败')
+        // 全局 request 拦截器已提示
       }
     },
     // 权限管理（查看权限列表）
@@ -430,25 +429,12 @@ export default {
       this.addRoleForm = { wid: worker.id, value: '' }
       this.addRoleDialogVisible = true
     },
-    async submitAddRole() {
-      if (!this.addRoleForm.value) {
-        this.$message.warning('请选择权限')
-        return
-      }
-      await CreateWorkerRole(this.addRoleForm)
-      this.$message.success('权限添加成功')
-      this.addRoleDialogVisible = false
-      // 刷新权限列表
-      if (this.editForm.id) {
-        const res = await FindWorkerRoles(this.editForm.id)
-        this.roleList = Array.isArray(res?.data) ? res.data : []
-      }
-    },
     // 删除员工
     handleDeleteWork(worker) {
       this.$confirm(`确定删除员工 ${worker.username} 吗？`, '提示', { type: 'warning' })
         .then(async () => {
-          await DeleteWorker(worker.id)
+          const res = await DeleteWorker(worker.id)
+          if (!res?.success) return
           this.$message.success('删除成功')
           // 如果当前页只剩一条数据且不是第一页，则跳转到上一页
           if (this.workerList.length === 1 && this.currentPage > 1) {
@@ -488,16 +474,16 @@ export default {
         return
       }
       try {
-        await CreateWorkerRole(this.addRoleForm)
+        const res = await CreateWorkerRole(this.addRoleForm)
+        if (!res?.success) return
         this.$message.success('权限添加成功')
         this.addRoleDialogVisible = false
-        // 如果当前有打开的权限对话框，且添加的员工 ID 与当前显示的一致，则刷新权限列表
         if (this.roleDialogVisible && this.currentWorkerForRole && this.currentWorkerForRole.id === this.addRoleForm.wid) {
-          const res = await FindWorkerRoles(this.currentWorkerForRole.id)
-          this.roleList = Array.isArray(res?.data) ? res.data : []
+          const roleRes = await FindWorkerRoles(this.currentWorkerForRole.id)
+          this.roleList = Array.isArray(roleRes?.data) ? roleRes.data : []
         }
-      } catch (error) {
-        this.$message.error('添加失败')
+      } catch {
+        // 全局 request 拦截器已提示
       }
     }
   }

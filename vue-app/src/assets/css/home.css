@@ -285,7 +285,8 @@
 
 .panel-title {
   font-size: 26px;
-  color: #ffb400
+  color: var(--app-title);
+  font-weight: 600;
 }
 
 .panel-title > span > h2 {
@@ -354,7 +355,7 @@
   top: -40px;
   left: -29px;
   overflow: hidden;
-  background: #fff;
+  background: var(--app-surface-elevated);
   -moz-box-shadow: 0 0 16px #fff, 0 0 6px rgba(0, 0, 0, .2);
   -webkit-box-shadow: 0 0 16px #fff, 0 0 6px rgba(0, 0, 0, .2);
   box-shadow: 0 0 16px #fff, 0 0 6px rgba(0, 0, 0, .2)
@@ -392,14 +393,14 @@ img.movie-hover-img {
   position: absolute;
   z-index: 11;
   top: 150px;
-  background: #fff;
+  background: var(--app-surface-elevated);
   width: 218px
 }
 
 .movie-hover-title {
   font-size: 16px;
   line-height: 16px;
-  color: #999;
+  color: var(--app-text-secondary);
   margin-top: 12px;
   width: 100%;
   overflow: hidden;
@@ -410,7 +411,7 @@ img.movie-hover-img {
 .movie-hover-title:first-child {
   margin-top: 6px;
   font-size: 20px;
-  color: #333;
+  color: var(--app-title-strong);
   line-height: 20px
 }
 
@@ -424,11 +425,11 @@ img.movie-hover-img {
 }
 
 .hover-tag {
-  color: #333
+  color: var(--app-text-secondary)
 }
 
 .movie-poster {
-  background-color: #fcfcfc;
+  background-color: var(--app-surface-muted);
   width: 160px;
   height: 220px;
   overflow: hidden;
@@ -561,7 +562,7 @@ img.movie-hover-img {
 .movie-wish {
   font-size: 14px;
   color: #ffb400;
-  background-color: #fbfbfb;
+  background-color: var(--app-surface-muted);
   text-align: left;
   padding-left: 10px
 }
@@ -574,16 +575,16 @@ img.movie-hover-img {
 
 .movie-sale a:hover {
   color: #999;
-  background-color: #fff
+  background-color: var(--app-surface-elevated)
 }
 
 .movie-sale a.active {
-  color: #ef4238
+  color: var(--app-primary)
 }
 
 .movie-sale a.active:hover {
   color: #fff;
-  background-color: #ef4238
+  background-color: var(--app-primary)
 }
 
 .movie-presale a {
@@ -597,7 +598,7 @@ img.movie-hover-img {
 
 .movie-presale a:hover {
   color: #999;
-  background-color: #fff
+  background-color: var(--app-surface-elevated)
 }
 
 .movie-presale-sep {
@@ -627,12 +628,12 @@ img.movie-hover-img {
   text-overflow: ellipsis;
   text-align: center;
   font-size: 16px;
-  color: #333;
+  color: var(--app-title);
   margin-top: 10px
 }
 
 .channel-detail a {
-  color: #333
+  color: var(--app-title)
 }
 
 .channel-detail-orange, .channel-detail-prescore {
@@ -668,7 +669,7 @@ img.movie-hover-img {
 }
 
 .channel-action-sale {
-  background-color: #f34d41
+  background-color: var(--app-primary-dark)
 }
 
 .channel-action-pre {
@@ -877,7 +878,7 @@ dd, dl, dt, h1, h2, h3, h4, h5, h6, li, p, ul {
 }
 
 .ranking-movie-name {
-  color: #7e7e7e
+  color: var(--app-title)
 }
 
 .ranking-first-movie .ranking-movie-name {
@@ -916,7 +917,7 @@ dd, dl, dt, h1, h2, h3, h4, h5, h6, li, p, ul {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 18px;
-  color: #333;
+  color: var(--app-title-strong);
   line-height: 1.4
 }
 
@@ -931,7 +932,7 @@ dd, dl, dt, h1, h2, h3, h4, h5, h6, li, p, ul {
 
 .ranking-top-right .ranking-release-time {
   margin-top: 12px;
-  color: #999
+  color: var(--app-text-secondary)
 }
 
 .ranking-top-right .ranking-top-content {
@@ -946,7 +947,7 @@ dd, dl, dt, h1, h2, h3, h4, h5, h6, li, p, ul {
 
 .ranking-index-1 {
   margin-bottom: 11px;
-  border: 1px solid #efefef
+  border: 1px solid var(--app-border)
 }
 
 .ranking-top-right-main {
@@ -977,7 +978,7 @@ dd, dl, dt, h1, h2, h3, h4, h5, h6, li, p, ul {
 }
 
 .ranking-mostExpect .ranking-index-2, .ranking-mostExpect .ranking-index-3 {
-  border: 1px solid #efefef;
+  border: 1px solid var(--app-border);
   position: relative;
   width: 170px;
   float: left;
@@ -1006,7 +1007,7 @@ dd, dl, dt, h1, h2, h3, h4, h5, h6, li, p, ul {
 .ranking-mostExpect .ranking-index-2 .name-link, .ranking-mostExpect .ranking-index-3 .name-link {
   display: block;
   font-size: 18px;
-  color: #333;
+  color: var(--app-title-strong);
   margin-top: 8px;
   margin-left: 10px;
   margin-right: 10px
@@ -1066,18 +1067,18 @@ dd, dl, dt, h1, h2, h3, h4, h5, h6, li, p, ul {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 16px;
-  color: #333;
+  color: var(--app-title);
   vertical-align: top
 }
 
 .ranking-item:hover {
   cursor: pointer;
-  background-color: #f7f7f7
+  background-color: var(--app-surface-muted)
 }
 
 .ranking-index {
   font-size: 18px;
-  color: #999;
+  color: var(--app-text-secondary);
   vertical-align: top
 }
 
@@ -1262,7 +1263,7 @@ h4 {
 }
 
 .top1-news-content a:hover {
-  color: #ef4238
+  color: var(--app-primary)
 }
 
 .top10-news-content {
@@ -1281,11 +1282,11 @@ h4 {
 }
 
 .red, .top10-news-content a:hover {
-  color: #ef4238
+  color: var(--app-primary)
 }
 
 .red-bg {
-  background-color: #ef4238
+  background-color: var(--app-primary)
 }
 
 .blue {
@@ -1348,12 +1349,12 @@ h4 {
 }
 
 .ranking-box-wrapper .panel-title, .ranking-box-wrapper .ranking-index-2 .ranking-index, .ranking-box-wrapper .ranking-index-3 .ranking-index, .ranking-box-wrapper .ranking-num-info, .ranking-box-wrapper .ranking-top-right .ranking-top-wish {
-  color: #ef4238
+  color: var(--app-primary)
 }
 
 .box-total-wrapper {
   margin-top: 29px;
-  background-color: #fdfdfd;
+  background-color: var(--app-surface);
   border: 1px solid #efefef;
   padding-right: 15px
 }
@@ -1364,7 +1365,7 @@ h4 {
   height: 83px;
   padding: 10px;
   color: #fff;
-  background-color: #ef4238;
+  background-color: var(--app-primary);
   text-align: center;
   font-weight: 400;
   font-size: 17px;
@@ -1374,7 +1375,7 @@ h4 {
 .box-total-wrapper > div {
   font-size: 14px;
   margin-left: 54px;
-  color: #ef4238;
+  color: var(--app-primary);
   padding-top: 20px
 }
 
@@ -1385,7 +1386,7 @@ h4 {
 }
 
 .box-total-wrapper > div a.more[href] {
-  color: #ef4238;
+  color: var(--app-primary);
   margin-top: 13px;
   float: right;
   line-height: 16px
@@ -1426,7 +1427,7 @@ h4 {
 .no-hots {
   width: 730px;
   height: 120px;
-  background-color: #f7f7f7;
+  background-color: var(--app-surface-muted);
   color: #999;
   font-size: 18px;
   line-height: 120px;

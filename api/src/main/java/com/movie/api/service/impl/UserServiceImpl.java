@@ -74,9 +74,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(User user) throws Exception {
         ValidationUtil.requireValidMobileCNIfPresent(user.getPhone(), "手机号");
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        User existing = userMapper.selectById(user.getId());
+        if (existing == null) {
+            throw new Exception("用户不存在");
+        }
+        if (StringUtils.hasText(user.getPassword()) && !user.getPassword().startsWith("$2")) {
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        } else {
+            user.setPassword(existing.getPassword());
+        }
+        user.setUpdateAt(DataTimeUtil.getNowTimeString());
         userMapper.updateById(user);
-        return user;
+        return userMapper.selectById(user.getId());
     }
 
     // 注册新用户

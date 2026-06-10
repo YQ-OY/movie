@@ -125,12 +125,11 @@ export default {
         if (!valid) return
         this.loading = true
         this.form.avatar = this.avatarPreview
-        CreateWorker(this.form).then(() => {
+        CreateWorker(this.form).then(res => {
+          if (!res?.success) return
           this.$message.success('添加员工成功')
           this.$router.push("/worker/list")
-        }).catch(() => {
-          this.$message.error('添加失败')
-        }).finally(() => {
+        }).catch(() => {}).finally(() => {
           this.loading = false
         })
       })

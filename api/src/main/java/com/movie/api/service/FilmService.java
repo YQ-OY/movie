@@ -13,9 +13,6 @@ public interface FilmService {
 
     List<Film> findAll();
 
-    /** 已有排片的影片 */
-    List<Film> findWithArrangement();
-
     List<Film> findByRegionAndType(String region, String type);
 
     //获取热门电影
@@ -28,5 +25,5 @@ public interface FilmService {
 
     Film update(Film film);
 
-    PageResult<Film> findByPage(Integer page, Integer size, String name, List<String> type, List<String> region, Boolean status);
+    PageResult<Film> findByPage(Integer page, Integer size, String name, List<String> type, List<String> region, Boolean status, String releasePhase);
 }

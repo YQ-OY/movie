@@ -139,13 +139,12 @@ export default {
           keyword: this.searchKeyword || null,   // 后端支持按用户名/昵称模糊搜索
         }
         const res = await listUserPage(params)
+        if (!res?.success) return
         this.userList = res.data.rows || []
         this.totalCount = res.data.total || 0
-        // 可选：同步后端返回的 page
         this.currentPage = res.data.page || this.currentPage
       } catch (error) {
         console.error('加载用户列表失败', error)
-        this.$message.error('加载失败，请重试')
       } finally {
         this.loading = false
       }
@@ -190,12 +189,11 @@ export default {
       }).then(({ value }) => {
         // 调用更新接口
         const updateData = { ...user, password: value }
-        UpdateUser(updateData).then(() => {
+        UpdateUser(updateData).then(res => {
+          if (!res?.success) return
           this.$message.success('密码修改成功')
           this.loadUsers()
-        }).catch(() => {
-          this.$message.error('密码修改失败')
-        })
+        }).catch(() => {})
       }).catch(() => {
         this.$message.info('已取消修改')
       })

@@ -69,16 +69,11 @@ export default {
       const wid = localStorage.getItem("wid")
       ListWorkerEvaluate(wid)
         .then(res => {
-          if (res.success) {
-            this.evaluateList = res.data || []
-            this.currentPage = 1
-          } else {
-            this.$message.error(res.msg || '加载评价失败')
-          }
+          if (!res?.success) return
+          this.evaluateList = res.data || []
+          this.currentPage = 1
         })
-        .catch(() => {
-          this.$message.error('加载评价失败')
-        })
+        .catch(() => {})
         .finally(() => {
           this.loading = false
         })

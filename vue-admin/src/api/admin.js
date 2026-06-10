@@ -9,10 +9,11 @@ export function getCurrentAdmin() {
 }
 
 // 更新管理员信息（使用现有 POST 接口）
-export function updateAdmin(data) {
+export function updateAdmin(data, options = {}) {
   return service({
     url: '/admin/update',
     method: 'post',
-    data
+    data,
+    silent: options.silent,
   });
 }

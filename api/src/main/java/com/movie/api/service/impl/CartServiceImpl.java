@@ -77,7 +77,9 @@ public class CartServiceImpl implements CartService {
     @Cacheable
     public List<CartVO> findAllByUserId(String uid) {
         List<CartVO> result = new ArrayList<>();
-        List<Cart> carts = cartMapper.selectList(new QueryWrapper<Cart>().in("uid", uid));
+        QueryWrapper<Cart> wrapper = new QueryWrapper<Cart>().in("uid", uid);
+        wrapper.orderByDesc("create_at");
+        List<Cart> carts = cartMapper.selectList(wrapper);
         for (Cart c : carts) {
             Arrangement arrangement = arrangementMapper.selectById(c.getAid());
             Film film = filmMapper.selectById(arrangement.getFid());

@@ -36,21 +36,16 @@ public class FilmController {
     }
 
     @GetMapping("/page")
-    @Operation(summary = "分页查询电影（支持名称模糊、类型多选、地区多选、状态筛选）")
+    @Operation(summary = "分页查询电影（支持名称模糊、类型多选、地区多选、状态筛选、上映阶段）")
     public PageResult<Film> page(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "5") Integer size,
             @RequestParam(required = false) String name,                 // 电影名称模糊搜索
             @RequestParam(required = false) List<String> type,          // 类型多选
             @RequestParam(required = false) List<String> region,        // 地区多选
-            @RequestParam(required = false) Boolean status) {           // 上架状态
-        return filmService.findByPage(page, size, name, type, region, status);
-    }
-
-    @GetMapping("/scheduled")
-    @Operation(summary = "已有排片的电影（首页正在热播）")
-    public List<Film> listScheduled() {
-        return filmService.findWithArrangement();
+            @RequestParam(required = false) Boolean status,             // 上架状态
+            @RequestParam(required = false) String releasePhase) {      // showing / upcoming
+        return filmService.findByPage(page, size, name, type, region, status, releasePhase);
     }
 
     @GetMapping("/hot/{limit}")

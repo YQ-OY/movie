@@ -1,7 +1,7 @@
 <template>
-  <div class="activity-page">
-    <div class="activity-page__inner">
-      <header class="activity-hero">
+  <div class="activity-page app-page">
+    <div class="activity-page__inner app-page__inner">
+      <header class="activity-hero app-hero">
         <div class="activity-hero__left">
           <div class="activity-hero__icon" aria-hidden="true">
             <el-icon :size="28"><Flag /></el-icon>
@@ -21,7 +21,7 @@
             <span class="hero-stat__num">{{ list.length }}</span>
             <span class="hero-stat__lbl">场活动</span>
           </div>
-          <div class="hero-stat hero-stat--orange">
+          <div class="hero-stat hero-stat--accent">
             <el-icon><StarFilled /></el-icon>
             <span class="hero-stat__lbl">会员专享</span>
           </div>
@@ -51,7 +51,7 @@
               <span class="timeline-date">{{ formatDateLabel(item.startTime) }}</span>
               <el-tag
                   :type="statusTag(item).type"
-                  effect="light"
+                  effect="dark"
                   size="small"
                   round
                   class="timeline-status"
@@ -208,35 +208,20 @@ export default {
 </script>
 
 <style scoped>
-.activity-page {
-  min-height: calc(100vh - 140px);
-  padding: 80px 8% 64px;
-  box-sizing: border-box;
-  background: #ffffff;
-}
-
 .activity-page__inner {
   max-width: 900px;
-  margin: 0 auto;
 }
 
-.activity-hero {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px 24px;
-  margin-bottom: 28px;
-  padding: 18px 22px;
-  background: #ffffff;
-  border-radius: 14px;
-  border: 1px solid rgba(64, 158, 255, 0.2);
-  box-shadow: 0 4px 20px rgba(64, 158, 255, 0.08), 0 2px 8px rgba(255, 140, 66, 0.06);
-  transition: box-shadow 0.12s ease, transform 0.12s ease;
+.activity-hero.app-hero {
+  background: rgba(24, 24, 24, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 
 .activity-hero:hover {
-  box-shadow: 0 6px 24px rgba(64, 158, 255, 0.12), 0 4px 12px rgba(255, 140, 66, 0.08);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
 }
 
 .activity-hero__left {
@@ -256,13 +241,13 @@ export default {
   width: 56px;
   height: 56px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #409eff 0%, #66b1ff 45%, #79bbff 100%);
+  background: var(--app-gradient-brand);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 14px rgba(64, 158, 255, 0.45);
+  box-shadow: 0 4px 14px var(--app-primary-shadow-strong);
   transition: transform 0.12s ease;
 }
 
@@ -274,17 +259,14 @@ export default {
   margin: 0;
   font-size: 22px;
   font-weight: 700;
-  letter-spacing: 3px;
-  background: linear-gradient(90deg, #303133 0%, #409eff 55%, #e6a23c 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  letter-spacing: 2px;
+  color: var(--app-title);
 }
 
 .activity-hero__sub {
   margin: 6px 0 0;
   font-size: 13px;
-  color: #909399;
+  color: var(--app-text-muted);
   letter-spacing: 1px;
 }
 
@@ -303,22 +285,30 @@ export default {
   border-radius: 12px;
   font-size: 12px;
   transition: transform 0.1s ease;
+  background: rgba(24, 24, 24, 0.52);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero-stat--blue {
+  color: var(--app-primary);
+}
+
+.hero-stat--accent {
+  color: var(--app-primary);
+}
+
+.hero-stat--accent .hero-stat__lbl {
+  color: var(--app-text-secondary);
 }
 
 .hero-stat:hover {
   transform: translateY(-2px);
 }
 
-.hero-stat--blue {
-  background: linear-gradient(145deg, #ecf5ff, #d9ecff);
-  color: #409eff;
-  border: 1px solid rgba(64, 158, 255, 0.25);
-}
-
-.hero-stat--orange {
-  background: linear-gradient(145deg, #fff4e6, #fdebd0);
-  color: #e6a23c;
-  border: 1px solid rgba(230, 162, 60, 0.35);
+.hero-stat--blue .hero-stat__num {
+  color: var(--app-highlight);
 }
 
 .hero-stat .el-icon {
@@ -350,7 +340,7 @@ export default {
 }
 
 .activity-timeline :deep(.el-timeline-item__tail) {
-  border-left: 2px solid #c5dcf7;
+  border-left: 2px solid rgba(255, 255, 255, 0.12);
   opacity: 0.95;
 }
 
@@ -359,22 +349,22 @@ export default {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 3px solid #fff;
+  border: 3px solid rgba(255, 255, 255, 0.25);
   box-sizing: border-box;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
   transition: transform 0.12s ease;
 }
 
 .timeline-dot--0 {
-  background: linear-gradient(135deg, #409eff, #66b1ff);
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-light));
 }
 
 .timeline-dot--1 {
-  background: linear-gradient(135deg, #e6a23c, #f0c78a);
+  background: linear-gradient(135deg, var(--app-primary-light), #5ce07a);
 }
 
 .timeline-dot--2 {
-  background: linear-gradient(135deg, #b37feb, #d3adf7);
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
 }
 
 .activity-timeline :deep(.el-timeline-item:hover) .timeline-dot {
@@ -392,7 +382,7 @@ export default {
 .timeline-date {
   font-size: 14px;
   font-weight: 700;
-  color: #303133;
+  color: var(--app-title);
   letter-spacing: 1px;
 }
 
@@ -402,10 +392,14 @@ export default {
 
 .activity-card {
   position: relative;
+  --el-card-bg-color: transparent;
   border-radius: 14px;
-  border: 1px solid rgba(235, 238, 245, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   overflow: hidden;
-  background: #ffffff;
+  background: rgba(24, 24, 24, 0.58) !important;
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
   transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
   animation: card-in 0.22s ease-out both;
 }
@@ -422,8 +416,8 @@ export default {
 }
 
 .activity-card:hover {
-  border-color: rgba(64, 158, 255, 0.35);
-  box-shadow: 0 8px 28px rgba(64, 158, 255, 0.12), 0 4px 12px rgba(230, 162, 60, 0.08);
+  border-color: rgba(0, 204, 54, 0.35) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
   transform: translateY(-1px);
 }
 
@@ -436,19 +430,20 @@ export default {
 }
 
 .activity-card__accent--0 {
-  background: linear-gradient(180deg, #409eff, #79bbff);
+  background: linear-gradient(180deg, var(--app-primary), var(--app-primary-light));
 }
 
 .activity-card__accent--1 {
-  background: linear-gradient(180deg, #e6a23c, #f3d19e);
+  background: linear-gradient(180deg, var(--app-primary-light), #60a5fa);
 }
 
 .activity-card__accent--2 {
-  background: linear-gradient(180deg, #b37feb, #d3adf7);
+  background: linear-gradient(180deg, var(--app-primary-dark), var(--app-primary));
 }
 
 .activity-card :deep(.el-card__body) {
   padding: 0;
+  background: transparent;
 }
 
 .activity-card__main {
@@ -459,8 +454,8 @@ export default {
   margin: 0 0 10px;
   font-size: 18px;
   font-weight: 700;
-  color: #303133;
-  letter-spacing: 1px;
+  color: var(--app-title);
+  letter-spacing: 0.04em;
   line-height: 1.45;
 }
 
@@ -468,13 +463,13 @@ export default {
   margin: 0 0 14px;
   padding: 12px 14px;
   font-size: 14px;
-  color: #5c6b7a;
+  color: var(--app-text-secondary);
   line-height: 1.75;
   white-space: pre-wrap;
   word-break: break-word;
-  background: linear-gradient(90deg, #f8fafc 0%, #fff9f4 100%);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 10px;
-  border-left: 3px solid #e6a23c;
+  border-left: 3px solid var(--app-primary);
 }
 
 .activity-card__meta {
@@ -503,27 +498,27 @@ export default {
 }
 
 .meta-pill--start {
-  background: #ecf5ff;
-  color: #409eff;
-  border: 1px solid rgba(64, 158, 255, 0.25);
+  background: rgba(0, 204, 54, 0.12);
+  color: var(--app-primary-light);
+  border: 1px solid rgba(0, 204, 54, 0.25);
 }
 
 .meta-pill--end {
-  background: #f4f1ff;
-  color: #8e6be8;
-  border: 1px solid rgba(179, 127, 235, 0.25);
+  background: rgba(139, 92, 246, 0.12);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.25);
 }
 
 .meta-pill--quota {
-  background: #fdf6ec;
-  color: #c97c12;
-  border: 1px solid rgba(230, 162, 60, 0.35);
+  background: rgba(0, 204, 54, 0.1);
+  color: var(--app-primary);
+  border: 1px solid rgba(0, 204, 54, 0.2);
 }
 
 .activity-card__footer {
   padding: 12px 20px;
-  background: #fafafa;
-  border-top: 1px solid #f0f2f5;
+  background: rgba(0, 0, 0, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -535,7 +530,7 @@ export default {
 
 .activity-card__footer :deep(.el-button:hover) {
   transform: scale(1.02);
-  box-shadow: 0 4px 14px rgba(64, 158, 255, 0.35);
+  box-shadow: 0 4px 14px var(--app-primary-shadow-strong);
 }
 
 .btn-icon {

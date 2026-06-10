@@ -94,120 +94,73 @@
             <el-tag v-else-if="scope.row.order.status === 0" type="info" effect="light">等待支付</el-tag>
             <el-tag v-else-if="scope.row.order.status === 3" type="warning" effect="light">已被撤销</el-tag>
             <el-tag v-else-if="scope.row.order.status === 1" type="danger" effect="light">支付失败</el-tag>
+            <el-tag v-else-if="scope.row.order.status === 4" type="info" effect="plain">已退款</el-tag>
             <span v-else>{{ formatCell(scope.row.order.status) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="280" align="center" fixed="right">
           <template #default="scope">
             <div class="action-buttons">
-              <el-button size="small" type="warning" plain :icon="RefreshRight" :disabled="scope.row.order.status === 3"
-                @click="handleRevokeOrder(scope.$index, scope.row.order)">
+              <el-button size="small" type="warning" plain :icon="RefreshRight"
+                :disabled="scope.row.order.status === 3 || scope.row.order.status === 4"
+                @click="handleRevokeOrder(scope.row)">
                 撤销订单
               </el-button>
             </div>
           </template>
         </el-table-column>
       </el-table>
-  <div class="main page-list">
-
-    <el-table
-        v-loading="loading"
-        :data="orders"
-        style="width: 100%">
-      <el-table-column type="expand" width="48">
-        <template #default="props">
-          <div class="expand-detail">
-            <div class="expand-detail__grid">
-              <div class="expand-detail__item">
-                <span class="expand-detail__label">订单 ID</span>
-                <span class="expand-detail__value">{{ formatCell(props.row.order?.id) }}</span>
-              </div>
-              <div class="expand-detail__item">
-                <span class="expand-detail__label">用户 ID</span>
-                <span class="expand-detail__value">{{ formatCell(props.row.user?.id) }}</span>
-              </div>
-              <div class="expand-detail__item">
-                <span class="expand-detail__label">电影 ID</span>
-                <span class="expand-detail__value">{{ formatCell(props.row.film?.id) }}</span>
-              </div>
-              <div class="expand-detail__item">
-                <span class="expand-detail__label">场次 ID</span>
-                <span class="expand-detail__value">{{ formatCell(props.row.arrangement?.id) }}</span>
-              </div>
-              <div class="expand-detail__item">
-                <span class="expand-detail__label">电影名称</span>
-                <span class="expand-detail__value">《{{ formatCell(props.row.film?.name) }}》</span>
-              </div>
-              <div class="expand-detail__item">
-                <span class="expand-detail__label">座位号</span>
-                <span class="expand-detail__value">{{ formatCell(props.row.order?.seats) }}</span>
-              </div>
-              <div class="expand-detail__item">
-                <span class="expand-detail__label">订单金额</span>
-                <span class="expand-detail__value expand-detail__value--money">{{ moneyText(props.row.order?.price) }}</span>
-              </div>
-              <div class="expand-detail__item">
-                <span class="expand-detail__label">下单时间</span>
-                <span class="expand-detail__value">{{ formatCell(props.row.order?.createAt) }}</span>
-              </div>
-              <div class="expand-detail__item">
-                <span class="expand-detail__label">支付时间</span>
-                <span class="expand-detail__value">{{ formatCell(props.row.order?.payAt) }}</span>
-              </div>
-            </div>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column
-          label="订单 ID"
-          min-width="220"
-          show-overflow-tooltip
-          prop="order.id">
-      </el-table-column>
-      <el-table-column
-          width="200"
-          label="订单金额"
-          prop="order.price">
-        <template #default="scope">
-          <span class="table-money">{{ moneyText(scope.row.order?.price) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="订单状态">
-        <template #default="scope">
-          <el-tag v-if="scope.row.order.status === 2" type="success">支付成功</el-tag>
-          <el-tag v-if="scope.row.order.status === 0" type="info">等待支付</el-tag>
-          <el-tag v-if="scope.row.order.status === 3" type="warning">已被撤销</el-tag>
-          <el-tag v-if="scope.row.order.status === 1" type="danger">支付失败</el-tag>
-          <el-tag v-if="scope.row.order.status === 4" type="info">已退款</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="250">
-        <template #default="scope">
-          <el-button @click="handle1(scope.$index, scope.row.order)" size="small" type="warning"
-                     :icon="RefreshRight"
-                     :disabled="scope.row.order.status === 3"
-                     plain>撤销订单
-          </el-button>
-          <el-button @click="handle2(scope.$index, scope.row.order)" size="small" type="danger"
-                     :icon="CircleClose"
-                     plain>上报异常
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
 
       <!-- 分页组件 -->
       <div class="pagination-container">
-        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15, 20]"
-          :total="totalCount" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
-          @current-change="handleCurrentChange" :pager-count="5" />
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="[5, 10, 15, 20]"
+          :total="totalCount"
+          layout="total, sizes, prev, pager, next, jumper"
+          :pager-count="5"
+          :disabled="loading"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
       </div>
     </div>
+
+    <el-dialog
+        v-model="refundDialogVisible"
+        title="确认退款"
+        width="480px"
+        align-center
+        :close-on-click-modal="false"
+        @closed="resetRefundDialog"
+    >
+      <el-alert
+          title="将通过支付宝沙箱原路退款，退款成功后订单状态变为「已退款」，座位将释放。"
+          type="warning"
+          :closable="false"
+          show-icon
+          style="margin-bottom: 16px"
+      />
+      <div v-if="refundTarget" class="refund-dialog__info">
+        <p><span>订单 ID</span>{{ refundTarget.order?.id }}</p>
+        <p><span>电影</span>《{{ formatCell(refundTarget.film?.name) }}》</p>
+        <p><span>座位</span>{{ formatCell(refundTarget.order?.seats) }}</p>
+        <p><span>放映</span>{{ formatCell(refundTarget.arrangement?.date) }} {{ formatCell(refundTarget.arrangement?.startTime) }}</p>
+        <p><span>用户 ID</span>{{ formatCell(refundTarget.user?.id) }}</p>
+        <p><span>支付时间</span>{{ formatCell(refundTarget.order?.payAt) }}</p>
+        <p><span>退款金额</span><em class="refund-dialog__price">{{ moneyText(refundTarget.order?.price) }}</em></p>
+      </div>
+      <template #footer>
+        <el-button @click="refundDialogVisible = false">取消</el-button>
+        <el-button type="warning" :loading="refundSubmitting" @click="confirmAdminRefund">确定退款</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listOrderPage, UpdateOrder } from "@/api/order";
+import { listOrderPage, UpdateOrder, AdminRefundOrder } from "@/api/order";
 import { RefreshRight, CircleClose, Search, Refresh } from '@element-plus/icons-vue'
 
 export default {
@@ -227,6 +180,9 @@ export default {
         reviewer: '',
         reason: '',
       },
+      refundDialogVisible: false,
+      refundSubmitting: false,
+      refundTarget: null,
     }
   },
   mounted() {
@@ -251,18 +207,31 @@ export default {
         const params = {
           page: this.currentPage,
           size: this.pageSize,
-          keyword: this.searchKeyword || null,   // 后端根据 keyword 匹配订单ID或用户ID
+          keyword: this.searchKeyword?.trim() || undefined,
         }
         const res = await listOrderPage(params)
-        if (res.success) {
-          this.orderList = res.data.rows || []
-          this.totalCount = res.data.total || 0
-          this.currentPage = res.data.page || this.currentPage
-        } else {
-          this.$message.error(res.msg || '加载失败')
+        if (!res.success) return
+        const total = Number(res.data?.total) || 0
+        const rows = res.data?.rows || []
+        const backendPage = Number(res.data?.page) || this.currentPage
+        const backendTotalPages = Number(res.data?.totalPages) || (total ? Math.ceil(total / this.pageSize) : 0)
+
+        if (total > 0 && backendPage > backendTotalPages) {
+          this.currentPage = backendTotalPages
+          await this.loadOrders()
+          return
         }
-      } catch (error) {
-        this.$message.error('加载订单列表失败')
+
+        this.orderList = rows
+        this.totalCount = total
+        this.currentPage = backendPage
+
+        if (total > 0 && rows.length === 0 && this.currentPage > 1) {
+          this.currentPage -= 1
+          await this.loadOrders()
+        }
+      } catch {
+        // 全局 request 拦截器已提示
       } finally {
         this.loading = false
       }
@@ -285,16 +254,64 @@ export default {
       this.currentPage = newPage
       this.loadOrders()
     },
-    async handleRevokeOrder(index, order) {
+    async handleRevokeOrder(row) {
+      const order = row.order
+      if (!order) return
+
+      if (order.status === 2) {
+        try {
+          await this.$confirm(
+              '确定要撤销该订单吗？支付成功的订单撤销后将进入退款流程。',
+              '撤销订单',
+              { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+          )
+          this.refundTarget = row
+          this.refundDialogVisible = true
+        } catch {
+          // 用户取消
+        }
+        return
+      }
+
       try {
+        await this.$confirm('确定要撤销该订单吗？', '撤销订单', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
         const updatedOrder = { ...order, status: 3 }
-        await UpdateOrder(updatedOrder)
+        const res = await UpdateOrder(updatedOrder)
+        if (!res?.success) return
         this.$message.success('订单撤销成功')
-        this.loadOrders()   // 刷新当前页
-      } catch (error) {
-        this.$message.error('撤销失败')
+        this.loadOrders()
+      } catch (e) {
+        if (e !== 'cancel' && e !== 'close') {
+          // 全局 request 拦截器已提示
+        }
       }
     },
+
+    resetRefundDialog() {
+      this.refundTarget = null
+      this.refundSubmitting = false
+    },
+
+    async confirmAdminRefund() {
+      if (!this.refundTarget?.order?.id) return
+      this.refundSubmitting = true
+      try {
+        const res = await AdminRefundOrder(this.refundTarget.order.id)
+        if (!res?.success) return
+        this.$message.success('退款成功')
+        this.refundDialogVisible = false
+        this.loadOrders()
+      } catch {
+        // 全局 request 拦截器已提示
+      } finally {
+        this.refundSubmitting = false
+      }
+    },
+
     handleReportException(index, order) {
       this.exceptionForm = {
         oid: order.id,
@@ -593,5 +610,31 @@ export default {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.refund-dialog__info {
+  padding: 14px 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 2;
+  color: #475569;
+}
+
+.refund-dialog__info p {
+  margin: 0;
+}
+
+.refund-dialog__info span {
+  display: inline-block;
+  width: 72px;
+  color: #94a3b8;
+}
+
+.refund-dialog__price {
+  font-style: normal;
+  font-size: 18px;
+  font-weight: 700;
+  color: #e6a23c;
 }
 </style>

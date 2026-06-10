@@ -151,15 +151,12 @@ export default {
           keyword: this.searchKeyword || null
         }
         const res = await ListDailyWorkPage(params)
-        if (res.success) {
-          this.workList = res.data.rows || []
-          this.totalCount = res.data.total || 0
-          this.currentPage = res.data.page || this.currentPage
-        } else {
-          this.$message.error(res.msg || '加载失败')
-        }
-      } catch (error) {
-        this.$message.error('加载失败')
+        if (!res?.success) return
+        this.workList = res.data.rows || []
+        this.totalCount = res.data.total || 0
+        this.currentPage = res.data.page || this.currentPage
+      } catch {
+        // 全局 request 拦截器已提示
       } finally {
         this.loading = false
       }
@@ -187,33 +184,29 @@ export default {
         this.$message.warning('请填写工作内容')
         return
       }
-      AddDailyWork(this.form).then(() => {
+      AddDailyWork(this.form).then(res => {
+        if (!res?.success) return
         this.$message.success('保存成功')
         this.dialogFormVisible = false
         this.form = { type: 1, content: '' }
-        // 重置到第一页并刷新
         this.currentPage = 1
         this.loadWorkList()
-      }).catch(() => {
-        this.$message.error('保存失败')
-      })
+      }).catch(() => {})
     },
     openDeleteDialog(index, row) {
       this.deleteTarget = { id: row.id, content: row.content }
       this.dialogDeleteVisible = true
     },
     confirmDelete() {
-      DeleteDailyWork(this.deleteTarget.id).then(() => {
+      DeleteDailyWork(this.deleteTarget.id).then(res => {
+        if (!res?.success) return
         this.$message.success('删除成功')
         this.dialogDeleteVisible = false
-        // 如果当前页只剩一条数据且不是第一页，跳到上一页
         if (this.workList.length === 1 && this.currentPage > 1) {
           this.currentPage--
         }
         this.loadWorkList()
-      }).catch(() => {
-        this.$message.error('删除失败')
-      })
+      }).catch(() => {})
     }
   }
 }

@@ -72,4 +72,11 @@ public class OrderController {
         return orderService.refund(id, uid);
     }
 
+    @PostMapping("/refund/admin")
+    @Operation(summary = "管理员退款（支付成功订单）")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_ORDER_MANAGE')")
+    public Order adminRefund(@RequestParam String id) throws Exception {
+        return orderService.adminRefund(id);
+    }
+
 }

@@ -23,3 +23,10 @@ export function UpdateOrder(data) {
         data: data
     })
 }
+
+export function AdminRefundOrder(id) {
+    return service({
+        url: '/order/refund/admin?id=' + id,
+        method: 'post'
+    })
+}

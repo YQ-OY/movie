@@ -1,7 +1,7 @@
 import axios from "axios"
 import config from "../config";
 import router from '../router'
-import { ElNotification, ElMessage } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 function isSessionInvalid403(res) {
     return res && res.code === 403 && typeof res.msg === 'string' &&
@@ -23,6 +23,16 @@ function clearSessionAndGoLogin(msg) {
     }
 }
 
+function notifySuccess(res, config) {
+    if (config?.silent || res?.msg == null) return
+    ElMessage.success(res.msg)
+}
+
+function notifyError(res, config) {
+    if (config?.silent) return
+    ElMessage.error(res?.msg || '请求失败')
+}
+
 const service = axios.create({
     baseURL: config.API_URL,
     timeout: 5000,
@@ -38,6 +48,7 @@ service.interceptors.request.use(cfg => {
 service.interceptors.response.use(
     response => {
         const res = response.data;
+        const config = response.config
 
         if (res.code === 403 && isSessionInvalid403(res)) {
             clearSessionAndGoLogin(res.msg)
@@ -52,25 +63,18 @@ service.interceptors.response.use(
         }
 
         if (res.success === true) {
-            if (res.msg !== null) {
-                ElNotification.success({
-                    title: 'Success ',
-                    message: res.msg,
-                    type: 'success'
-                });
-            }
-
+            notifySuccess(res, config)
         } else {
-            ElNotification.error({
-                title: 'Error ' + res.code,
-                message: res.msg
-            });
+            notifyError(res, config)
         }
         return res
     },
 
     error => {
         console.log('err' + error);
+        if (!error.config?.silent) {
+            ElMessage.error(error?.response?.data?.msg || '网络异常，请稍后重试')
+        }
         return Promise.reject(error)
     }
 );

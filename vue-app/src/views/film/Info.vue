@@ -2,10 +2,9 @@
   <div>
     <el-page-header @back="goBack" content="详情页面">
     </el-page-header>
-    <div style="font-weight: bolder;font-size: 25px;padding-top: 40px;padding-bottom: 40px">剧情简介</div>
-    <div style="line-height: 30px;text-indent:2.5em;padding-top: 20px;padding-bottom: 20px"> {{film.introduction}}
-    </div>
-    <div style="font-weight: bolder;font-size: 25px;padding-top: 40px;padding-bottom: 40px">电影评论</div>
+    <div class="info-section-title app-subpage__title">剧情简介</div>
+    <div class="info-intro app-subpage__text">{{ film.introduction }}</div>
+    <div class="info-section-title app-subpage__title">电影评论</div>
     <div style="padding-right: 100px">
       <div class="item" v-for="item in evaluateList">
         <img alt="" style="float: left;width: 55px;height: 55px;border-radius: 50%" :src="item.user.avatar">
@@ -18,7 +17,7 @@
               style="padding-top: 7px"
               v-model="item.filmEvaluate.star"
               disabled
-              text-color="#ff9900"
+              text-color="#eab308"
               score-template="{value}">
           </el-rate>
         </div>
@@ -69,13 +68,25 @@ export default {
 }
 
 .header-name {
-  color: #000000;
+  color: var(--app-title);
   padding-top: 5px;
   float: left;
   padding-left: 20px;
-  font-weight: bolder;
+  font-weight: 600;
   font-size: 14px;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+}
+
+.info-section-title {
+  padding-top: 32px;
+  padding-bottom: 16px;
+}
+
+.info-intro {
+  line-height: 1.85;
+  text-indent: 2em;
+  padding-bottom: 20px;
+  color: var(--app-text-muted);
 }
 
 .film-content {

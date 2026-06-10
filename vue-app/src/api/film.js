@@ -14,11 +14,11 @@ export function ListAllFilm() {
     })
 }
 
-/** 已有排片的电影（首页「正在热播」） */
-export function ListFilmScheduled() {
+export function listFilmPage(params) {
     return service({
-        url: '/film/scheduled',
-        method: 'get'
+        url: '/film/page',
+        method: 'get',
+        params,
     })
 }
 

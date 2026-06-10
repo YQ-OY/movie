@@ -1,0 +1,402 @@
+:root {
+  /* 爱奇艺风格 — 品牌绿 */
+  --app-primary: #00cc36;
+  --app-primary-light: #33d65c;
+  --app-primary-dark: #00b830;
+  --app-primary-bg: rgba(0, 204, 54, 0.12);
+  --app-primary-bg-soft: rgba(0, 204, 54, 0.18);
+  --app-primary-border: rgba(0, 204, 54, 0.45);
+  --app-primary-border-soft: rgba(0, 204, 54, 0.28);
+  --app-primary-shadow: rgba(0, 204, 54, 0.2);
+  --app-primary-shadow-strong: rgba(0, 204, 54, 0.32);
+
+  --app-secondary: #33d65c;
+  --app-secondary-light: #5ce07a;
+  --app-secondary-dark: #00b830;
+  --app-secondary-bg: rgba(0, 204, 54, 0.1);
+  --app-secondary-bg-soft: rgba(0, 204, 54, 0.16);
+  --app-secondary-border: rgba(0, 204, 54, 0.3);
+  --app-secondary-shadow: rgba(0, 204, 54, 0.18);
+
+  --app-highlight: #ffbb00;
+  --app-highlight-light: #ffd04a;
+  --app-highlight-bg: rgba(255, 187, 0, 0.12);
+
+  --app-price: #ff6b6b;
+  --app-price-dark: #ff5252;
+
+  /* 深灰背景层次（由深到浅） */
+  --app-bg: #111111;
+  --app-bg-alt: #0d0d0d;
+  --app-surface-muted: #181818;
+  --app-surface: #1f1f1f;
+  --app-surface-elevated: #2a2a2a;
+  --app-surface-hover: #333333;
+  --app-surface-header: #1a1a1a;
+
+  /* 白色文字层次（由亮到暗） */
+  --app-text-strong: #ffffff;
+  --app-title-strong: #ffffff;
+  --app-title: rgba(255, 255, 255, 0.95);
+  --app-text: rgba(255, 255, 255, 0.85);
+  --app-text-secondary: rgba(255, 255, 255, 0.65);
+  --app-text-muted: rgba(255, 255, 255, 0.45);
+  --app-text-disabled: rgba(255, 255, 255, 0.28);
+
+  --app-border: rgba(255, 255, 255, 0.08);
+  --app-border-strong: rgba(255, 255, 255, 0.14);
+  --app-header-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+
+  --app-gradient-brand: linear-gradient(135deg, var(--app-primary-dark) 0%, var(--app-primary-light) 100%);
+  --app-gradient-hero: linear-gradient(125deg, #1a1a1a 0%, #222222 50%, #2a2a2a 100%);
+  --app-gradient-page: linear-gradient(180deg, #141414 0%, #111111 100%);
+  --app-gradient-soft: linear-gradient(135deg, rgba(0, 204, 54, 0.1) 0%, rgba(0, 204, 54, 0.04) 100%);
+
+  /* Element Plus 深色变量 */
+  --el-color-primary: #00cc36;
+  --el-color-primary-light-3: #33d65c;
+  --el-color-primary-light-5: #5ce07a;
+  --el-color-primary-light-7: rgba(0, 204, 54, 0.3);
+  --el-color-primary-light-8: rgba(0, 204, 54, 0.2);
+  --el-color-primary-light-9: rgba(0, 204, 54, 0.1);
+  --el-color-primary-dark-2: #00b830;
+
+  --el-bg-color: #1f1f1f;
+  --el-bg-color-page: #111111;
+  --el-bg-color-overlay: #2a2a2a;
+  --el-text-color-primary: rgba(255, 255, 255, 0.95);
+  --el-text-color-regular: rgba(255, 255, 255, 0.85);
+  --el-text-color-secondary: rgba(255, 255, 255, 0.65);
+  --el-text-color-placeholder: rgba(255, 255, 255, 0.38);
+  --el-text-color-disabled: rgba(255, 255, 255, 0.25);
+  --el-border-color: rgba(255, 255, 255, 0.1);
+  --el-border-color-light: rgba(255, 255, 255, 0.07);
+  --el-border-color-lighter: rgba(255, 255, 255, 0.05);
+  --el-border-color-extra-light: rgba(255, 255, 255, 0.03);
+  --el-fill-color: rgba(255, 255, 255, 0.06);
+  --el-fill-color-light: rgba(255, 255, 255, 0.04);
+  --el-fill-color-lighter: rgba(255, 255, 255, 0.03);
+  --el-fill-color-blank: #1f1f1f;
+  --el-fill-color-dark: rgba(255, 255, 255, 0.1);
+  --el-mask-color: rgba(0, 0, 0, 0.72);
+  --el-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  --el-box-shadow-light: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+html,
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+/* Element Plus 组件深色适配 */
+.el-card {
+  --el-card-bg-color: var(--app-surface);
+  border-color: var(--app-border) !important;
+  color: var(--app-text);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.el-input__wrapper {
+  background-color: var(--app-surface-muted) !important;
+  box-shadow: 0 0 0 1px var(--app-border) inset !important;
+}
+
+.el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--app-border-strong) inset !important;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--app-primary) inset !important;
+}
+
+.el-input__inner {
+  color: var(--app-text) !important;
+}
+
+.el-input__inner::placeholder {
+  color: var(--app-text-muted) !important;
+}
+
+.el-textarea__inner {
+  background-color: var(--app-surface-muted);
+  border-color: var(--app-border);
+  color: var(--app-text);
+}
+
+.el-dialog {
+  --el-dialog-bg-color: var(--app-surface-elevated);
+  border: 1px solid var(--app-border-strong);
+}
+
+.el-drawer {
+  --el-drawer-bg-color: var(--app-surface-elevated);
+}
+
+.el-page-header {
+  color: var(--app-text);
+}
+
+.el-page-header__content {
+  color: var(--app-title) !important;
+}
+
+.el-divider {
+  border-color: var(--app-border);
+}
+
+.el-steps {
+  --el-text-color-primary: var(--app-title);
+  --el-text-color-placeholder: var(--app-text-muted);
+}
+
+.el-result__title {
+  color: var(--app-title) !important;
+}
+
+.el-result__subtitle {
+  color: var(--app-text-secondary) !important;
+}
+
+.el-pagination.is-background .btn-prev,
+.el-pagination.is-background .btn-next,
+.el-pagination.is-background .el-pager li {
+  background-color: var(--app-surface) !important;
+  color: var(--app-text-secondary) !important;
+}
+
+.el-pagination.is-background .el-pager li:not(.is-disabled).is-active {
+  background-color: var(--app-primary) !important;
+  color: #fff !important;
+}
+
+.el-empty__description p {
+  color: var(--app-text-muted);
+}
+
+.el-timeline-item__content {
+  color: var(--app-text);
+}
+
+.el-collapse {
+  --el-collapse-header-bg-color: var(--app-surface);
+  --el-collapse-content-bg-color: var(--app-surface-muted);
+  border-color: var(--app-border);
+}
+
+.textcolor_blue {
+  color: var(--app-primary-light);
+}
+
+.textcolor_title {
+  color: var(--app-title);
+}
+
+.textcolor_highlight {
+  color: var(--app-highlight);
+}
+
+.textcolor_brand {
+  color: var(--app-primary);
+}
+
+.app-page {
+  min-height: calc(100vh - 72px);
+  padding: 28px 20px 48px;
+  box-sizing: border-box;
+  background: var(--app-gradient-page);
+}
+
+.app-page__inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.app-page-banner {
+  width: calc(100%+40px);
+ 
+
+  overflow: hidden;
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: none;
+}
+
+.app-page-banner__img {
+  width: 100%;
+
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.app-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 22px 24px;
+  border-radius: 12px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  margin-bottom: 18px;
+}
+
+.app-subpage__title {
+  margin: 0 0 20px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--app-title-strong);
+  letter-spacing: 0.04em;
+}
+
+.app-subpage__title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 18px;
+  margin-right: 10px;
+  border-radius: 2px;
+  vertical-align: -2px;
+  background: var(--app-primary);
+}
+
+.app-price {
+  font-weight: 700;
+  color: var(--app-price);
+}
+
+.app-btn-brand {
+  background: var(--app-gradient-brand) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.app-btn-brand:hover {
+  filter: brightness(1.06);
+}
+
+.app-text-highlight {
+  color: var(--app-highlight);
+}
+
+/* 首页深色适配 */
+.movie-item {
+  border-color: var(--app-border) !important;
+}
+
+.movie-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.movie-item-hover {
+  background: var(--app-surface-elevated) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+.movie-hover-info {
+  background: var(--app-surface-elevated) !important;
+}
+
+.movie-hover-title {
+  color: var(--app-text-secondary) !important;
+}
+
+.movie-hover-title:first-child {
+  color: var(--app-title-strong) !important;
+}
+
+.movie-wish {
+  background-color: var(--app-surface-muted) !important;
+}
+
+.movie-sale a:hover,
+.movie-presale a:hover {
+  background-color: var(--app-surface-hover) !important;
+}
+
+.box-total-wrapper {
+  background-color: var(--app-surface) !important;
+  border-color: var(--app-border) !important;
+}
+
+.panel-title > span > h2 {
+  color: var(--app-title-strong);
+}
+
+/* 电影列表页 */
+.tags-panel {
+  border-color: var(--app-border) !important;
+  background: var(--app-surface) !important;
+}
+
+.tags-line-border {
+  border-top-color: var(--app-border) !important;
+}
+
+.tags-title {
+  color: var(--app-text-secondary) !important;
+}
+
+.tags li a {
+  color: var(--app-text) !important;
+}
+
+.channel-detail,
+.channel-detail a,
+.no-movies,
+.hover-tag {
+  color: var(--app-title) !important;
+}
+
+.movie-poster {
+  background-color: var(--app-surface-muted) !important;
+}
+
+.list-pager a {
+  color: var(--app-text) !important;
+}
+
+.list-pager li {
+  border-color: var(--app-border) !important;
+  color: var(--app-text-muted) !important;
+}
+
+/* 首页容器 */
+.app {
+  background: var(--app-bg);
+}
+
+/* 首页 — 电影名与辅助文字 */
+.movie-title {
+  color: var(--app-title) !important;
+}
+
+.movie-detail {
+  color: var(--app-text-secondary) !important;
+}
+
+.movie-sale a,
+.movie-presale a,
+.movie-rt {
+  color: var(--app-text-secondary) !important;
+}
+
+.ranking-num-info {
+  color: var(--app-highlight) !important;
+}
+
+.ranking-top-right .ranking-top-wish {
+  color: var(--app-highlight) !important;
+}
+
+.popular-container a {
+  color: var(--app-title) !important;
+}
+
+.ranking {
+  color: var(--app-text-secondary) !important;
+}

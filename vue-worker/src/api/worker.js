@@ -29,11 +29,12 @@ export function FindAllWorker() {
     })
 }
 
-export function UpdateWorker(data) {
+export function UpdateWorker(data, options = {}) {
     return service({
         url: "/worker",
         method: "put",
-        data: data
+        data: data,
+        silent: options.silent,
     })
 }
 

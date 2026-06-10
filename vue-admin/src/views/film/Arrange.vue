@@ -337,16 +337,16 @@ export default {
     // 确认删除排片
     async confirmDeleteArrangement() {
       try {
-        await DeleteArrangement(this.deleteTarget.id)
+        const res = await DeleteArrangement(this.deleteTarget.id)
+        if (!res?.success) return
         this.dialogDelete = false
         this.$message.success(`排片《${this.deleteTarget.name}》删除成功！`)
-        // 如果当前页只剩一条数据且不是第一页，则跳到上一页
         if (this.arrangementList.length === 1 && this.currentPage > 1) {
           this.currentPage--
         }
-        this.loadArrangementList()   // 刷新列表
+        this.loadArrangementList()
       } catch (error) {
-        this.$message.error('删除失败')
+        console.error('删除排片失败', error)
       }
     },
 
@@ -377,13 +377,13 @@ export default {
           startDate: startDate || null,
           endDate: endDate || null,
         };
-        const res = await listArrangementPage(params);   // 这里必须正确导入
+        const res = await listArrangementPage(params);
+        if (!res?.success) return
         this.arrangementList = res.data.rows || [];
         this.totalCount = res.data.total || 0;
         this.currentPage = res.data.page || this.currentPage;
       } catch (error) {
         console.error('加载排片列表失败', error);
-        this.$message.error('加载失败，请重试');
       } finally {
         this.loading = false;
       }

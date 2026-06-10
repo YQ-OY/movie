@@ -14,7 +14,7 @@
     >
       <template #extra>
         <el-button type="primary" :disabled="!orderId" @click="goPay">立即支付</el-button>
-        <el-button @click="$router.push('/me/order')">返回订单列表</el-button>
+        <el-button @click="goOrders">返回订单列表</el-button>
       </template>
     </el-result>
   </div>
@@ -22,11 +22,17 @@
 
 <script setup>
 import { computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import config from '@/config'
+import { openProfileCenter } from '@/utils/profileCenter'
 
 const route = useRoute()
+const router = useRouter()
 const orderId = computed(() => route.query.orderId)
+
+const goOrders = () => {
+  openProfileCenter(router, 'order')
+}
 
 const goPay = () => {
   if (!orderId.value) {
@@ -49,7 +55,7 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
+  background: var(--app-gradient-page);
   padding: 24px;
 }
 

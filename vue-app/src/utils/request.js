@@ -1,7 +1,7 @@
 import axios from "axios"
 import config from "@/config"
 import router from "@/router"
-import { ElNotification, ElMessage } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 const service = axios.create({
     baseURL: config.API_URL,
@@ -29,6 +29,16 @@ function clearSessionAndGoLogin(msg) {
     }
 }
 
+function notifySuccess(res, config) {
+    if (config?.silent || res?.msg == null) return
+    ElMessage.success(res.msg)
+}
+
+function notifyError(res, config) {
+    if (config?.silent) return
+    ElMessage.error(res?.msg || '请求失败')
+}
+
 service.interceptors.request.use(cfg => {
     const token = localStorage.getItem('token')
     cfg.headers = cfg.headers || {}
@@ -39,31 +49,23 @@ service.interceptors.request.use(cfg => {
 service.interceptors.response.use(
     response => {
         const res = response.data;
+        const config = response.config
 
         if (res.success === true) {
-            if (res.msg !== null) {
-                ElNotification.success({
-                    title: 'Success ',
-                    message: res.msg,
-                    type: 'success'
-                });
-            }
-
+            notifySuccess(res, config)
+        } else if (isSessionInvalid403(res)) {
+            clearSessionAndGoLogin(res.msg)
         } else {
-            if (isSessionInvalid403(res)) {
-                clearSessionAndGoLogin(res.msg)
-            } else {
-                ElNotification.error({
-                    title: '错误提示: ' + res.code,
-                    message: res.msg
-                });
-            }
+            notifyError(res, config)
         }
         return res
     },
 
     error => {
         console.log('err' + error);
+        if (!error.config?.silent) {
+            ElMessage.error(error?.response?.data?.msg || '网络异常，请稍后重试')
+        }
         return Promise.reject(error)
     }
 );

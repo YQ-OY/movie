@@ -103,12 +103,11 @@ export default {
       this.loading = true
       ListAllLeavingMessage()
         .then(res => {
+          if (!res?.success) return
           this.messageList = res.data || []
           this.currentPage = 1
         })
-        .catch(() => {
-          this.$message.error('加载留言失败')
-        })
+        .catch(() => {})
         .finally(() => {
           this.loading = false
         })
@@ -133,16 +132,11 @@ export default {
         return
       }
       ReplyLeavingMessage(this.form).then(res => {
-        if (res.success) {
-          this.$message.success('回复成功')
-          this.dialogFormVisible = false
-          this.loadMessages()   // 刷新列表
-        } else {
-          this.$message.error(res.msg || '回复失败')
-        }
-      }).catch(() => {
-        this.$message.error('回复失败')
-      })
+        if (!res?.success) return
+        this.$message.success('回复成功')
+        this.dialogFormVisible = false
+        this.loadMessages()
+      }).catch(() => {})
     }
   }
 }

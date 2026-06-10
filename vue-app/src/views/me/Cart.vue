@@ -2,6 +2,19 @@
   <div class="ticket-page">
     <h3 class="ticket-page__title">购物车</h3>
 
+    <div class="ticket-range-tabs">
+      <button
+        v-for="option in timeRangeOptions"
+        :key="option.key"
+        type="button"
+        class="ticket-range-tab"
+        :class="{ 'ticket-range-tab--active': timeRange === option.key }"
+        @click="timeRange = option.key"
+      >
+        {{ option.label }}
+      </button>
+    </div>
+
     <el-alert
         v-if="cartList.length !== 0"
         class="ticket-page__tip"
@@ -12,10 +25,10 @@
     />
 
     <div v-loading="loading" class="ticket-list">
-      <div v-for="(item, index) in cartList" :key="index" class="ticket-card">
+      <div v-for="(item, index) in cartList" :key="item.cart.id || index" class="ticket-card">
         <div class="ticket-card__main">
           <div class="ticket-card__check">
-            <el-checkbox @change="handleCheck" v-model="selectList[index].checked"/>
+            <el-checkbox @change="handleCheck" v-model="checkedMap[item.cart.id]"/>
           </div>
           <div class="ticket-card__poster">
             <img class="ticket-card__cover" alt="" :src="item.film.cover"/>
@@ -29,6 +42,7 @@
               <p class="info-text info-text--accent">
                 放映时间：{{ item.arrangement.date }} {{ item.arrangement.startTime }}
               </p>
+              <p class="info-text">加入时间：{{ item.cart.createAt || '—' }}</p>
               <p class="info-text info-text--price-row">
                 <span class="info-price">￥{{ formatPrice(item.cart.price) }}</span>
               </p>
@@ -39,7 +53,7 @@
                   class="info-action-btn"
                   type="danger"
                   plain
-                  @click="handleDelete(index)">
+                  @click="handleDelete(item)">
                 删除
               </el-button>
             </div>
@@ -48,7 +62,7 @@
       </div>
 
       <div v-if="!loading && cartList.length === 0" class="ticket-empty">
-        购物车是空的，去选座吧
+        {{ emptyText }}
       </div>
     </div>
 
@@ -69,17 +83,42 @@
 <script>
 import {DeleteCartById, ListCarts} from "@/api/cart"
 import {CreateOrder} from "@/api/order";
+import { TIME_RANGE_OPTIONS, filterAndSortByCreateAt } from "@/utils/timeRangeFilter";
 
 export default {
   data() {
     return {
       loading: false,
       price: 0,
-      selectList: [],
+      checkedMap: {},
       checkAll: false,
-      cartList: [],
+      allCartList: [],
+      timeRange: 'all',
+      timeRangeOptions: TIME_RANGE_OPTIONS,
       uid: localStorage.getItem("uid"),
     }
+  },
+
+  computed: {
+    cartList() {
+      return filterAndSortByCreateAt(
+        this.allCartList,
+        item => item.cart?.createAt,
+        this.timeRange
+      )
+    },
+    emptyText() {
+      if (this.allCartList.length === 0) {
+        return '购物车是空的，去选座吧'
+      }
+      return this.timeRange === 'all' ? '购物车是空的，去选座吧' : '该时间范围内暂无购物车记录'
+    },
+  },
+
+  watch: {
+    timeRange() {
+      this.syncCheckAllState()
+    },
   },
 
   mounted() {
@@ -97,11 +136,10 @@ export default {
       this.loading = true;
       ListCarts(this.uid).then(res => {
         setTimeout(() => {
-          this.cartList = res.data
-          this.selectList = []
-          for (let i = 0; i < this.cartList.length; i++) {
-            this.selectList[i] = {checked: false, cart: this.cartList[i].cart}
-          }
+          this.allCartList = Array.isArray(res.data) ? res.data : []
+          this.checkedMap = {}
+          this.checkAll = false
+          this.price = 0
           this.loading = false
         }, 700)
       })
@@ -109,45 +147,55 @@ export default {
 
     handleCheck() {
       this.checkOut()
+      this.syncCheckAllState()
     },
 
     handleCheckAll() {
       if (this.checkAll) {
-        this.changeAllChecked(true)
+        this.cartList.forEach(item => {
+          this.checkedMap[item.cart.id] = true
+        })
         this.checkOut()
       } else {
-        this.changeAllChecked(false)
+        this.cartList.forEach(item => {
+          this.checkedMap[item.cart.id] = false
+        })
         this.price = 0
       }
     },
 
-    changeAllChecked(status) {
-      for (let i = 0; i < this.selectList.length; i++) {
-        this.selectList[i].checked = status
+    syncCheckAllState() {
+      if (this.cartList.length === 0) {
+        this.checkAll = false
+        return
       }
+      this.checkAll = this.cartList.every(item => this.checkedMap[item.cart.id])
     },
 
     checkOut() {
       this.price = 0
-      for (let i = 0; i < this.selectList.length; i++) {
-        if (this.selectList[i].checked) {
-          this.price += this.selectList[i].cart.price
+      this.cartList.forEach(item => {
+        if (this.checkedMap[item.cart.id]) {
+          this.price += item.cart.price
         }
-      }
+      })
     },
 
-    handleDelete(index) {
-      DeleteCartById(this.cartList[index].cart.id).then(res => {
+    handleDelete(item) {
+      DeleteCartById(item.cart.id).then(res => {
         if (res.success) {
-          this.cartList.splice(index, 1)
-          this.selectList.splice(index, 1)
+          this.allCartList = this.allCartList.filter(c => c.cart.id !== item.cart.id)
+          delete this.checkedMap[item.cart.id]
           this.checkOut()
+          this.syncCheckAllState()
         }
       })
     },
 
     submitCart() {
-      const checkedItems = this.selectList.filter(item => item.checked)
+      const checkedItems = this.cartList
+        .filter(item => this.checkedMap[item.cart.id])
+        .map(item => ({ checked: true, cart: item.cart }))
       if (checkedItems.length === 0) {
         this.$message.warning('请先选择要结算的商品')
         return

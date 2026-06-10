@@ -19,6 +19,8 @@ public interface OrderService {
 
     void completeAlipayPayment(String orderId, String payAt) throws Exception;
 
+    Order syncAlipayPaymentStatus(String orderId) throws Exception;
+
     String buildPaySubject(String orderId) throws Exception;
 
     void update(Order order);
@@ -30,5 +32,7 @@ public interface OrderService {
     PageResult<OrderVO> findByPage(Integer page, Integer size, String keyword);
 
     Order refund(String id, String uid) throws Exception;
+
+    Order adminRefund(String id) throws Exception;
 
 }

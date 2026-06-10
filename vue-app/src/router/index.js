@@ -1,6 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from "@/components/layout/Layout"
-import Me from "@/views/me/Index"
+
+const profileRedirect = (tab) => ({
+  path: '/',
+  query: { profile: tab },
+})
 
 const routes = [
 
@@ -68,21 +72,19 @@ const routes = [
             },
             {
                 path: '/me',
-                component: Me,
-                children: [
-                    {
-                        path: 'cart',
-                        component: () => import("@/views/me/Cart")
-                    },
-                    {
-                        path: 'order',
-                        component: () => import("@/views/me/Order")
-                    },
-                    {
-                        path: 'setting',
-                        component: () => import("@/views/me/Setting")
-                    },
-                ]
+                redirect: profileRedirect('setting'),
+            },
+            {
+                path: '/me/cart',
+                redirect: profileRedirect('cart'),
+            },
+            {
+                path: '/me/order',
+                redirect: profileRedirect('order'),
+            },
+            {
+                path: '/me/setting',
+                redirect: profileRedirect('setting'),
             },
         ]
     }

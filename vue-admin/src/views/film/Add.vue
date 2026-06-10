@@ -77,10 +77,14 @@
                 <el-switch v-model="form.status" class="bordered-switch" />
               </el-form-item>
 
-              <el-form-item label="电影类型">
-                <el-select v-model="form.type" placeholder="请选择电影类型" class="full-width-input" filterable>
-                  <el-option v-for="item in filmTypeOptions" :key="item" :label="item" :value="item" />
-                </el-select>
+              <el-form-item label="电影类型" class="film-type-item">
+                <el-checkbox-group v-model="form.typeList" class="film-type-checkbox-group">
+                  <el-checkbox
+                    v-for="item in filmTypeOptions"
+                    :key="item"
+                    :label="item"
+                  />
+                </el-checkbox-group>
               </el-form-item>
 
               <el-form-item label="内容简介" class="introduction-item introduction-item--right">
@@ -110,6 +114,7 @@
 import { AddFilm } from "@/api/film";
 import config from "@/config";
 import { Upload, Delete } from '@element-plus/icons-vue'
+import { FILM_TYPE_OPTIONS, joinFilmTypes } from '@/utils/filmType'
 
 export default {
   components: { Upload, Delete },
@@ -126,10 +131,10 @@ export default {
         releaseTime: '',
         duration: 120,
         introduction: '',
-        type: '',
+        typeList: [],
         status: true,
       },
-      filmTypeOptions: ['爱情', '喜剧', '科幻', '动画', '恐怖', '悬疑', '冒险', '动作', '犯罪', '历史', '古装', '战争', '纪录片', '家庭', '传记', '武侠', '儿童', '短片', '其他'],
+      filmTypeOptions: FILM_TYPE_OPTIONS,
     }
   },
   methods: {
@@ -142,17 +147,20 @@ export default {
         this.$message.warning('请选择上映地区');
         return;
       }
-      if (!this.form.type) {
-        this.$message.warning('请选择电影类型');
+      if (!this.form.typeList.length) {
+        this.$message.warning('请至少选择一个电影类型');
         return;
       }
       this.form.cover = this.url;
-      AddFilm(this.form).then(() => {
+      const payload = {
+        ...this.form,
+        type: joinFilmTypes(this.form.typeList),
+      }
+      AddFilm(payload).then(res => {
+        if (!res?.success) return
         this.$message.success('电影添加成功!');
         this.$router.push("/film/list");
-      }).catch(() => {
-        this.$message.error('添加失败，请重试');
-      });
+      }).catch(() => {});
     },
     onCancel() {
       this.$router.back();
@@ -352,8 +360,19 @@ export default {
   margin-bottom: 18px;
 }
 
-.introduction-item--right {
+.introduction-item--right,
+.film-type-item {
   grid-column: 1 / -1;
+}
+
+.film-type-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.film-type-checkbox-group :deep(.el-checkbox) {
+  margin-right: 0;
 }
 
 /* 统一输入框宽度 */

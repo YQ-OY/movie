@@ -17,6 +17,7 @@ export default {
   text-align: center;
   letter-spacing: 2px;
   font-size: 13px;
-  color: darkgray;
+  color: var(--app-text-secondary);
+  background: var(--app-surface-header);
 }
 </style>

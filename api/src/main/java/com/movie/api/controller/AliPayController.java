@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +49,41 @@ public class AliPayController {
         response.setContentType("text/html;charset=" + aliPayConfig.getCharset());
         response.getWriter().write(form);
         response.getWriter().flush();
+    }
+
+    /**
+     * 支付宝同步回跳：验签后主动查询交易状态并更新本地订单，再重定向到前端结果页。
+     * 解决本地/沙箱环境下异步 notify 无法送达导致订单状态不更新的问题。
+     */
+    @GetMapping("/return")
+    @DisableBaseResponse
+    public void payReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Map<String, String> params = convertRequestParams(request);
+        String outTradeNo = params.get("out_trade_no");
+        String frontend = resolveFrontendReturnUrl();
+        try {
+            if (outTradeNo == null || outTradeNo.isBlank()) {
+                response.sendRedirect(frontend + "?error=missing_order");
+                return;
+            }
+            if (!payUtil.verifyNotify(params)) {
+                log.warn("支付宝同步回跳验签失败, out_trade_no={}", outTradeNo);
+                response.sendRedirect(buildFrontendRedirect(frontend, outTradeNo, params.get("total_amount"), "sign"));
+                return;
+            }
+            orderService.syncAlipayPaymentStatus(outTradeNo);
+            log.info("支付宝同步回跳确认成功, out_trade_no={}", outTradeNo);
+            response.sendRedirect(buildFrontendRedirect(frontend, outTradeNo, params.get("total_amount"), null));
+        } catch (Exception e) {
+            log.error("处理支付宝同步回跳失败, out_trade_no={}", outTradeNo, e);
+            response.sendRedirect(buildFrontendRedirect(frontend, outTradeNo, params.get("total_amount"), "sync"));
+        }
+    }
+
+    /** 前端支付结果页可主动调用，向支付宝查询并同步订单状态（幂等） */
+    @GetMapping("/confirm")
+    public Order confirm(@RequestParam String orderId) throws Exception {
+        return orderService.syncAlipayPaymentStatus(orderId);
     }
 
     @PostMapping("/notify")
@@ -85,5 +122,27 @@ public class AliPayController {
             }
         }
         return params;
+    }
+
+    private String resolveFrontendReturnUrl() {
+        String frontend = aliPayConfig.getFrontendReturnUrl();
+        if (frontend == null || frontend.isBlank()) {
+            return "http://localhost:8080/pay/success";
+        }
+        return frontend.trim();
+    }
+
+    private String buildFrontendRedirect(String frontend, String outTradeNo, String totalAmount, String error)
+            throws IOException {
+        StringBuilder url = new StringBuilder(frontend);
+        url.append(frontend.contains("?") ? "&" : "?");
+        url.append("out_trade_no=").append(URLEncoder.encode(outTradeNo, StandardCharsets.UTF_8));
+        if (totalAmount != null && !totalAmount.isBlank()) {
+            url.append("&total_amount=").append(URLEncoder.encode(totalAmount, StandardCharsets.UTF_8));
+        }
+        if (error != null && !error.isBlank()) {
+            url.append("&error=").append(URLEncoder.encode(error, StandardCharsets.UTF_8));
+        }
+        return url.toString();
     }
 }

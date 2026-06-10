@@ -7,11 +7,12 @@ export function findById(id) {
     })
 }
 
-export function Login(data) {
+export function Login(data, options = {}) {
     return service({
         url: '/user/login',
         method: 'post',
-        data: data
+        data: data,
+        silent: options.silent,
     })
 }
 
@@ -23,11 +24,12 @@ export function Register(data){
     })
 }
 
-export function updateUser(data) {
+export function updateUser(data, options = {}) {
     return service({
         url: '/user',
         method: 'put',
-        data: data
+        data: data,
+        silent: options.silent,
     })
 }
 

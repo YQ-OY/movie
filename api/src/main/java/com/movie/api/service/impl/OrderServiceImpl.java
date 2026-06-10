@@ -17,6 +17,7 @@ import com.movie.api.model.vo.PageResult;
 import com.movie.api.service.ArrangementService;
 import com.movie.api.service.OrderService;
 import com.alipay.api.AlipayApiException;
+import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.movie.api.utils.ArrangementScheduleUtil;
 import com.movie.api.utils.DataTimeUtil;
@@ -142,12 +143,45 @@ public class OrderServiceImpl implements OrderService {
         if (OrderStatus.PAYMENT_SUCCESSFUL.equals(order.getStatus())) {
             return;
         }
-        if (!OrderStatus.PAYMENT_WAITING.equals(order.getStatus())) {
+        if (!OrderStatus.PAYMENT_WAITING.equals(order.getStatus())
+                && !OrderStatus.PAYMENT_FAILED.equals(order.getStatus())) {
             return;
         }
         order.setStatus(OrderStatus.PAYMENT_SUCCESSFUL);
         order.setPayAt(payAt != null && !payAt.isEmpty() ? payAt : DataTimeUtil.getNowTimeString());
         orderMapper.updateById(order);
+    }
+
+    @Override
+    public Order syncAlipayPaymentStatus(String orderId) throws Exception {
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new Exception("订单不存在");
+        }
+        if (OrderStatus.PAYMENT_SUCCESSFUL.equals(order.getStatus())) {
+            return order;
+        }
+
+        AlipayTradeQueryResponse response = payUtil.query(orderId);
+        if (!response.isSuccess()) {
+            String msg = response.getSubMsg() != null ? response.getSubMsg() : response.getMsg();
+            throw new Exception("查询支付宝订单失败：" + msg);
+        }
+
+        String tradeStatus = response.getTradeStatus();
+        if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
+            String payAt = DataTimeUtil.getNowTimeString();
+            if (response.getSendPayDate() != null) {
+                payAt = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(response.getSendPayDate());
+            }
+            completeAlipayPayment(orderId, payAt);
+            return orderMapper.selectById(orderId);
+        }
+
+        if ("WAIT_BUYER_PAY".equals(tradeStatus)) {
+            throw new Exception("支付宝订单尚未支付完成，请稍后再试");
+        }
+        throw new Exception("支付宝订单状态异常：" + tradeStatus);
     }
 
     @Override
@@ -210,10 +244,24 @@ public class OrderServiceImpl implements OrderService {
             throw new Exception("电影已开场或放映时间已过，无法退款");
         }
 
+        return executeAlipayRefund(order, order.getId() + "_refund");
+    }
+
+    @Override
+    public Order adminRefund(String id) throws Exception {
+        Order order = orderMapper.selectById(id);
+        if (order == null) {
+            throw new Exception("订单不存在");
+        }
+        if (!OrderStatus.PAYMENT_SUCCESSFUL.equals(order.getStatus())) {
+            throw new Exception("仅支付成功的订单可退款");
+        }
+        return executeAlipayRefund(order, order.getId() + "_refund_admin");
+    }
+
+    private Order executeAlipayRefund(Order order, String outRequestNo) throws Exception {
         String refundAmount = String.format("%.2f", order.getPrice());
-        String outRequestNo = order.getId() + "_refund";
         try {
-            // 本地已校验支付成功，直接调用退款接口（避免沙箱 trade.query 频繁 504）
             AlipayTradeRefundResponse refundResponse = payUtil.refund(order.getId(), refundAmount, outRequestNo);
             if (!refundResponse.isSuccess()) {
                 String msg = refundResponse.getSubMsg() != null ? refundResponse.getSubMsg() : refundResponse.getMsg();
@@ -226,6 +274,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.REFUNDED);
         orderMapper.updateById(order);
 
+        Arrangement arrangement = arrangementService.findById(order.getAid());
         if (arrangement != null) {
             Film film = filmMapper.selectById(arrangement.getFid());
             if (film != null) {
@@ -263,6 +312,7 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderVO> findByUser(String uid) {
         QueryWrapper<Order> wrapper = new QueryWrapper<>();
         wrapper.in("uid", uid);
+        wrapper.orderByDesc("create_at");
         return findByWrapper(wrapper);
     }
 

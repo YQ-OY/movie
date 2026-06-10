@@ -6,60 +6,103 @@
       <el-step title="步骤3" description="加入购物车"></el-step>
       <el-step title="步骤4" description="结算付款"></el-step>
     </el-steps>
+
     <div class="seat-content">
+      <!-- 左侧信息栏 -->
       <div class="seat-aside">
-        <div style="display: flex">
-          <img style="padding: 30px" :src="film.cover" alt=""/>
-          <div>
+        <div class="film-basic">
+          <img :src="film.cover" alt="" class="film-cover" />
+          <div class="film-info">
             <div class="film-title">{{ film.name }}</div>
-            <div class="seat-aside-text">类型：{{ film.type }}</div>
-            <div class="seat-aside-text">地区：{{ film.region }}</div>
-            <div class="seat-aside-text">时长：{{ film.duration }}分钟</div>
+            <div class="film-desc">类型：{{ formatFilmTypes(film.type) }}</div>
+            <div class="film-desc">地区：{{ film.region }}</div>
+            <div class="film-desc">时长：{{ film.duration }}分钟</div>
           </div>
         </div>
-        <div style="padding: 5px 30px">
-          <div class="d1"><span>放映：</span>{{ arrangement.type }}</div>
-          <div class="d1" style="color: #f56c6c">
-            <span>开场：</span>{{ arrangement.date }} {{ arrangement.startTime }}
-          </div>
-          <div class="d1"><span>散场：</span>{{ arrangement.endTime }}</div>
-          <div class="d1"><span>票价：</span>¥{{ arrangement.price }}/张</div>
-          <el-divider></el-divider>
-          <div class="d1">
-            已选座位：
-            <el-tag v-for="(item, i) in userSelectSeats" :key="i"
-                    type="success"
-                    style="margin-right: 5px"
-                    effect="plain">
-              {{ item }} 号
-            </el-tag>
-          </div>
-          <div class="d1" style="padding-top: 10px">
-            总计：
-            <span style="color: #f56c6c">¥ </span>
-            <span class="price-total">{{ cart.price }}</span>
-          </div>
-          <el-divider></el-divider>
-          <div style="padding: 0 50px">
-            <el-input
+
+        <div class="order-panel">
+          <div class="order-card">
+            <div class="info-list">
+              <div class="info-row">
+                <span class="info-icon-wrap"><el-icon><VideoCamera /></el-icon></span>
+                <span class="info-label">放映</span>
+                <span class="show-type-tag" :class="showTypeClass">
+                  <el-icon class="show-type-tag__icon"><Tickets /></el-icon>
+                  {{ arrangement.type }}
+                </span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-icon-wrap"><el-icon><Calendar /></el-icon></span>
+                <span class="info-label">开场</span>
+                <span class="info-value info-value--time">{{ arrangement.date }} {{ arrangement.startTime }}</span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-icon-wrap"><el-icon><Timer /></el-icon></span>
+                <span class="info-label">散场</span>
+                <span class="info-value info-value--time">{{ arrangement.endTime }}</span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-icon-wrap"><el-icon><PriceTag /></el-icon></span>
+                <span class="info-label">票价</span>
+                <span class="price-value">¥{{ arrangement.price }}<small>/张</small></span>
+              </div>
+            </div>
+
+            <div class="order-divider" />
+
+            <div class="info-row seats-row">
+              <span class="info-icon-wrap"><el-icon><Ticket /></el-icon></span>
+              <span class="info-label">已选座位</span>
+              <div class="seats-list">
+                <el-tag
+                  v-for="(item, i) in userSelectSeats"
+                  :key="i"
+                  type="success"
+                  effect="plain"
+                  size="small"
+                  class="seat-tag"
+                >
+                  {{ item }} 号
+                </el-tag>
+                <span v-if="!userSelectSeats.length" class="empty-seat">未选择</span>
+              </div>
+            </div>
+
+            <div class="total-card">
+              <span class="info-icon-wrap info-icon-wrap--accent"><el-icon><Wallet /></el-icon></span>
+              <span class="info-label">总计</span>
+              <span class="total-price">¥{{ cart.price }}</span>
+            </div>
+
+            <div class="order-divider" />
+
+            <div class="payment-area">
+              <el-input
                 v-model="cart.phone"
-                style="padding-top: 20px; padding-bottom: 30px"
                 placeholder="请输入11位中国大陆手机号"
                 maxlength="11"
                 clearable
-            />
-            <el-button
+                class="phone-input"
+              />
+              <el-button
                 :disabled="saleClosed"
                 @click="submitSeat"
                 class="add-cart-btn"
                 type="danger"
                 round
-            >加入购物车
-            </el-button>
+              >
+                <el-icon><ShoppingCart /></el-icon>
+                加入购物车
+              </el-button>
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- 右侧选座区 -->
       <div class="hall seat-select">
         <div class="seat-legend">
           <div class="legend-item">
@@ -93,11 +136,11 @@
                 <template v-for="(cell, ci) in row.cells" :key="ci">
                   <span v-if="cell.type === 'aisle'" class="cinema-aisle"></span>
                   <span
-                      v-else
-                      class="seat-box"
-                      :class="'seat-box--' + cell.status"
-                      :title="cell.seatNo + ' 号'"
-                      @click="onSeatClick(cell)"
+                    v-else
+                    class="seat-box"
+                    :class="'seat-box--' + cell.status"
+                    :title="cell.seatNo + ' 号'"
+                    @click="onSeatClick(cell)"
                   >{{ cell.seatNo }}</span>
                 </template>
               </div>
@@ -108,12 +151,13 @@
       </div>
     </div>
 
+    <!-- 预订成功弹窗 -->
     <el-dialog
-        v-model="bookingDialogVisible"
-        title="预订成功"
-        width="420px"
-        :show-close="false"
-        align-center
+      v-model="bookingDialogVisible"
+      title="预订成功"
+      width="420px"
+      :show-close="false"
+      align-center
     >
       <el-result icon="success" title="预订成功" sub-title="请前往购物车完成付款">
         <template #extra>
@@ -135,13 +179,22 @@
 </template>
 
 <script>
-import {FindArrangementById, GetArrangementSeats} from "@/api/film";
-import {CreateCart} from "@/api/cart";
+import {
+  VideoCamera, Tickets, Calendar, Timer, PriceTag, Ticket, Wallet, ShoppingCart
+} from '@element-plus/icons-vue'
+import { FindArrangementById, GetArrangementSeats } from "@/api/film";
+import { CreateCart } from "@/api/cart";
 import { isValidMobileCN } from "@/utils/validate";
 import { isTicketSaleAllowed, TICKET_CLOSE_BEFORE_MINUTES } from "@/utils/ticketSale";
 import { buildSeatRows } from "@/utils/cinemaSeatLayout";
+import { openProfileCenter } from "@/utils/profileCenter";
+import { formatFilmTypes } from '@/utils/filmType'
 
 export default {
+  name: "SeatSelection",
+  components: {
+    VideoCamera, Tickets, Calendar, Timer, PriceTag, Ticket, Wallet, ShoppingCart
+  },
   data() {
     return {
       cart: {
@@ -169,7 +222,15 @@ export default {
       },
     }
   },
-
+  computed: {
+    showTypeClass() {
+      const type = (this.arrangement.type || '').toUpperCase()
+      if (type.includes('IMAX')) return 'show-type-tag--imax'
+      if (type.includes('3D')) return 'show-type-tag--3d'
+      if (type.includes('2D')) return 'show-type-tag--2d'
+      return 'show-type-tag--default'
+    },
+  },
   mounted() {
     FindArrangementById(this.$route.query.id).then((res) => {
       this.arrangement = res.data.arrangement;
@@ -193,14 +254,14 @@ export default {
       }, 30000)
     });
   },
-
   beforeUnmount() {
     if (this.seatRefreshTimer) {
       clearInterval(this.seatRefreshTimer)
     }
   },
-
   methods: {
+    formatFilmTypes,
+
     statusContext() {
       return {
         userSelectSeats: this.userSelectSeats,
@@ -208,7 +269,6 @@ export default {
         lockedSeats: this.lockedSeats,
       }
     },
-
     rebuildLayout() {
       if (!this.arrangement.seatNumber) {
         this.seatRows = []
@@ -216,7 +276,6 @@ export default {
       }
       this.seatRows = buildSeatRows(this.arrangement.seatNumber, this.statusContext())
     },
-
     refreshSeatStatus() {
       GetArrangementSeats(this.$route.query.id).then(res => {
         this.soldSeats = res.data.soldSeats || []
@@ -224,7 +283,6 @@ export default {
         this.rebuildLayout()
       })
     },
-
     onSeatClick(cell) {
       if (cell.status === 'sold' || cell.status === 'locked') {
         return
@@ -235,7 +293,6 @@ export default {
         this.handleSelect(cell.seatNo)
       }
     },
-
     handleSelect(seatNo) {
       if (this.userSelectSeats.length >= 4) {
         this.userSelectSeats.shift()
@@ -244,7 +301,6 @@ export default {
       this.cart.price = this.arrangement.price * this.userSelectSeats.length
       this.rebuildLayout()
     },
-
     handleDisSelect(seatNo) {
       const idx = this.userSelectSeats.indexOf(seatNo)
       if (idx !== -1) {
@@ -253,7 +309,6 @@ export default {
       this.cart.price = this.arrangement.price * this.userSelectSeats.length
       this.rebuildLayout()
     },
-
     checkPhoneAndSeats() {
       if (this.userSelectSeats.length === 0) {
         this.$message.warning('请选择要订购的座位')
@@ -265,7 +320,6 @@ export default {
       }
       return true
     },
-
     submitSeat() {
       if (this.saleClosed) {
         this.$message.error(`开场前${TICKET_CLOSE_BEFORE_MINUTES}分钟停止售票`)
@@ -290,7 +344,6 @@ export default {
         })
       }
     },
-
     resetSelection() {
       this.cart.seats = ''
       this.cart.phone = ''
@@ -298,88 +351,324 @@ export default {
       this.userSelectSeats = []
       this.rebuildLayout()
     },
-
     stayOnPage() {
       this.bookingDialogVisible = false
     },
-
     goToCart() {
       this.bookingDialogVisible = false
-      this.$router.push('/me/cart')
+      openProfileCenter(this.$router, 'cart')
     },
   },
 };
 </script>
 
 <style scoped>
+/* 全局容器 */
 .seat-main {
   padding: 80px;
+  background: var(--app-bg);
+  min-height: calc(100vh - 72px);
 }
 
+/* 左右布局容器 */
 .seat-content {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
   min-height: 850px;
   overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 8px;
+  border: 1px solid var(--app-border-strong);
+  background: var(--app-surface);
 }
 
+/* ========= 左侧信息栏 ========= */
 .seat-aside {
   width: 30%;
   min-height: 850px;
-  float: left;
-  background: #f5f6f7;
+  background: linear-gradient(175deg, var(--app-surface-muted) 0%, var(--app-bg) 100%);
+  display: flex;
+  flex-direction: column;
+  color: var(--app-text);
 }
 
-.seat-aside img {
-  width: 140px;
-  height: 200px;
+.film-basic {
+  display: flex;
+  padding: 26px 22px 22px;
+  gap: 16px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.film-cover {
+  width: 118px;
+  height: 168px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.film-info {
+  flex: 1;
+  min-width: 0;
+  padding-top: 2px;
 }
 
 .film-title {
-  padding-top: 40px;
-  padding-bottom: 10px;
-  font-size: 25px;
-  letter-spacing: 2px;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  line-height: 1.35;
+  color: var(--app-title-strong);
+  letter-spacing: 0.5px;
 }
 
-.seat-select {
-  padding: 30px 24px 40px;
-  width: 65%;
-  float: left;
-  box-sizing: border-box;
-}
-
-.seat-aside-text {
-  padding-top: 8px;
+.film-desc {
   font-size: 13px;
-  letter-spacing: 1px;
-  color: #666;
+  color: var(--app-text-secondary);
+  margin-bottom: 5px;
+  line-height: 1.55;
 }
 
-.d1 {
-  font-size: 16px;
-  letter-spacing: 2px;
-  padding-bottom: 15px;
+.order-panel {
+  padding: 18px 20px 24px;
+  flex: 1;
 }
 
-.d1 span {
-  color: #91949c;
+.order-card {
+  padding: 0;
 }
 
-.price-total {
-  color: #f56c6c;
-  font-size: 25px;
-  font-weight: bold;
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: 36px 68px 1fr;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+}
+
+.info-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--app-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.info-icon-wrap .el-icon {
+  font-size: 18px;
+}
+
+.info-icon-wrap--accent {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.info-label {
+  color: var(--app-text-secondary);
+  font-size: 14px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.info-value {
+  color: var(--app-title);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.info-value--time {
+  color: var(--app-text);
+  font-weight: 400;
+}
+
+.price-value {
+  color: var(--app-price);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.price-value small {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--app-text-muted);
+  margin-left: 1px;
+}
+
+/* 放映类型标签 */
+.show-type-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.show-type-tag__icon {
+  font-size: 14px;
+}
+
+.show-type-tag--2d {
+  background: linear-gradient(135deg, #4a4a4a, #666666);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.show-type-tag--3d {
+  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.35);
+}
+
+.show-type-tag--imax {
+  background: linear-gradient(135deg, #b45309, #f59e0b);
+  box-shadow: 0 2px 10px rgba(180, 83, 9, 0.35);
+}
+
+.show-type-tag--default {
+  background: var(--app-gradient-brand);
+  box-shadow: 0 2px 10px var(--app-primary-shadow);
+}
+
+.order-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 14px 0;
+}
+
+/* 已选座位 */
+.seats-row {
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.seats-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 26px;
+}
+
+.seat-tag {
+  margin: 0;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+.empty-seat {
+  font-size: 14px;
+  color: var(--app-text-muted);
+}
+
+.total-card {
+  display: grid;
+  grid-template-columns: 36px 68px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+}
+
+.total-card .info-label {
+  color: var(--app-text);
+}
+
+.total-price {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--app-price);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+/* 支付区域 */
+.payment-area {
+  margin-top: 2px;
+}
+
+.phone-input {
+  margin-bottom: 14px;
+}
+
+.phone-input :deep(.el-input__wrapper) {
+  border-radius: 50px;
+  height: 48px;
+  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.phone-input :deep(.el-input__wrapper:hover),
+.phone-input :deep(.el-input__wrapper.is-focus) {
+  border-color: var(--app-primary-border);
+  box-shadow: 0 0 0 3px var(--app-primary-bg);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.phone-input :deep(.el-input__inner) {
+  font-size: 15px;
+  color: var(--app-title);
+}
+
+.phone-input :deep(.el-input__inner::placeholder) {
+  color: var(--app-text-muted);
 }
 
 .add-cart-btn {
   width: 100%;
-  height: 60px;
+  height: 50px;
   border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--app-gradient-brand);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  letter-spacing: 0.5px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-:deep(.el-input__inner) {
-  border-radius: 50px;
-  height: 55px;
+.add-cart-btn .el-icon {
+  font-size: 18px;
+}
+
+.add-cart-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px var(--app-primary-shadow-strong);
+}
+
+.add-cart-btn:active {
+  transform: translateY(1px);
+}
+
+/* ========= 右侧选座区 ========= */
+.seat-select {
+  padding: 30px 24px 40px;
+  width: 70%;
+  box-sizing: border-box;
+  background: var(--app-surface-elevated);
 }
 
 /* 图例 */
@@ -397,7 +686,7 @@ export default {
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #606266;
+  color: var(--app-text-muted);
 }
 
 .legend-box {
@@ -453,7 +742,7 @@ export default {
 .cinema-screen__label {
   margin-top: 10px;
   font-size: 14px;
-  color: #909399;
+  color: var(--app-text-muted);
   letter-spacing: 4px;
 }
 
@@ -473,7 +762,7 @@ export default {
 .cinema-row__label {
   width: 36px;
   font-size: 12px;
-  color: #909399;
+  color: var(--app-text-muted);
   text-align: center;
   flex-shrink: 0;
 }
@@ -512,13 +801,13 @@ export default {
 .seat-box--available {
   background: transparent;
   border: 2px solid #c0c4cc;
-  color: #909399;
+  color: var(--app-text-muted);
   cursor: pointer;
 }
 
 .seat-box--available:hover {
-  border-color: #409eff;
-  color: #409eff;
+  border-color: var(--app-primary, #409eff);
+  color: var(--app-primary, #409eff);
   transform: scale(1.06);
 }
 
@@ -544,21 +833,74 @@ export default {
   cursor: not-allowed;
 }
 
+/* 弹窗样式 */
 .booking-info {
   width: 100%;
   text-align: left;
   font-size: 14px;
   line-height: 1.9;
-  color: #606266;
+  color: var(--app-text-secondary);
 }
 
 .booking-info span {
-  color: #909399;
+  color: var(--app-text-muted);
 }
 
 .booking-price {
   font-size: 16px;
   font-weight: bold;
-  color: #f56c6c;
+  color: var(--app-price, #f56c6c);
+}
+
+/* 响应式 */
+@media (max-width: 1000px) {
+  .seat-main {
+    padding: 40px;
+  }
+  .seat-aside {
+    width: 35%;
+  }
+  .film-basic {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .order-panel {
+    padding: 14px 16px 20px;
+  }
+  .info-row,
+  .total-card {
+    grid-template-columns: 32px 60px 1fr;
+    gap: 8px;
+  }
+  .info-icon-wrap {
+    width: 32px;
+    height: 32px;
+  }
+  .info-icon-wrap .el-icon {
+    font-size: 16px;
+  }
+  .seat-select {
+    width: 65%;
+  }
+}
+
+@media (max-width: 768px) {
+  .seat-main {
+    padding: 20px;
+  }
+  .seat-content {
+    flex-direction: column;
+  }
+  .seat-aside {
+    width: 100%;
+    min-height: auto;
+  }
+  .seat-select {
+    width: 100%;
+  }
+  .cinema-row__label--right {
+    visibility: visible;
+  }
 }
 </style>

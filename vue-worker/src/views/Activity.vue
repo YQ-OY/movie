@@ -157,16 +157,11 @@ export default {
       this.loading = true
       ListAllActivity()
         .then(res => {
-          if (res.success) {
-            this.allList = res.data || []
-            this.currentPage = 1
-          } else {
-            this.$message.error(res.msg || '加载失败')
-          }
+          if (!res?.success) return
+          this.allList = res.data || []
+          this.currentPage = 1
         })
-        .catch(() => {
-          this.$message.error('加载活动列表失败')
-        })
+        .catch(() => {})
         .finally(() => {
           this.loading = false
         })
@@ -193,18 +188,13 @@ export default {
       }
       CreateActivity(this.form)
         .then(res => {
-          if (res.success) {
-            this.$message.success('保存成功')
-            this.dialogFormVisible = false
-            this.form = { content: '', startTime: '', endTime: '' }
-            this.loadList()
-          } else {
-            this.$message.error(res.msg || '保存失败')
-          }
+          if (!res?.success) return
+          this.$message.success('保存成功')
+          this.dialogFormVisible = false
+          this.form = { content: '', startTime: '', endTime: '' }
+          this.loadList()
         })
-        .catch(() => {
-          this.$message.error('保存失败')
-        })
+        .catch(() => {})
     },
     openDeleteDialog(index, row) {
       this.deleteTarget = {
@@ -216,21 +206,15 @@ export default {
     confirmDeleteActivity() {
       DeleteActivityById(this.deleteTarget.id)
         .then(res => {
-          if (res.success) {
-            this.$message.success('删除成功')
-            this.dialogDeleteVisible = false
-            // 如果当前页只剩一条数据且不是第一页，回退页码
-            if (this.paginatedList.length === 1 && this.currentPage > 1) {
-              this.currentPage--
-            }
-            this.loadList()
-          } else {
-            this.$message.error(res.msg || '删除失败')
+          if (!res?.success) return
+          this.$message.success('删除成功')
+          this.dialogDeleteVisible = false
+          if (this.paginatedList.length === 1 && this.currentPage > 1) {
+            this.currentPage--
           }
+          this.loadList()
         })
-        .catch(() => {
-          this.$message.error('删除失败')
-        })
+        .catch(() => {})
     }
   }
 }

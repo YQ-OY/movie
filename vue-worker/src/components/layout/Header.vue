@@ -39,105 +39,175 @@
       <div class="drawer-content">
         <div class="drawer-main">
           <div class="drawer-header">
-            <el-upload class="avatar-uploader" :show-file-list="false" :before-upload="beforeAvatarUpload"
-              :on-success="handleAvatarSuccess" :action="uploadAction" :headers="uploadHeaders">
+            <el-upload
+              v-if="settingSubTab === 'profile'"
+              class="avatar-uploader"
+              :show-file-list="false"
+              :before-upload="beforeAvatarUpload"
+              :on-success="handleAvatarSuccess"
+              :action="uploadAction"
+              :headers="uploadHeaders"
+            >
               <el-avatar class="drawer-avatar" :size="72" :src="worker.avatar || defaultAvatar" />
               <div class="avatar-upload-tip">点击更换头像</div>
             </el-upload>
+            <el-avatar v-else class="drawer-avatar" :size="72" :src="worker.avatar || defaultAvatar" />
             <div class="drawer-user">
               <div class="drawer-name">{{ worker.username || '客服' }}</div>
               <div class="drawer-role">{{ worker.department || '未设置部门' }}</div>
             </div>
           </div>
 
-          <el-form :model="worker" label-width="48px" class="drawer-form">
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-yonghu" />
-              </template>
-              <el-input v-model="worker.username" placeholder="请输入用户名" />
-            </el-form-item>
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-nicheng drawer-icon-nickname" />
-              </template>
-              <el-input v-model="worker.nickname" placeholder="请输入昵称" />
-            </el-form-item>
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-shoujihao" />
-              </template>
-              <el-input v-model="worker.phone" placeholder="请输入手机号" maxlength="11" show-word-limit />
-            </el-form-item>
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-xingbie" />
-              </template>
-              <el-select v-model="worker.gender" placeholder="请选择性别" style="width: 100%">
-                <el-option label="男" value="男" />
-                <el-option label="女" value="女" />
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-yuangongguanli" />
-              </template>
-              <el-select v-model="worker.department" placeholder="请选择部门" style="width: 100%">
-                <el-option label="客服部" value="客服部" />
-                <el-option label="运营部" value="运营部" />
-                <el-option label="宣传部" value="宣传部" />
-                <el-option label="策划部" value="策划部" />
-                <el-option label="人事部" value="人事部" />
-                <el-option label="监管部" value="监管部" />
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-suo" />
-              </template>
-              <el-button link type="primary" @click="openPasswordModal">
-                <el-icon>
-                  <Lock />
-                </el-icon>修改密码
-              </el-button>
-            </el-form-item>
-          </el-form>
-        </div>
+          <div class="drawer-panel">
+            <div class="setting-sub-tabs">
+              <button
+                type="button"
+                class="setting-sub-tab"
+                :class="{ 'setting-sub-tab--active': settingSubTab === 'profile' }"
+                @click="switchSettingSubTab('profile')"
+              >
+                个人资料
+              </button>
+              <button
+                type="button"
+                class="setting-sub-tab"
+                :class="{ 'setting-sub-tab--active': settingSubTab === 'account' }"
+                @click="switchSettingSubTab('account')"
+              >
+                账号设置
+              </button>
+            </div>
 
-        <div class="drawer-actions">
-          <el-button type="primary" class="drawer-save-button" @click="saveProfile">保存资料</el-button>
-          <el-button class="drawer-logout-button" @click="handleLogout">退出登录</el-button>
+            <template v-if="settingSubTab === 'profile'">
+              <el-form :model="worker" label-width="48px" class="drawer-form drawer-form--panel">
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-yonghu" />
+                  </template>
+                  <el-input v-model="worker.username" placeholder="请输入用户名" />
+                </el-form-item>
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-nicheng drawer-icon-nickname" />
+                  </template>
+                  <el-input v-model="worker.nickname" placeholder="请输入昵称" />
+                </el-form-item>
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-shoujihao" />
+                  </template>
+                  <el-input v-model="worker.phone" placeholder="请输入手机号" maxlength="11" show-word-limit />
+                </el-form-item>
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-xingbie" />
+                  </template>
+                  <el-select v-model="worker.gender" placeholder="请选择性别" style="width: 100%">
+                    <el-option label="男" value="男" />
+                    <el-option label="女" value="女" />
+                  </el-select>
+                </el-form-item>
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-yuangongguanli" />
+                  </template>
+                  <el-select v-model="worker.department" placeholder="请选择部门" style="width: 100%">
+                    <el-option label="客服部" value="客服部" />
+                    <el-option label="运营部" value="运营部" />
+                    <el-option label="宣传部" value="宣传部" />
+                    <el-option label="策划部" value="策划部" />
+                    <el-option label="人事部" value="人事部" />
+                    <el-option label="监管部" value="监管部" />
+                  </el-select>
+                </el-form-item>
+              </el-form>
+              <div class="drawer-actions drawer-actions--panel">
+                <el-button type="primary" class="drawer-save-button" @click="saveProfile">保存资料</el-button>
+                <el-button class="drawer-logout-button" @click="handleLogout">退出登录</el-button>
+              </div>
+            </template>
+
+            <template v-else>
+              <el-form
+                :model="passwordForm"
+                :rules="passwordRules"
+                ref="passwordFormRef"
+                label-width="48px"
+                class="drawer-form drawer-form--panel password-form"
+                autocomplete="off"
+              >
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-yonghu" />
+                  </template>
+                  <el-input v-model="worker.username" disabled autocomplete="off" />
+                </el-form-item>
+                <el-form-item prop="oldPassword">
+                  <template #label>
+                    <i class="iconfont icon-suo" />
+                  </template>
+                  <el-input
+                    v-model="passwordForm.oldPassword"
+                    type="password"
+                    placeholder="请输入当前密码"
+                    show-password
+                    autocomplete="off"
+                    name="profile-verify-pwd"
+                    :readonly="oldPasswordReadonly"
+                    @focus="oldPasswordReadonly = false"
+                  />
+                </el-form-item>
+                <el-form-item prop="newPassword">
+                  <template #label>
+                    <i class="iconfont icon-suo" />
+                  </template>
+                  <el-input
+                    v-model="passwordForm.newPassword"
+                    type="password"
+                    placeholder="请输入新密码"
+                    show-password
+                    autocomplete="new-password"
+                  />
+                </el-form-item>
+                <el-form-item prop="confirmPassword">
+                  <template #label>
+                    <i class="iconfont icon-suo" />
+                  </template>
+                  <el-input
+                    v-model="passwordForm.confirmPassword"
+                    type="password"
+                    placeholder="请再次输入新密码"
+                    show-password
+                    autocomplete="new-password"
+                  />
+                </el-form-item>
+              </el-form>
+              <div class="drawer-actions drawer-actions--panel">
+                <el-button type="primary" class="drawer-save-button" @click="changePassword">修改密码</el-button>
+              </div>
+            </template>
+          </div>
         </div>
       </div>
     </el-drawer>
-
-    <!-- 修改密码对话框 -->
-    <el-dialog title="修改密码" v-model="passwordDialogVisible" width="30%" align-center class="film-dialog">
-      <el-form :model="passwordForm" label-width="80px">
-        <el-form-item label="新密码">
-          <el-input v-model="passwordForm.newPassword" type="password" placeholder="至少6位" show-password />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="passwordDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitPassword">确定</el-button>
-        </span>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { FindWorkerById, UpdateWorker } from "@/api/worker";
-import { ListDailyWork } from "@/api/worker";
-import { Setting, SwitchButton, Lock } from '@element-plus/icons-vue'
+import { FindWorkerById, UpdateWorker, ListDailyWork } from "@/api/worker";
+import { Login } from "@/api/user";
 import config from "@/config";
 
 export default {
   name: "Header",
-  components: { Setting, SwitchButton, Lock },
   data() {
+    const validateConfirmPassword = (rule, value, callback) => {
+      if (value !== this.passwordForm.newPassword) {
+        callback(new Error('两次输入的新密码不一致'))
+      } else {
+        callback()
+      }
+    }
     return {
       worker: {
         id: '',
@@ -149,66 +219,113 @@ export default {
         department: '',
       },
       defaultAvatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-      list: [],           // 通知列表（可扩展）
+      list: [],
       drawerVisible: false,
-      passwordDialogVisible: false,
-      passwordForm: { newPassword: '' },
+      settingSubTab: 'profile',
+      passwordForm: {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      },
+      oldPasswordReadonly: true,
+      passwordRules: {
+        oldPassword: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
+        newPassword: [
+          { required: true, message: '请输入新密码', trigger: 'blur' },
+          { min: 6, message: '密码长度不能少于 6 位', trigger: 'blur' },
+        ],
+        confirmPassword: [
+          { required: true, message: '请再次输入新密码', trigger: 'blur' },
+          { validator: validateConfirmPassword, trigger: 'blur' },
+        ],
+      },
       uploadAction: config.API_URL + '/upload',
       uploadHeaders: { Authorization: localStorage.getItem('token') },
     }
   },
+  watch: {
+    drawerVisible(val) {
+      if (val) {
+        this.settingSubTab = 'profile'
+        this.resetPasswordForm()
+        this.fetchWorkerInfo()
+      }
+    },
+  },
   mounted() {
-    const wid = localStorage.getItem("wid");
-    if (wid) {
-      FindWorkerById(wid).then(res => {
-        this.worker = res.data;
-      }).catch(() => {
-        this.worker = { nickname: '客服', avatar: '' };
-      });
-    }
+    this.fetchWorkerInfo()
     ListDailyWork().then(res => {
       this.list = Array.isArray(res?.data) ? res.data : [];
     }).catch(() => { this.list = [] });
   },
   methods: {
+    fetchWorkerInfo() {
+      const wid = localStorage.getItem("wid");
+      if (!wid) return
+      FindWorkerById(wid).then(res => {
+        if (res.data) {
+          const { password, ...profile } = res.data
+          this.worker = { ...this.worker, ...profile }
+        }
+      }).catch(() => {
+        this.worker = { nickname: '客服', avatar: '' };
+      });
+    },
+    switchSettingSubTab(tab) {
+      if (this.settingSubTab === tab) return
+      this.settingSubTab = tab
+      if (tab === 'account') {
+        this.resetPasswordForm()
+      }
+    },
+    resetPasswordForm() {
+      this.passwordForm = {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      }
+      this.oldPasswordReadonly = true
+      this.$refs.passwordFormRef?.resetFields()
+    },
     // 保存个人资料
     async saveProfile() {
       try {
-        const res = await UpdateWorker(this.worker);
+        const { password, ...payload } = this.worker
+        const res = await UpdateWorker(payload, { silent: true });
         if (res.success) {
           this.$message.success('资料已保存');
           this.drawerVisible = false;
-          // 同步更新头部显示
           localStorage.setItem('name', this.worker.nickname);
-        } else {
-          this.$message.error(res.msg || '保存失败');
         }
-      } catch (error) {
-        this.$message.error('保存失败');
+      } catch {
+        // 网络异常由请求拦截器统一提示
       }
     },
-    // 打开修改密码弹窗
-    openPasswordModal() {
-      this.passwordForm.newPassword = '';
-      this.passwordDialogVisible = true;
-    },
-    async submitPassword() {
-      if (!this.passwordForm.newPassword || this.passwordForm.newPassword.length < 6) {
-        this.$message.warning('密码长度至少6位');
-        return;
-      }
-      const updatedWorker = { ...this.worker, password: this.passwordForm.newPassword };
-      try {
-        const res = await UpdateWorker(updatedWorker);
-        if (res.success) {
-          this.$message.success('密码修改成功');
-          this.passwordDialogVisible = false;
-        } else {
-          this.$message.error(res.msg || '修改失败');
-        }
-      } catch (error) {
-        this.$message.error('修改失败');
-      }
+    changePassword() {
+      this.$refs.passwordFormRef.validate(valid => {
+        if (!valid) return
+        Login({
+          username: this.worker.username,
+          password: this.passwordForm.oldPassword,
+          remember: false,
+        }, { silent: true }).then(res => {
+          if (!res?.success) {
+            this.$message.error(res?.msg || '当前密码不正确')
+            return
+          }
+          UpdateWorker({
+            id: this.worker.id,
+            password: this.passwordForm.newPassword,
+          }, { silent: true }).then(res => {
+            if (res.success) {
+              this.$message.success('密码修改成功')
+              this.resetPasswordForm()
+            } else {
+              this.$message.error(res?.msg || '修改失败')
+            }
+          })
+        })
+      })
     },
     handleLogout() {
       localStorage.removeItem("wid");
@@ -407,6 +524,65 @@ export default {
   justify-content: center;
   gap: 18px;
   min-height: 0;
+  flex: 1;
+}
+
+.drawer-panel {
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.setting-sub-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 14px 18px 0;
+  flex-shrink: 0;
+}
+
+.setting-sub-tab {
+  flex: 1;
+  height: 36px;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #667085;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.setting-sub-tab:hover:not(.setting-sub-tab--active) {
+  color: #344054;
+  border-color: #d0d5dd;
+  background: #fff;
+}
+
+.setting-sub-tab--active {
+  color: #fff;
+  font-weight: 600;
+  background: #3b82f6;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.24);
+}
+
+.drawer-form--panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  max-height: calc(100vh - 420px);
+}
+
+.drawer-actions--panel {
+  margin-top: 0;
+  padding: 0 18px 18px;
 }
 
 .drawer-header {
@@ -558,48 +734,6 @@ export default {
 
 :deep(.el-button + .el-button) {
   margin-left: 0;
-}
-
-/* 对话框样式（用于修改密码） */
-.film-dialog {
-  border-radius: 18px;
-  overflow: hidden;
-}
-
-.film-dialog :deep(.el-dialog__header) {
-  margin-right: 0;
-  padding: 18px 22px 14px;
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.film-dialog :deep(.el-dialog__title) {
-  font-size: 18px;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.film-dialog :deep(.el-dialog__body) {
-  padding: 20px 24px 12px;
-  background: #fbfdff;
-}
-
-.film-dialog :deep(.el-dialog__footer) {
-  padding: 14px 22px 22px;
-  background: #fbfdff;
-  border-top: 1px solid #e2e8f0;
-}
-
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.dialog-footer .el-button {
-  min-width: 92px;
-  height: 38px;
-  border-radius: 10px;
 }
 
 .drawer-form :deep(.drawer-icon-nickname) {

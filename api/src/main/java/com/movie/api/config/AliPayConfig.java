@@ -13,7 +13,10 @@ public class AliPayConfig {
     private String appPrivateKey;
     private String alipayPublicKey;
     private String notifyUrl;
+    /** 支付宝同步回跳地址（后端接口，用于验签并更新订单） */
     private String returnUrl;
+    /** 同步处理完成后重定向到前端的支付结果页 */
+    private String frontendReturnUrl;
     private String gatewayUrl;
     private String signType;
     private String charset;

@@ -129,7 +129,7 @@
               </el-form-item>
 
               <el-form-item label="上映时间">
-                <el-date-picker v-model="form.releaseTime" type="date" value-format="YYYY年MM月DD日" placeholder="选择日期"
+                <el-date-picker v-model="form.releaseTime" type="date" value-format="YYYY-MM-DD" placeholder="选择日期"
                   style="width: 100%;" class="" />
               </el-form-item>
 
@@ -137,11 +137,14 @@
                 <el-switch v-model="form.status" class="bordered-switch" />
               </el-form-item>
 
-              <el-form-item label="电影类型">
-                <el-select v-model="form.type" placeholder="请选择电影类型" class="full-width-input  film-type-select"
-                  filterable>
-                  <el-option v-for="item in filmTypeOptions" :key="item" :label="item" :value="item" />
-                </el-select>
+              <el-form-item label="电影类型" class="film-type-item">
+                <el-checkbox-group v-model="form.typeList" class="film-type-checkbox-group">
+                  <el-checkbox
+                    v-for="item in filmTypeOptions"
+                    :key="item"
+                    :label="item"
+                  />
+                </el-checkbox-group>
               </el-form-item>
 
               <el-form-item label="内容简介" class="introduction-item introduction-item--right">
@@ -287,7 +290,9 @@
               </el-image>
               <div class="film-meta">
                 <div class="film-name">{{ scope.row.name }}</div>
-                <div class="film-subtitle">{{ scope.row.type }} · {{ scope.row.region }}</div>
+                <div class="film-subtitle" :title="formatFilmTypes(scope.row.type) + ' · ' + scope.row.region">
+                  {{ subtitleFilmTypes(scope.row.type) }} · {{ scope.row.region }}
+                </div>
               </div>
             </div>
           </template>
@@ -301,12 +306,35 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="类型" prop="type" min-width="110" align="center">
+        <el-table-column
+          label="类型"
+          prop="type"
+          min-width="160"
+          align="center"
+          class-name="film-type-column"
+        >
           <template #default="scope">
-            <el-tag class="table-chip table-chip--type" :style="getTypeTagStyle(scope.row.type)" effect="light"
-              :disable-transitions="true">
-              {{ scope.row.type }}
-            </el-tag>
+            <el-tooltip
+              v-if="splitFilmTypes(scope.row.type).length"
+              :content="formatFilmTypes(scope.row.type, ', ')"
+              placement="top"
+              effect="dark"
+              :disabled="!hasMoreFilmTypes(scope.row.type)"
+            >
+              <div class="film-type-tags">
+                <el-tag
+                  v-for="item in displayFilmTypes(scope.row.type)"
+                  :key="item"
+                  class="table-chip table-chip--type"
+                  :style="getTypeTagStyle(item)"
+                  effect="light"
+                  :disable-transitions="true"
+                >
+                  {{ item }}
+                </el-tag>
+                <span v-if="hasMoreFilmTypes(scope.row.type)" class="film-type-tags__more">...</span>
+              </div>
+            </el-tooltip>
           </template>
         </el-table-column>
 
@@ -380,6 +408,7 @@
 import { listFilmPage, DeleteById, UpdateFilm, AddArrangement } from "@/api/film";
 import config from "@/config";
 import { computeEndTimeHms } from "@/utils/arrangementEnd";
+import { FILM_TYPE_OPTIONS, splitFilmTypes, joinFilmTypes, formatFilmTypes } from '@/utils/filmType'
 import { Upload, Edit, CirclePlus, Delete, WarningFilled, Search, Refresh } from '@element-plus/icons-vue'
 
 export default {
@@ -398,8 +427,8 @@ export default {
       totalCount: 0,
       searchForm: {
         name: '',
-        type: '',
-        region: '',
+        type: [],
+        region: [],
         status: '',         // 注意后端需要接收 boolean 或 null
       },
       form: {
@@ -409,11 +438,11 @@ export default {
         releaseTime: '',
         duration: 120,
         introduction: '',
-        type: '',
+        typeList: [],
         status: true,
       },
       coverPreview: '',
-      filmTypeOptions: ['爱情', '喜剧', '科幻', '动画', '恐怖', '悬疑', '冒险', '动作', '犯罪', '历史', '古装', '战争', '纪录片', '家庭', '传记', '武侠', '儿童', '短片', '其他'],
+      filmTypeOptions: FILM_TYPE_OPTIONS,
       arrangement: {
         name: '',
         fid: '',
@@ -448,6 +477,23 @@ export default {
   },
 
   methods: {
+    splitFilmTypes,
+    formatFilmTypes,
+
+    displayFilmTypes(type, max = 2) {
+      return splitFilmTypes(type).slice(0, max)
+    },
+
+    hasMoreFilmTypes(type, max = 2) {
+      return splitFilmTypes(type).length > max
+    },
+
+    subtitleFilmTypes(type, max = 2) {
+      const list = splitFilmTypes(type)
+      if (!list.length) return ''
+      if (list.length <= max) return list.join(' / ')
+      return `${list.slice(0, max).join(' / ')}...`
+    },
 
     getTypeTagStyle(type) {
       const map = {
@@ -509,14 +555,12 @@ export default {
           status: this.searchForm.status === '' ? null : this.searchForm.status
         }
         const res = await listFilmPage(params)
-        // 假设后端返回格式为 { data: { rows, total, page, size, totalPages } }
+        if (!res?.success) return
         this.filmList = res.data.rows || []
         this.totalCount = res.data.total || 0
-        // 可选：同步页码（防止后端返回的 page 不一致）
         this.currentPage = res.data.page || this.currentPage
       } catch (error) {
         console.error('加载电影列表失败', error)
-        this.$message.error('加载失败，请重试')
       } finally {
         this.tableLoading = false
       }
@@ -532,8 +576,8 @@ export default {
     handleResetSearch() {
       this.searchForm = {
         name: '',
-        type: '',
-        region: '',
+        type: [],
+        region: [],
         status: '',
       }
       this.currentPage = 1
@@ -555,14 +599,23 @@ export default {
 
     // 提交修改（更新后重新加载当前页）
     async submitUpdate() {
+      if (!this.form.typeList.length) {
+        this.$message.warning('请至少选择一个电影类型')
+        return
+      }
       this.form.cover = this.url || this.form.cover
+      const payload = {
+        ...this.form,
+        type: joinFilmTypes(this.form.typeList),
+      }
       try {
-        await UpdateFilm(this.form)
+        const res = await UpdateFilm(payload)
+        if (!res?.success) return
         this.dialog1 = false
         this.$message.success('修改成功')
-        this.loadFilmList()   // 刷新当前页
+        this.loadFilmList()
       } catch (error) {
-        this.$message.error('修改失败')
+        console.error('修改电影失败', error)
       }
     },
 
@@ -572,19 +625,21 @@ export default {
       const payload = { ...this.arrangement }
       delete payload.filmDuration
       try {
-        await AddArrangement(payload)
+        const res = await AddArrangement(payload)
+        if (!res?.success) return
         this.dialog2 = false
         this.$message.success('排片成功')
-        // 如果电影列表需要展示“已有排片”标识，可刷新当前页
-        // this.loadFilmList()
       } catch (error) {
-        this.$message.error('排片失败')
+        console.error('排片失败', error)
       }
     },
 
     handleEdit(index, row) {
       this.dialog1 = true
-      this.form = { ...row }
+      this.form = {
+        ...row,
+        typeList: splitFilmTypes(row.type),
+      }
       this.url = row.cover || ''
       this.coverPreview = row.cover || ''
     },
@@ -621,7 +676,8 @@ export default {
 
     async confirmDeleteMovie() {
       try {
-        await DeleteById(this.deleteTarget.id)
+        const res = await DeleteById(this.deleteTarget.id)
+        if (!res?.success) return
         this.dialogDelete = false
         this.filmList.splice(this.deleteTarget.index, 1)
         this.$message({
@@ -629,7 +685,7 @@ export default {
           type: 'success'
         })
       } catch (error) {
-        this.$message.error('删除失败')
+        console.error('删除电影失败', error)
       }
     },
 
@@ -863,6 +919,9 @@ export default {
   margin-top: 7px;
   font-size: 12px;
   color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .action-buttons {
@@ -1397,22 +1456,63 @@ export default {
   line-height: 1.5;
 }
 
-.film-type-radios {
+.film-type-checkbox-group {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 20px;
+  gap: 8px 16px;
   max-width: 100%;
 }
 
-.film-type-radios :deep(.el-radio) {
+.film-type-checkbox-group :deep(.el-checkbox) {
   margin-right: 0;
-  height: auto;
-  align-items: center;
 }
 
-.film-type-radios :deep(.el-radio__label) {
+.film-table :deep(.film-type-column .cell) {
+  overflow: hidden;
+}
+
+.film-type-tags {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: default;
+}
+
+.film-type-tags :deep(.el-tag.table-chip) {
+  display: inline-flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: auto;
+  max-width: none;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.film-type-tags :deep(.el-tag__content) {
+  overflow: visible;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.film-type-tags__more {
+  flex-shrink: 0;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1;
+  letter-spacing: 1px;
 }
 
 .full-width-input {

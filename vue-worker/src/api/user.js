@@ -1,10 +1,11 @@
 import service from "../utils/request";
 
-export function Login(data) {
+export function Login(data, options = {}) {
     return service({
         url: '/worker/login',
         method: 'post',
-        data: data
+        data: data,
+        silent: options.silent,
     })
 }
 

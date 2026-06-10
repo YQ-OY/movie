@@ -28,17 +28,25 @@
             </template>
             <span v-else class="film-no-score">暂无评分</span>
           </div>
-          <p class="film-line">电影类型：{{ film.type }}</p>
+          <p class="film-line">电影类型：{{ formatFilmTypes(film.type) }}</p>
           <p class="film-line">{{ film.region }} / {{ film.duration }} 分钟</p>
           <p class="film-line">上映日期：{{ film.releaseTime }} 上映</p>
           <div class="film-actions">
-            <router-link :to="'/film/ticket?fid=' + filmId">
-              <el-button type="danger" class="film-btn">
+            <router-link v-if="!isUpcomingFilm" :to="'/film/ticket?fid=' + filmId">
+              <el-button type="primary" class="film-btn film-btn--buy">
                 <el-icon class="film-btn__icon"><Coin /></el-icon>
                 特惠购票
               </el-button>
             </router-link>
-            <el-button type="danger" plain class="film-btn" @click="openComment">
+            <el-button
+              v-else
+              type="primary"
+              class="film-btn film-btn--buy"
+              disabled
+            >
+              即将上映
+            </el-button>
+            <el-button type="primary" plain class="film-btn film-btn--rate" @click="openComment">
               <el-icon class="film-btn__icon"><StarFilled /></el-icon>
               评分
             </el-button>
@@ -83,6 +91,8 @@
 <script>
 import { AddFilmEvaluate, FindFilmById, GetFilmEvaluateAvg } from "@/api/film";
 import { Coin, StarFilled } from '@element-plus/icons-vue'
+import { isUpcoming } from '@/utils/filmRelease'
+import { formatFilmTypes } from '@/utils/filmType'
 
 export default {
   components: { Coin, StarFilled },
@@ -107,7 +117,14 @@ export default {
     }
   },
 
+  computed: {
+    isUpcomingFilm() {
+      return isUpcoming(this.film.releaseTime)
+    },
+  },
+
   methods: {
+    formatFilmTypes,
 
     openComment() {
       if (!localStorage.getItem("uid")) {
@@ -177,7 +194,7 @@ export default {
 .film-hero__bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(125deg, #3d5afe 0%, #5a84fd 45%, #6c5ce7 100%);
+  background: var(--app-gradient-hero);
 }
 
 .film-hero__inner {
@@ -262,6 +279,24 @@ export default {
   font-size: 15px;
   vertical-align: middle;
 }
+
+.film-btn--buy {
+  background: linear-gradient(135deg, var(--app-price-dark) 0%, var(--app-price) 55%, #f87171 100%) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(239, 68, 68, 0.38);
+}
+
+.film-btn--buy:hover {
+  filter: brightness(1.06);
+}
+
+.film-btn--rate {
+  --el-button-text-color: rgba(255, 255, 255);
+  --el-button-hover-text-color:rgba(255, 255, 255);
+  --el-button-bg-color: rgba(255, 255, 255, 0.2);
+}
+
 
 .film-body {
   max-width: 1100px;

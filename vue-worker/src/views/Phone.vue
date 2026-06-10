@@ -105,16 +105,11 @@ export default {
       this.loading = true
       ListActiveUser()
         .then(res => {
-          if (res.success) {
-            this.allList = res.data || []
-            this.currentPage = 1
-          } else {
-            this.$message.error(res.msg || '加载失败')
-          }
+          if (!res?.success) return
+          this.allList = res.data || []
+          this.currentPage = 1
         })
-        .catch(() => {
-          this.$message.error('加载活跃用户失败')
-        })
+        .catch(() => {})
         .finally(() => {
           this.loading = false
         })

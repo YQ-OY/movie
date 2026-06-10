@@ -176,6 +176,7 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 <script>
@@ -216,15 +217,12 @@ export default {
           size: this.pageSize,
         }
         const res = await listOrderPage(params)  // 后端分页接口
-        if (res.success) {
-          this.orderList = res.data.rows || []
-          this.totalCount = res.data.total || 0
-          this.currentPage = res.data.page || this.currentPage
-        } else {
-          this.$message.error(res.msg || '加载失败')
-        }
-      } catch (error) {
-        this.$message.error('加载订单列表失败')
+        if (!res?.success) return
+        this.orderList = res.data.rows || []
+        this.totalCount = res.data.total || 0
+        this.currentPage = res.data.page || this.currentPage
+      } catch {
+        // 全局 request 拦截器已提示
       } finally {
         this.loading = false
       }

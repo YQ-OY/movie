@@ -2,7 +2,7 @@
 const config = {
     //后端api地址
     API_URL: "http://localhost:8888/api",
-    //前端访问地址（须与 application.yml 中 alipay.returnUrl 同源）
+    //前端访问地址（须与 application.yml 中 alipay.frontendReturnUrl 一致）
     WEB_URL: "http://localhost:8080",
 };
 

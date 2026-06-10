@@ -216,11 +216,11 @@ export default {
     loadPosters() {
       this.loading = true
       ListAllPoster().then(res => {
+        if (!res?.success) return
         this.posterList = res.data || []
         this.currentPage = 1
         this.loading = false
       }).catch(() => {
-        this.$message.error('加载海报列表失败')
         this.loading = false
       })
     },
@@ -264,35 +264,32 @@ export default {
         this.$message.warning('请填写海报标题')
         return
       }
-      AddPoster(this.uploadPoster).then(() => {
+      AddPoster(this.uploadPoster).then(res => {
+        if (!res?.success) return
         this.$message.success('上传成功')
         this.dialogFormVisible = false
         this.uploadPoster = { url: '', title: '', status: true, createAt: '' }
         this.loadPosters()
-      }).catch(() => {
-        this.$message.error('上传失败')
-      })
+      }).catch(() => {})
     },
     deleteAllPoster() {
       this.dialogDeleteAllVisible = true
     },
     confirmDeleteAllPoster() {
-      DeleteAllPoster().then(() => {
+      DeleteAllPoster().then(res => {
+        if (!res?.success) return
         this.$message.success('已删除所有海报')
         this.dialogDeleteAllVisible = false
         this.loadPosters()
-      }).catch(() => {
-        this.$message.error('删除失败')
-      })
+      }).catch(() => {})
     },
     changePosterStatus(poster, status) {
       const updated = { ...poster, status }
-      UpdatePoster(updated).then(() => {
+      UpdatePoster(updated).then(res => {
+        if (!res?.success) return
         poster.status = status
         this.$message.success(`已${status ? '上架' : '下架'}海报`)
-      }).catch(() => {
-        this.$message.error('操作失败')
-      })
+      }).catch(() => {})
     },
     // 打开删除对话框
     openDeleteDialog(index, row) {
@@ -304,19 +301,16 @@ export default {
     },
     // 确认删除海报
     confirmDeletePoster() {
-      DeletePosterById(this.deleteTarget.id).then(() => {
-        // 从全量数据中删除
+      DeletePosterById(this.deleteTarget.id).then(res => {
+        if (!res?.success) return
         const targetIndex = this.posterList.findIndex(item => item.id === this.deleteTarget.id)
         if (targetIndex !== -1) this.posterList.splice(targetIndex, 1)
-        // 如果当前页无数据且不是第一页，回退页码
         if (this.paginatedList.length === 1 && this.currentPage > 1) {
           this.currentPage--
         }
         this.dialogDeleteVisible = false
         this.$message.success('删除成功')
-      }).catch(() => {
-        this.$message.error('删除失败')
-      })
+      }).catch(() => {})
     }
   }
 }

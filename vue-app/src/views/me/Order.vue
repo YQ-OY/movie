@@ -2,8 +2,21 @@
   <div class="ticket-page">
     <h3 class="ticket-page__title">我的订单</h3>
 
+    <div class="ticket-range-tabs">
+      <button
+        v-for="option in timeRangeOptions"
+        :key="option.key"
+        type="button"
+        class="ticket-range-tab"
+        :class="{ 'ticket-range-tab--active': timeRange === option.key }"
+        @click="timeRange = option.key"
+      >
+        {{ option.label }}
+      </button>
+    </div>
+
     <div v-loading="loading" class="ticket-list">
-      <div v-for="(item, index) in orderList" :key="index" class="ticket-card">
+      <div v-for="(item, index) in orderList" :key="item.order.id || index" class="ticket-card">
         <div class="ticket-card__main">
           <div class="ticket-card__poster">
             <img class="ticket-card__cover" alt="" :src="item.film.cover"/>
@@ -12,9 +25,6 @@
           <div class="ticket-card__info">
             <div>
               <p class="info-text info-text--title">《{{ item.film.name }}》</p>
-              <p :class="['info-text', statusTextClass(item.order.status)]">
-                订单状态：{{ statusLabel(item.order.status) }}
-              </p>
               <p class="info-text">订购座位：{{ item.order.seats }}</p>
               <p class="info-text info-text--accent">
                 放映时间：{{ item.arrangement.date }} {{ item.arrangement.startTime }}
@@ -24,6 +34,9 @@
                   v-if="item.order.status === 2 || item.order.status === 4"
                   class="info-text info-text--pay">
                 支付时间：{{ item.order.payAt }}
+              </p>
+                <p :class="['info-text', statusTextClass(item.order.status)]">
+                {{ statusLabel(item.order.status) }}
               </p>
               <p class="info-text info-text--price-row">
                 <span class="info-price">￥{{ formatPrice(item.order.price) }}</span>
@@ -47,17 +60,12 @@
                 申请退款
               </el-button>
             </div>
-            <div v-else-if="item.order.status === 2" class="info-action-row">
-              <el-tooltip content="电影已开场或放映时间已过，无法退款" placement="top">
-                <span class="info-action-hint">放映开始后不可退款</span>
-              </el-tooltip>
-            </div>
           </div>
         </div>
       </div>
 
       <div v-if="!loading && orderList.length === 0" class="ticket-empty">
-        暂无订单
+        {{ emptyText }}
       </div>
     </div>
 
@@ -96,6 +104,7 @@
 <script>
 import {FindOrderByUser, RefundOrder} from "@/api/order";
 import { isBeforeShowStart } from "@/utils/ticketSale";
+import { TIME_RANGE_OPTIONS, filterAndSortByCreateAt } from "@/utils/timeRangeFilter";
 
 const STATUS_LABEL = {
   0: '等待支付',
@@ -119,12 +128,27 @@ export default {
   data() {
     return {
       loading: false,
-      orderList: [],
+      allOrderList: [],
+      timeRange: 'all',
+      timeRangeOptions: TIME_RANGE_OPTIONS,
       uid: localStorage.getItem("uid"),
       refundDialogVisible: false,
       refundSubmitting: false,
       refundTarget: null,
     }
+  },
+
+  computed: {
+    orderList() {
+      return filterAndSortByCreateAt(
+        this.allOrderList,
+        item => item.order?.createAt,
+        this.timeRange
+      )
+    },
+    emptyText() {
+      return this.timeRange === 'all' ? '暂无订单' : '该时间范围内暂无订单'
+    },
   },
 
   mounted() {
@@ -154,7 +178,7 @@ export default {
       this.loading = true
       FindOrderByUser(this.uid).then(res => {
         setTimeout(() => {
-          this.orderList = res.data
+          this.allOrderList = Array.isArray(res.data) ? res.data : []
           this.loading = false
         }, 700)
       })
@@ -217,19 +241,19 @@ export default {
   border-radius: 8px;
   font-size: 14px;
   line-height: 2;
-  color: #606266;
+  color: var(--app-text-secondary);
 }
 
 .refund-dialog__info span {
   display: inline-block;
   width: 48px;
-  color: #909399;
+  color: var(--app-text-muted);
 }
 
 .refund-dialog__price {
   font-style: normal;
   font-size: 18px;
   font-weight: 600;
-  color: #e6a23c;
+  color: var(--app-price);
 }
 </style>
