@@ -10,6 +10,12 @@ const routes = [
     },
 
     {
+        path: '/forgot-password',
+        name: 'ForgotPassword',
+        component: () => import("@/views/ForgotPassword")
+    },
+
+    {
         path: '/',
         component: Layout,
         children: [
@@ -61,7 +67,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const token = localStorage.getItem("token")
     const isAuthenticated = token != null && token !== '' && token !== 'null'
-    const publicPaths = ['/login', '/403', '/404']
+    const publicPaths = ['/login', '/forgot-password', '/403', '/404']
     if (publicPaths.includes(to.path) || to.name === 'Login') {
         next()
         return

@@ -32,3 +32,34 @@ export function listUserPage(params) {
     params
   })
 }
+
+export function getForgotCaptcha(role) {
+  return service({
+    url: `/${role}/forgot/captcha`,
+    method: 'get',
+  })
+}
+
+export function sendForgotCode(role, data) {
+  return service({
+    url: `/${role}/forgot/send-code`,
+    method: 'post',
+    data,
+  })
+}
+
+export function verifyForgotSms(role, data) {
+  return service({
+    url: `/${role}/forgot/verify-sms`,
+    method: 'post',
+    data,
+  })
+}
+
+export function resetPasswordByPhone(role, data) {
+  return service({
+    url: `/${role}/forgot/reset`,
+    method: 'post',
+    data,
+  })
+}

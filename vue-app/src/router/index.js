@@ -21,6 +21,12 @@ const routes = [
     },
 
     {
+        path: '/forgot-password',
+        name: 'ForgotPassword',
+        component: () => import("@/views/ForgotPassword")
+    },
+
+    {
         path: '/pay',
         name: 'PayJump',
         component: () => import("@/views/pay/PayJump")

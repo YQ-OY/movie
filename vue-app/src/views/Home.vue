@@ -314,7 +314,7 @@ export default {
   flex-shrink: 0;
   font-size: 14px;
   font-weight: 500;
-  color: #31bf41;
+  color: #38ef38;
   text-decoration: none;
   letter-spacing: 0.04em;
   transition: opacity 0.2s ease;

@@ -47,7 +47,7 @@
 
           <div class="auth-row">
             <el-checkbox v-model="remember">记住我</el-checkbox>
-            <a class="auth-link" href="#" @click.prevent="onForget">忘记密码？</a>
+            <a class="auth-link" href="#" @click.prevent="$router.push('/forgot-password')">忘记密码？</a>
           </div>
 
           <el-button
@@ -88,9 +88,6 @@ export default {
     }
   },
   methods: {
-    onForget() {
-      this.$message.info("请联系客服或通过注册手机找回密码")
-    },
     postLogin() {
       if (!this.username?.trim() || !this.password) {
         this.$message.warning("请输入账号和密码")
@@ -272,16 +269,42 @@ export default {
 
 .auth-form :deep(.el-input__wrapper) {
   border-radius: 12px;
-  box-shadow: 0 0 0 1px #e4e7ed inset;
+  background-color: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: 0 0 0 1px rgba(220, 223, 230, 0.95) inset !important;
   padding-left: 12px;
+  transition: background-color 0.2s, box-shadow 0.2s;
 }
 
 .auth-form :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #c0c4cc inset;
+  background-color: #fff !important;
+  box-shadow: 0 0 0 1px #c0c4cc inset !important;
 }
 
 .auth-form :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #5a84fd inset, 0 0 0 3px rgba(90, 132, 253, 0.15);
+  background-color: #fff !important;
+  box-shadow: 0 0 0 1px #5a84fd inset, 0 0 0 3px rgba(90, 132, 253, 0.15) !important;
+}
+
+.auth-form :deep(.el-input__inner) {
+  color: #303133 !important;
+}
+
+.auth-form :deep(.el-input__inner::placeholder) {
+  color: #a8abb2 !important;
+}
+
+.auth-form :deep(.el-input__count-inner) {
+  background: transparent;
+  color: #909399;
+}
+
+.auth-form :deep(.el-input__inner:-webkit-autofill),
+.auth-form :deep(.el-input__inner:-webkit-autofill:hover),
+.auth-form :deep(.el-input__inner:-webkit-autofill:focus) {
+  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.92) inset !important;
+  -webkit-text-fill-color: #303133 !important;
+  caret-color: #303133;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .auth-row {
@@ -292,7 +315,10 @@ export default {
   flex-wrap: wrap;
   gap: 8px;
 }
-
+.auth-row ::v-deep .el-checkbox__input:not(.is-checked) .el-checkbox__inner {
+  border-color: #d3d3d3;      /* 浅灰色边框 */
+  background-color: #ffffff;   /* 保持白色背景，与默认一致 */
+}
 .auth-row :deep(.el-checkbox) {
   --el-checkbox-font-size: 13px;
   color: #606266;

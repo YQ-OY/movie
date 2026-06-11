@@ -43,4 +43,8 @@ public final class ValidationUtil {
             throw new Exception(fieldLabel + "格式不正确");
         }
     }
+
+    public static String normalizePhone(String phone) {
+        return phone == null ? null : phone.trim();
+    }
 }

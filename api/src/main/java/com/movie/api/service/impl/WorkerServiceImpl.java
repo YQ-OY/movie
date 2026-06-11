@@ -6,16 +6,20 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.movie.api.constant.Roles;
 import com.movie.api.mapper.RoleMapper;
 import com.movie.api.mapper.WorkerMapper;
+import com.movie.api.model.dto.ForgotResetDto;
+import com.movie.api.model.dto.ForgotSendCodeDto;
 import com.movie.api.model.dto.LoginDto;
 import com.movie.api.model.entity.Role;
 import com.movie.api.model.entity.Worker;
+import com.movie.api.model.vo.ForgotSendCodeVO;
+import com.movie.api.model.vo.PageResult;
 import com.movie.api.model.vo.WorkerPublicVO;
+import com.movie.api.service.ForgotPasswordService;
 import com.movie.api.service.RoleService;
 import com.movie.api.service.WorkerService;
 import com.movie.api.utils.DataTimeUtil;
 import com.movie.api.utils.ValidationUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import com.movie.api.model.vo.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -38,6 +42,9 @@ public class WorkerServiceImpl implements WorkerService {
 
     @Resource
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Resource
+    private ForgotPasswordService forgotPasswordService;
 
     // 创建员工（含默认权限ROLE_WORKER）
     @Override
@@ -125,6 +132,53 @@ public class WorkerServiceImpl implements WorkerService {
     }
 
     // 根据ID删除员工及所有权限
+    @Override
+    public Worker findByPhone(String phone) {
+        if (!StringUtils.hasText(phone)) {
+            return null;
+        }
+        LambdaQueryWrapper<Worker> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Worker::getPhone, phone.trim());
+        return workerMapper.selectOne(wrapper);
+    }
+
+    @Override
+    public ForgotSendCodeVO sendForgotCode(ForgotSendCodeDto dto) throws Exception {
+        Worker worker = findByPhone(dto.getPhone());
+        return forgotPasswordService.sendCode("worker", dto, worker != null);
+    }
+
+    @Override
+    public void verifyForgotSms(ForgotResetDto dto) throws Exception {
+        ValidationUtil.requireValidMobileCN(dto.getPhone(), "手机号");
+        if (ValidationUtil.isBlank(dto.getSmsCode())) {
+            throw new Exception("请输入短信验证码");
+        }
+        Worker worker = findByPhone(dto.getPhone());
+        if (worker == null) {
+            throw new Exception("该手机号未绑定账号");
+        }
+        if (!forgotPasswordService.verifySmsCode("worker", dto.getPhone(), dto.getSmsCode())) {
+            throw new Exception("短信验证码错误或已过期");
+        }
+    }
+
+    @Override
+    public void resetPasswordByPhone(ForgotResetDto dto) throws Exception {
+        forgotPasswordService.validateResetForm(dto);
+        Worker worker = findByPhone(dto.getPhone());
+        if (worker == null) {
+            throw new Exception("该手机号未绑定账号");
+        }
+        if (!forgotPasswordService.verifySmsCode("worker", dto.getPhone(), dto.getSmsCode())) {
+            throw new Exception("短信验证码错误或已过期");
+        }
+        worker.setPassword(bCryptPasswordEncoder.encode(dto.getNewPassword()));
+        worker.setUpdateAt(DataTimeUtil.getNowTimeString());
+        workerMapper.updateById(worker);
+        forgotPasswordService.clearSmsCode("worker", dto.getPhone());
+    }
+
     @Override
     public void deleteById(String id) {
         workerMapper.deleteById(id);

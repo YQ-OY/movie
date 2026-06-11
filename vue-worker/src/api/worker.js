@@ -88,3 +88,34 @@ export function DeleteRoleByWorkerId(id) {
         method: "delete"
     })
 }
+
+export function getForgotCaptcha() {
+    return service({
+        url: '/worker/forgot/captcha',
+        method: 'get',
+    })
+}
+
+export function sendForgotCode(data) {
+    return service({
+        url: '/worker/forgot/send-code',
+        method: 'post',
+        data,
+    })
+}
+
+export function verifyForgotSms(data) {
+    return service({
+        url: '/worker/forgot/verify-sms',
+        method: 'post',
+        data,
+    })
+}
+
+export function resetPasswordByPhone(data) {
+    return service({
+        url: '/worker/forgot/reset',
+        method: 'post',
+        data,
+    })
+}

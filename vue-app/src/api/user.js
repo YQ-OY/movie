@@ -40,3 +40,34 @@ export function uploadAvatar(data) {
         data: data,
     })
 }
+
+export function getForgotCaptcha() {
+    return service({
+        url: '/user/forgot/captcha',
+        method: 'get',
+    })
+}
+
+export function sendForgotCode(data) {
+    return service({
+        url: '/user/forgot/send-code',
+        method: 'post',
+        data,
+    })
+}
+
+export function verifyForgotSms(data) {
+    return service({
+        url: '/user/forgot/verify-sms',
+        method: 'post',
+        data,
+    })
+}
+
+export function resetPasswordByPhone(data) {
+    return service({
+        url: '/user/forgot/reset',
+        method: 'post',
+        data,
+    })
+}

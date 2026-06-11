@@ -59,6 +59,19 @@
               </template>
             </el-input>
           </el-form-item>
+          <el-form-item label="手机号">
+            <el-input
+              v-model="phone"
+              size="large"
+              placeholder="请输入11位手机号"
+              clearable
+              maxlength="11"
+            >
+              <template #prefix>
+                <el-icon class="auth-input-icon"><Iphone /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
 
           <div class="auth-agree">
             <el-checkbox v-model="agree">
@@ -92,15 +105,17 @@
 
 <script>
 import { Register } from "@/api/user"
-import { Right, User, Lock } from "@element-plus/icons-vue"
+import { isValidMobileCN } from "@/utils/validate"
+import { Right, User, Lock, Iphone } from "@element-plus/icons-vue"
 
 export default {
-  components: { Right, User, Lock },
+  components: { Right, User, Lock, Iphone },
   data() {
     return {
       username: "",
       password: "",
       checkPassword: "",
+      phone: "",
       agree: false,
       loading: false,
     }
@@ -123,10 +138,15 @@ export default {
         this.$message.warning("请输入密码")
         return
       }
+      if (!isValidMobileCN(this.phone)) {
+        this.$message.warning("请输入11位有效中国大陆手机号")
+        return
+      }
       this.loading = true
       Register({
         username: this.username.trim(),
         password: this.password,
+        phone: this.phone.trim(),
         remember: false,
       })
         .then((res) => {
@@ -291,28 +311,58 @@ export default {
 
 .auth-form :deep(.el-input__wrapper) {
   border-radius: 12px;
-  box-shadow: 0 0 0 1px #e4e7ed inset;
+  background-color: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: 0 0 0 1px rgba(220, 223, 230, 0.95) inset !important;
   padding-left: 12px;
+  transition: background-color 0.2s, box-shadow 0.2s;
 }
 
 .auth-form :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #c0c4cc inset;
+  background-color: #fff !important;
+  box-shadow: 0 0 0 1px #c0c4cc inset !important;
 }
 
 .auth-form :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #6c5ce7 inset, 0 0 0 3px rgba(108, 92, 231, 0.15);
+  background-color: #fff !important;
+  box-shadow: 0 0 0 1px #6c5ce7 inset, 0 0 0 3px rgba(108, 92, 231, 0.15) !important;
+}
+
+.auth-form :deep(.el-input__inner) {
+  color: #303133 !important;
+}
+
+.auth-form :deep(.el-input__inner::placeholder) {
+  color: #a8abb2 !important;
+}
+
+.auth-form :deep(.el-input__count-inner) {
+  background: transparent;
+  color: #909399;
+}
+
+.auth-form :deep(.el-input__inner:-webkit-autofill),
+.auth-form :deep(.el-input__inner:-webkit-autofill:hover),
+.auth-form :deep(.el-input__inner:-webkit-autofill:focus) {
+  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.92) inset !important;
+  -webkit-text-fill-color: #303133 !important;
+  caret-color: #303133;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .auth-agree {
   margin-bottom: 6px;
 }
-
+.auth-row ::v-deep .el-checkbox__input:not(.is-checked) .el-checkbox__inner,
+.auth-agree ::v-deep .el-checkbox__input:not(.is-checked) .el-checkbox__inner {
+  border-color: #d3d3d3;      /* 浅灰色边框 */
+  background-color: #ffffff;   /* 保持白色背景 */
+}
 .auth-agree :deep(.el-checkbox) {
   align-items: flex-start;
   white-space: normal;
   line-height: 1.5;
   --el-checkbox-font-size: 13px;
-  color: #606266;
+  color: #666062;
 }
 
 .auth-agree__name {

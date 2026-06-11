@@ -8,7 +8,7 @@
       </div>
       <div style="color: #91949c;font-weight: bolder">
 
-        <p>Username</p>
+        <p>用户名</p>
         <el-input class="login-form-input" v-model="username" placeholder="账 号"></el-input>
         <el-alert
             v-if="usernameError"
@@ -17,7 +17,7 @@
             show-icon>
         </el-alert>
 
-        <p>Password</p>
+        <p>密码</p>
         <el-input class="login-form-input" placeholder="密 码" v-model="password" show-password></el-input>
         <el-alert
             v-if="passwordError"
@@ -29,15 +29,10 @@
         <div style="padding-top: 10px">
           <el-checkbox v-model="remember">记住密码</el-checkbox>
           <div style="float: right">
-            <el-tooltip class="item" effect="dark" content="请联系管理员修改" placement="bottom">
-              <el-link style="font-weight: bolder;font-size: 14px;color: #91949c;"
-                       :underline="false">
-                忘记密码?
-              </el-link>
-            </el-tooltip>
+            <router-link class="forgot-link" to="/forgot-password">忘记密码?</router-link>
           </div>
         </div>
-        <el-button :loading="loading" @click="postLogin" class="login-form-button" type="primary">SIGN IN</el-button>
+        <el-button :loading="loading" @click="postLogin" class="login-form-button" type="primary">登录</el-button>
       </div>
       <div class="login-form-footer">
         <div style="font-weight: bolder;font-size: 16px;color: #91949c;"
@@ -175,6 +170,17 @@ export default {
   color: #91949c;
   font-weight: bolder;
   font-size: 15px;
+}
+
+.forgot-link {
+  font-weight: bolder;
+  font-size: 14px;
+  color: #91949c;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  color: #5a84fd;
 }
 
 </style>

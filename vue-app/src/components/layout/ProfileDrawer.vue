@@ -893,7 +893,7 @@ export default {
 </style>
 
 <style>
-.profile-drawer-wrap {
+.profile-drawer {
   --el-drawer-padding-primary: 0px !important;
 }
 </style>

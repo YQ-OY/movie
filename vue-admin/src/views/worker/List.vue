@@ -116,7 +116,7 @@
                 <el-input v-model="editForm.nickname" placeholder="昵称" />
               </el-form-item>
               <el-form-item label="联系电话">
-                <el-input v-model="editForm.phone" placeholder="联系电话" />
+                <el-input v-model="editForm.phone" placeholder="联系电话" maxlength="11" show-word-limit />
               </el-form-item>
               <el-form-item label="所在部门">
                 <el-input v-model="editForm.department" placeholder="部门名称" />
@@ -244,6 +244,7 @@ import {
 } from "@/api/worker";
 import { Edit, Delete, Search, Refresh, Upload, Lock, Setting } from '@element-plus/icons-vue'
 import config from "@/config";
+import { isValidMobileCN } from '@/utils/validate'
 
 const BASE_WORKER_ROLE = 'ROLE_WORKER'
 
@@ -373,6 +374,10 @@ export default {
     },
     // 编辑提交后刷新
     async submitEdit() {
+      if (!isValidMobileCN(this.editForm.phone)) {
+        this.$message.warning('请输入11位有效中国大陆手机号')
+        return
+      }
       try {
         const res = await UpdateWorker(this.editForm)
         if (!res?.success) return

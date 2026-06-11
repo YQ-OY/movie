@@ -4,9 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.movie.api.mapper.UserMapper;
+import com.movie.api.model.dto.ForgotResetDto;
+import com.movie.api.model.dto.ForgotSendCodeDto;
 import com.movie.api.model.dto.LoginDto;
 import com.movie.api.model.entity.User;
+import com.movie.api.model.vo.ForgotSendCodeVO;
 import com.movie.api.model.vo.PageResult;
+import com.movie.api.service.ForgotPasswordService;
 import com.movie.api.service.UserService;
 import com.movie.api.utils.DataTimeUtil;
 import com.movie.api.utils.ValidationUtil;
@@ -26,6 +30,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Resource
+    private ForgotPasswordService forgotPasswordService;
 
     // 用户登录验证（校验用户名和密码）
     @Override
@@ -91,7 +98,7 @@ public class UserServiceImpl implements UserService {
     // 注册新用户
     @Override
     public User save(User user) throws Exception {
-        ValidationUtil.requireValidMobileCNIfPresent(user.getPhone(), "手机号");
+        ValidationUtil.requireValidMobileCN(user.getPhone(), "手机号");
         if (findByUsername(user.getUsername()) != null) {
             throw new Exception("用户名已注册");
         }
@@ -113,6 +120,53 @@ public class UserServiceImpl implements UserService {
     }
 
     // 根据ID删除用户
+    @Override
+    public User findByPhone(String phone) {
+        if (!StringUtils.hasText(phone)) {
+            return null;
+        }
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getPhone, phone.trim());
+        return userMapper.selectOne(wrapper);
+    }
+
+    @Override
+    public ForgotSendCodeVO sendForgotCode(ForgotSendCodeDto dto) throws Exception {
+        User user = findByPhone(dto.getPhone());
+        return forgotPasswordService.sendCode("user", dto, user != null);
+    }
+
+    @Override
+    public void verifyForgotSms(ForgotResetDto dto) throws Exception {
+        ValidationUtil.requireValidMobileCN(dto.getPhone(), "手机号");
+        if (ValidationUtil.isBlank(dto.getSmsCode())) {
+            throw new Exception("请输入短信验证码");
+        }
+        User user = findByPhone(dto.getPhone());
+        if (user == null) {
+            throw new Exception("该手机号未绑定账号");
+        }
+        if (!forgotPasswordService.verifySmsCode("user", dto.getPhone(), dto.getSmsCode())) {
+            throw new Exception("短信验证码错误或已过期");
+        }
+    }
+
+    @Override
+    public void resetPasswordByPhone(ForgotResetDto dto) throws Exception {
+        forgotPasswordService.validateResetForm(dto);
+        User user = findByPhone(dto.getPhone());
+        if (user == null) {
+            throw new Exception("该手机号未绑定账号");
+        }
+        if (!forgotPasswordService.verifySmsCode("user", dto.getPhone(), dto.getSmsCode())) {
+            throw new Exception("短信验证码错误或已过期");
+        }
+        user.setPassword(bCryptPasswordEncoder.encode(dto.getNewPassword()));
+        user.setUpdateAt(DataTimeUtil.getNowTimeString());
+        userMapper.updateById(user);
+        forgotPasswordService.clearSmsCode("user", dto.getPhone());
+    }
+
     @Override
     public void deleteById(String id) {
         userMapper.deleteById(id);
