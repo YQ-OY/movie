@@ -1,17 +1,13 @@
 <template>
   <div class="film-list">
 
-    <!-- 搜索区 -->
+    <!-- 页面头部 -->
     <div class="page-header">
-      <div class="page-search-bar">
-        <div class="page-search-bar__title">
-          <div class="page-title">电影管理</div>
-          <div class="page-subtitle">支持按电影名称、电影类型、电影地区、上架状态筛选</div>
-        </div>
-
-        <div class="search-form">
-          <el-input v-model="searchForm.name" clearable placeholder="电影名称" class="search-item search-item--name" />
-          <!-- 多选 电影类型 -->
+      <div class="search-container">
+        <!-- 左侧：筛选条件 -->
+        <div class="search-filters">
+          <el-input v-model="searchForm.name" clearable placeholder="电影名称" class="search-item search-item--name"
+            @keyup.enter="handleSearch" />
           <el-select v-model="searchForm.type" clearable filterable placeholder="电影类型" multiple collapse-tags
             collapse-tags-tooltip class="search-item">
             <el-option label="爱情" value="爱情" />
@@ -34,8 +30,6 @@
             <el-option label="短片" value="短片" />
             <el-option label="其他" value="其他" />
           </el-select>
-
-          <!-- 多选 电影地区 -->
           <el-select v-model="searchForm.region" clearable filterable placeholder="电影地区" multiple collapse-tags
             collapse-tags-tooltip class="search-item">
             <el-option label="中国大陆" value="中国大陆" />
@@ -49,30 +43,46 @@
             <el-option label="印度" value="印度" />
             <el-option label="其他" value="其他" />
           </el-select>
-
-          <!-- 单选 上架状态 -->
           <el-select v-model="searchForm.status" clearable placeholder="上架状态" class="search-item">
             <el-option label="上架" :value="true" />
             <el-option label="下架" :value="false" />
           </el-select>
-          <el-button type="primary" class="search-submit-btn" @click="handleSearch">
-            <el-icon>
+        </div>
+
+        <!-- 右侧：操作按钮组 -->
+        <div class="search-actions">
+          <el-button type="primary" class="search-btn btn-primary btn-search" @click="handleSearch">
+            <el-icon class="btn-icon">
               <Search />
             </el-icon>
             <span>搜索</span>
           </el-button>
-          <el-button class="search-reset-btn" @click="handleResetSearch">
-            <el-icon>
+          <el-button class="search-btn btn-secondary btn-reset" @click="handleResetSearch">
+            <el-icon class="btn-icon">
               <Refresh />
             </el-icon>
             <span>重置</span>
+          </el-button>
+          <div class="btn-divider"></div>
+          <el-button type="primary" class="search-btn btn-primary btn-create" @click="openCreateDialog">
+            <el-icon class="btn-icon">
+              <Plus />
+            </el-icon>
+            <span>新增电影</span>
+          </el-button>
+          <el-button class="search-btn btn-secondary btn-export" @click="exportFilms">
+            <el-icon class="btn-icon">
+              <Download />
+            </el-icon>
+            <span>导出报表</span>
           </el-button>
         </div>
       </div>
     </div>
 
-    <!-- 编辑电影信息的对话框 -->
-    <el-dialog title="电影信息修改" v-model="dialog1" width="72%" align-center class="film-dialog film-dialog--edit">
+    <!-- 新增/编辑电影公用对话框 -->
+    <el-dialog :title="filmDialogMode === 'create' ? '新增电影' : '电影信息修改'" v-model="filmDialogVisible" width="72%"
+      align-center class="film-dialog film-dialog--edit">
 
       <el-form ref="form" class="film-dialog__form film-dialog__form--edit" :model="form" label-width="92px">
         <div class="film-edit-layout film-edit-layout--two-col">
@@ -138,13 +148,10 @@
               </el-form-item>
 
               <el-form-item label="电影类型" class="film-type-item">
-                <el-checkbox-group v-model="form.typeList" class="film-type-checkbox-group">
-                  <el-checkbox
-                    v-for="item in filmTypeOptions"
-                    :key="item"
-                    :label="item"
-                  />
-                </el-checkbox-group>
+                <el-select v-model="form.typeList" multiple collapse-tags collapse-tags-tooltip clearable filterable
+                  :max-collapse-tags="3" placeholder="请选择电影类型" class="full-width-input">
+                  <el-option v-for="item in filmTypeOptions" :key="item" :label="item" :value="item" />
+                </el-select>
               </el-form-item>
 
               <el-form-item label="内容简介" class="introduction-item introduction-item--right">
@@ -159,13 +166,13 @@
 
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="dialog1 = false">取 消</el-button>
-          <el-button type="primary" @click="submitUpdate()">确 定</el-button>
+          <el-button @click="filmDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitFilmForm()">确 定</el-button>
         </span>
       </template>
     </el-dialog>
 
-    <!-- 新增电影排片的对话框 -->
+    <!-- 新增排片的对话框 -->
     <el-dialog title="新增电影排片" v-model="dialog2" width="70%" align-center class="film-dialog film-dialog--arrange">
 
       <el-form ref="form" class="film-dialog__form film-dialog__form--arrange" :model="arrangement" label-width="92px">
@@ -275,7 +282,7 @@
       </template>
     </el-dialog>
 
-    <!-- 电影表格 -->
+    <!-- 主内容区 -->
     <div class="table-card">
 
       <!-- 电影表格 -->
@@ -286,8 +293,8 @@
         <el-table-column label="电影名称" min-width="380">
           <template #default="scope">
             <div class="film-cell">
-              <el-image class="film-cover" :src="scope.row.cover" fit="cover">
-              </el-image>
+              <el-image class="film-cover" :src="scope.row.cover" fit="cover" :preview-src-list="[scope.row.cover]"
+                :initial-index="0" preview-teleported />
               <div class="film-meta">
                 <div class="film-name">{{ scope.row.name }}</div>
                 <div class="film-subtitle" :title="formatFilmTypes(scope.row.type) + ' · ' + scope.row.region">
@@ -306,30 +313,13 @@
           </template>
         </el-table-column>
 
-        <el-table-column
-          label="类型"
-          prop="type"
-          min-width="160"
-          align="center"
-          class-name="film-type-column"
-        >
+        <el-table-column label="类型" prop="type" min-width="160" align="center" class-name="film-type-column">
           <template #default="scope">
-            <el-tooltip
-              v-if="splitFilmTypes(scope.row.type).length"
-              :content="formatFilmTypes(scope.row.type, ', ')"
-              placement="top"
-              effect="dark"
-              :disabled="!hasMoreFilmTypes(scope.row.type)"
-            >
+            <el-tooltip v-if="splitFilmTypes(scope.row.type).length" :content="formatFilmTypes(scope.row.type, ', ')"
+              placement="top" effect="dark" :disabled="!hasMoreFilmTypes(scope.row.type)">
               <div class="film-type-tags">
-                <el-tag
-                  v-for="item in displayFilmTypes(scope.row.type)"
-                  :key="item"
-                  class="table-chip table-chip--type"
-                  :style="getTypeTagStyle(item)"
-                  effect="light"
-                  :disable-transitions="true"
-                >
+                <el-tag v-for="item in displayFilmTypes(scope.row.type)" :key="item" class="table-chip table-chip--type"
+                  :style="getTypeTagStyle(item)" effect="light" :disable-transitions="true">
                   {{ item }}
                 </el-tag>
                 <span v-if="hasMoreFilmTypes(scope.row.type)" class="film-type-tags__more">...</span>
@@ -405,14 +395,15 @@
 </template>
 
 <script>
-import { listFilmPage, DeleteById, UpdateFilm, AddArrangement } from "@/api/film";
+import { listFilmPage, DeleteById, AddFilm, UpdateFilm, AddArrangement } from "@/api/film";
 import config from "@/config";
+import { downloadCsv } from '@/utils/exportCsv' // 新增：导入导出工具
 import { computeEndTimeHms } from "@/utils/arrangementEnd";
 import { FILM_TYPE_OPTIONS, splitFilmTypes, joinFilmTypes, formatFilmTypes } from '@/utils/filmType'
-import { Upload, Edit, CirclePlus, Delete, WarningFilled, Search, Refresh } from '@element-plus/icons-vue'
+import { Upload, Edit, CirclePlus, Delete, WarningFilled, Search, Refresh, Download } from '@element-plus/icons-vue'
 
 export default {
-  components: { Upload, Edit, CirclePlus, Delete, WarningFilled, Search, Refresh },
+  components: { Upload, Edit, CirclePlus, Delete, WarningFilled, Search, Refresh, Download },
   data() {
     return {
       header: {
@@ -432,7 +423,8 @@ export default {
         status: '',         // 注意后端需要接收 boolean 或 null
       },
       form: {
-        cover: 'null',
+        id: null,
+        cover: '',
         name: '',
         region: '',
         releaseTime: '',
@@ -443,6 +435,8 @@ export default {
       },
       coverPreview: '',
       filmTypeOptions: FILM_TYPE_OPTIONS,
+      filmDialogMode: 'create',
+      filmDialogVisible: false,
       arrangement: {
         name: '',
         fid: '',
@@ -455,7 +449,6 @@ export default {
         type: '2D放映',
         filmDuration: 120,
       },
-      dialog1: false,
       dialog2: false,
       dialogDelete: false,
       deleteTarget: {
@@ -597,6 +590,57 @@ export default {
       this.loadFilmList()
     },
 
+    openCreateDialog() {
+      this.filmDialogMode = 'create'
+      this.coverPreview = ''
+      this.url = ''
+      this.form = {
+        id: null,
+        cover: '',
+        name: '',
+        region: '',
+        releaseTime: '',
+        duration: 120,
+        introduction: '',
+        typeList: [],
+        status: true,
+      }
+      this.filmDialogVisible = true
+    },
+
+    submitFilmForm() {
+      return this.filmDialogMode === 'create' ? this.submitCreate() : this.submitUpdate()
+    },
+
+    async submitCreate() {
+      if (!this.form.name) {
+        this.$message.warning('请填写电影名称')
+        return
+      }
+      if (!this.form.region) {
+        this.$message.warning('请选择上映地区')
+        return
+      }
+      if (!this.form.typeList.length) {
+        this.$message.warning('请至少选择一个电影类型')
+        return
+      }
+      this.form.cover = this.url || this.form.cover
+      const payload = {
+        ...this.form,
+        type: joinFilmTypes(this.form.typeList),
+      }
+      try {
+        const res = await AddFilm(payload)
+        if (!res?.success) return
+        this.filmDialogVisible = false
+        this.$message.success('电影添加成功')
+        this.loadFilmList()
+      } catch (error) {
+        console.error('新增电影失败', error)
+      }
+    },
+
     // 提交修改（更新后重新加载当前页）
     async submitUpdate() {
       if (!this.form.typeList.length) {
@@ -611,7 +655,7 @@ export default {
       try {
         const res = await UpdateFilm(payload)
         if (!res?.success) return
-        this.dialog1 = false
+        this.filmDialogVisible = false
         this.$message.success('修改成功')
         this.loadFilmList()
       } catch (error) {
@@ -635,9 +679,11 @@ export default {
     },
 
     handleEdit(index, row) {
-      this.dialog1 = true
+      this.filmDialogMode = 'edit'
+      this.filmDialogVisible = true
       this.form = {
         ...row,
+        id: row.id,
         typeList: splitFilmTypes(row.type),
       }
       this.url = row.cover || ''
@@ -737,6 +783,24 @@ export default {
         this.arrangement.endTime = ''
       }
     },
+    // 导出电影报表（完全参考订单页面的实现规范）
+    exportFilms() {
+      const rows = (this.filmList || []).map((item) => ([
+        item.id ?? '—',
+        item.name ?? '—',
+        this.formatFilmTypes(item.type) ?? '—',
+        item.region ?? '—',
+        item.duration ?? '—',
+        item.releaseTime ?? '—',
+        item.status === true ? '上架' : item.status === false ? '下架' : '—',
+      ]))
+
+      downloadCsv(
+        `电影列表_${new Date().toISOString().slice(0, 10)}.csv`,
+        ['电影ID', '电影名称', '电影类型', '上映地区', '时长(分钟)', '上映时间', '上架状态'],
+        rows
+      )
+    },
   },
 }
 </script>
@@ -756,37 +820,92 @@ export default {
 }
 
 .page-header {
-  margin-bottom: 16px;
-  padding: 20px 22px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
 }
 
 .page-search-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.search-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
-.page-search-bar__title {
-  min-width: 220px;
+.search-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
-.page-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: 0.2px;
+.search-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
-.page-subtitle {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #64748b;
+.btn-divider {
+  width: 1px;
+  height: 32px;
+  background-color: #e2e8f0;
+  margin: 0 4px;
+}
+
+/* 原有 .search-item 样式保留，可微调宽度 */
+.search-item {
+  width: 160px;
+  /* height: 40px; */
+}
+
+.search-item--name {
+  width: 220px;
+}
+
+/* 输入框和选择框样式优化 */
+:deep(.el-input__wrapper),
+:deep(.el-select__wrapper) {
+  border-radius: 8px;
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+:deep(.el-input__wrapper:hover),
+:deep(.el-select__wrapper:hover) {
+  border-color: #93c5fd;
+}
+
+:deep(.el-input__wrapper.is-focus),
+:deep(.el-select__wrapper.is-focus) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+}
+
+/* 重置按钮样式微调 */
+.reset-btn {
+  background: #ffffff;
+  border-color: #d9d9d9;
+  color: #606266;
+}
+
+.reset-btn:hover {
+  background: #f8fafc;
+  border-color: #c0c4cc;
 }
 
 .search-form {
@@ -795,7 +914,7 @@ export default {
   gap: 10px;
   flex-wrap: wrap;
   flex: 1;
-  justify-content: flex-end;
+  /* justify-content: flex-end; */
 }
 
 .search-item {
@@ -804,15 +923,6 @@ export default {
 
 .search-item--name {
   width: 220px;
-}
-
-.search-submit-btn,
-.search-reset-btn {
-  border-radius: 6px;
-}
-
-.page-header {
-  flex: 0 0 auto;
 }
 
 .table-card {
@@ -894,6 +1004,7 @@ export default {
   padding: 8px 0;
 }
 
+/* 找到原有的.film-cover样式，添加以下内容 */
 .film-cover {
   width: 60px;
   height: 84px;
@@ -902,6 +1013,18 @@ export default {
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
   flex-shrink: 0;
   background: #f1f5f9;
+  cursor: pointer;
+  /* 鼠标悬浮时显示手型 */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* 平滑过渡动画 */
+}
+
+/* 新增悬浮效果 */
+.film-cover:hover {
+  transform: scale(1.08);
+  /* 放大8% */
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
+  /* 加深阴影 */
 }
 
 .film-meta {
@@ -1727,5 +1850,101 @@ export default {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.search-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* 按钮分隔线 */
+.btn-divider {
+  width: 1px;
+  height: 32px;
+  background-color: #e2e8f0;
+  margin: 0 4px;
+}
+
+/* 基础按钮样式 */
+.search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 35px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  box-shadow: none;
+}
+
+/* 按钮图标样式 */
+.btn-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* 主要按钮样式 */
+.btn-primary {
+  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.25);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #337ecc 0%, #409eff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.35);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(64, 158, 255, 0.3);
+}
+
+/* 次要按钮样式 */
+.btn-secondary {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* 搜索按钮特殊样式 */
+.btn-search {
+  padding: 0 22px;
+}
+
+/* 新增按钮特殊样式 - 更突出 */
+.btn-create {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.btn-create:hover {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+/* 导出按钮特殊样式 */
+.btn-export {
+  padding: 0 16px;
 }
 </style>

@@ -1,78 +1,109 @@
 <template>
   <div class="login">
-    <div class="login-form">
-      <div class="login-form-header">
-        <img style="width: 75px; height: 75px;float: left;padding-right: 30px;" src="../assets/img/logo.png" alt="" />
-        <div class="login-form-text">厅有独钟 - 后台管理</div>
+    <div class="login-background">
+      <div class="login-background__circle login-background__circle--1"></div>
+      <div class="login-background__circle login-background__circle--2"></div>
+      <div class="login-background__circle login-background__circle--3"></div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-card__header">
+        <img class="login-logo" src="../assets/img/logo.png" alt="厅有独钟" />
+        <div class="login-title">厅有独钟</div>
+        <div class="login-subtitle">找回密码</div>
       </div>
 
-      <div class="forgot-body">
-        <p class="forgot-title">找回密码</p>
-        <p class="forgot-sub">{{ step === 1 ? '验证手机号与验证码' : '设置新的登录密码' }}</p>
-
-        <el-steps :active="step - 1" finish-status="finish" align-center class="forgot-steps">
+      <div class="login-card__body">
+        <el-steps :active="step - 1" finish-status="success" align-center class="forgot-steps">
           <el-step title="身份验证" />
           <el-step title="重置密码" />
         </el-steps>
 
-        <!-- 第一步 -->
-        <div v-show="step === 1">
-          <p class="field-label">账号身份</p>
-          <el-select style="width: 100%" class="login-form-input" v-model="role" placeholder="请选择账号身份">
-            <el-option label="系统管理员" value="admin" />
-            <el-option label="工作人员" value="worker" />
-          </el-select>
+        <!-- 第一步：身份验证 -->
+        <div v-show="step === 1" class="step-content">
+          <el-form :model="form" :rules="step1Rules" ref="step1FormRef">
+            <el-form-item prop="role">
+              <el-select v-model="form.role" placeholder="请选择账号身份" size="large" style="width: 100%">
+                <el-option label="系统管理员" value="admin" />
+                <el-option label="工作人员" value="worker" />
+              </el-select>
+            </el-form-item>
 
-          <p class="field-label">手机号</p>
-          <el-input class="login-form-input" v-model="phone" placeholder="请输入11位手机号" maxlength="11" />
+            <el-form-item prop="phone">
+              <el-input v-model="form.phone" placeholder="请输入11位手机号" maxlength="11" prefix-icon="Phone" size="large" />
+            </el-form-item>
 
-          <p class="field-label">图形验证码</p>
-          <div class="captcha-row">
-            <div class="captcha-img-wrap" @click="refreshCaptcha" title="点击刷新">
-              <div v-if="captchaSvg" class="captcha-svg" v-html="captchaSvg" />
-              <span v-else class="captcha-loading">加载中…</span>
-            </div>
-            <el-button class="btn-soft" @click="refreshCaptcha" :disabled="captchaLoading">
-              <el-icon><Refresh /></el-icon>
-            </el-button>
-            <el-input v-model="captchaInput" class="login-form-input captcha-input" placeholder="请输入图中数字" maxlength="4" />
-          </div>
+            <el-form-item prop="captchaInput">
+              <div class="input-row">
+                <el-input v-model="form.captchaInput" placeholder="请输入图中数字" maxlength="4" prefix-icon="Picture"
+                  size="large" class="flex-1" />
+                <div class="captcha-box" @click="refreshCaptcha" title="点击刷新验证码"
+                  :class="{ 'captcha-box--loading': captchaLoading }">
+                  <div v-if="captchaSvg" class="captcha-svg" v-html="captchaSvg"></div>
+                  <span v-else class="captcha-loading">加载中</span>
+                </div>
+                <el-button class="refresh-btn" @click="refreshCaptcha" :disabled="captchaLoading" circle>
+                  <el-icon>
+                    <Refresh />
+                  </el-icon>
+                </el-button>
+              </div>
+            </el-form-item>
 
-          <p class="field-label">短信验证码</p>
-          <div class="sms-row">
-            <el-input class="login-form-input" v-model="smsCode" placeholder="请输入短信验证码" maxlength="6" />
-            <el-button class="btn-soft sms-btn" :disabled="smsCountdown > 0 || sendingCode" :loading="sendingCode" @click="handleSendCode">
-              {{ smsCountdown > 0 ? `${smsCountdown}秒后重发` : '获取验证码' }}
-            </el-button>
-          </div>
+            <el-form-item prop="smsCode">
+              <div class="input-row">
+                <el-input v-model="form.smsCode" placeholder="请输入短信验证码" maxlength="6" prefix-icon="Message" size="large"
+                  class="flex-1" />
+                <el-button class="sms-btn" :disabled="smsCountdown > 0 || sendingCode" :loading="sendingCode"
+                  @click="handleSendCode">
+                  {{ smsCountdown > 0 ? `${smsCountdown}s` : '获取验证码' }}
+                </el-button>
+              </div>
+            </el-form-item>
+          </el-form>
 
-          <el-alert v-if="demoHintVisible" type="info" :closable="false" show-icon title="演示环境短信验证码为 123456" class="demo-alert" />
+          <el-alert v-if="demoHintVisible" type="info" :closable="false" show-icon title="演示环境短信验证码为 123456"
+            class="demo-alert" />
 
-          <el-button :loading="verifying" @click="goToStep2" class="login-form-button" type="primary">下一步</el-button>
+          <el-button type="primary" size="large" class="submit-btn" :loading="verifying" @click="goToStep2">
+            下一步
+          </el-button>
         </div>
 
-        <!-- 第二步 -->
-        <div v-show="step === 2">
-          <div class="verified-phone">
-            <el-icon><CircleCheck /></el-icon>
+        <!-- 第二步：重置密码 -->
+        <div v-show="step === 2" class="step-content">
+          <div class="verified-badge">
+            <el-icon class="verified-icon">
+              <CircleCheck />
+            </el-icon>
             <span>已验证手机号 {{ maskedPhone }}</span>
           </div>
 
-          <p class="field-label">新密码</p>
-          <el-input class="login-form-input" v-model="newPassword" type="password" placeholder="至少6位" show-password />
+          <el-form :model="form" :rules="step2Rules" ref="step2FormRef">
+            <el-form-item prop="newPassword">
+              <el-input v-model="form.newPassword" type="password" placeholder="请输入新密码（至少6位）" show-password
+                prefix-icon="Lock" size="large" />
+            </el-form-item>
 
-          <p class="field-label">确认密码</p>
-          <el-input class="login-form-input" v-model="confirmPassword" type="password" placeholder="再次输入新密码" show-password @keyup.enter="submitReset" />
+            <el-form-item prop="confirmPassword">
+              <el-input v-model="form.confirmPassword" type="password" placeholder="请再次输入新密码" show-password
+                prefix-icon="Lock" size="large" @keyup.enter="submitReset" />
+            </el-form-item>
+          </el-form>
 
-          <div class="step2-actions">
-            <el-button class="btn-soft step2-back" @click="backToStep1">上一步</el-button>
-            <el-button :loading="submitting" @click="submitReset" class="login-form-button step2-submit" type="primary">重置密码</el-button>
+          <div class="button-group">
+            <el-button class="back-btn" size="large" @click="backToStep1">
+              上一步
+            </el-button>
+            <el-button type="primary" size="large" class="submit-btn" :loading="submitting" @click="submitReset">
+              重置密码
+            </el-button>
           </div>
         </div>
       </div>
 
-      <div class="login-form-footer">
-        <router-link class="back-link" to="/login">返回登录</router-link>
+      <div class="login-card__footer">
+        <router-link class="back-link" to="/login">返回登录页</router-link>
       </div>
     </div>
   </div>
@@ -81,30 +112,94 @@
 <script>
 import { getForgotCaptcha, sendForgotCode, verifyForgotSms, resetPasswordByPhone } from "@/api/user"
 import { isValidMobileCN } from "@/utils/validate"
-import { Refresh, CircleCheck } from "@element-plus/icons-vue"
+import { Refresh, CircleCheck, Phone, Message, Lock, Picture } from "@element-plus/icons-vue"
 
 export default {
-  components: { Refresh, CircleCheck },
+  components: { Refresh, CircleCheck, Phone, Message, Lock, Picture },
   data() {
+    const validatePhone = (rule, value, callback) => {
+      if (!isValidMobileCN(value)) {
+        callback(new Error('请输入11位有效中国大陆手机号'))
+      } else {
+        callback()
+      }
+    }
+
+    const validateCaptcha = (rule, value, callback) => {
+      if (!/^\d{4}$/.test(value)) {
+        callback(new Error('请输入4位数字验证码'))
+      } else {
+        callback()
+      }
+    }
+
+    const validateSmsCode = (rule, value, callback) => {
+      if (!/^\d{6}$/.test(value)) {
+        callback(new Error('请输入6位数字验证码'))
+      } else {
+        callback()
+      }
+    }
+
+    const validatePassword = (rule, value, callback) => {
+      if (!value || value.length < 6) {
+        callback(new Error('密码长度不能少于6位'))
+      } else {
+        callback()
+      }
+    }
+
+    const validateConfirmPassword = (rule, value, callback) => {
+      if (value !== this.form.newPassword) {
+        callback(new Error('两次输入的密码不一致'))
+      } else {
+        callback()
+      }
+    }
+
     return {
       step: 1,
-      role: "admin",
-      phone: "",
-      maskedPhone: "",
-      captchaKey: "",
-      captchaSvg: "",
-      captchaInput: "",
+      form: {
+        role: 'admin',
+        phone: '',
+        captchaInput: '',
+        smsCode: '',
+        newPassword: '',
+        confirmPassword: ''
+      },
+      step1Rules: {
+        role: [
+          { required: true, message: '请选择账号身份', trigger: 'change' }
+        ],
+        phone: [
+          { required: true, validator: validatePhone, trigger: 'blur' }
+        ],
+        captchaInput: [
+          { required: true, validator: validateCaptcha, trigger: 'blur' }
+        ],
+        smsCode: [
+          { required: true, validator: validateSmsCode, trigger: 'blur' }
+        ]
+      },
+      step2Rules: {
+        newPassword: [
+          { required: true, validator: validatePassword, trigger: 'blur' }
+        ],
+        confirmPassword: [
+          { required: true, validator: validateConfirmPassword, trigger: 'blur' }
+        ]
+      },
+      maskedPhone: '',
+      captchaKey: '',
+      captchaSvg: '',
       captchaLoading: false,
-      smsCode: "",
-      newPassword: "",
-      confirmPassword: "",
       sendingCode: false,
       verifying: false,
       submitting: false,
       smsCountdown: 0,
       demoHintVisible: false,
       smsSent: false,
-      countdownTimer: null,
+      countdownTimer: null
     }
   },
   mounted() {
@@ -114,9 +209,9 @@ export default {
     if (this.countdownTimer) clearInterval(this.countdownTimer)
   },
   watch: {
-    role() {
+    'form.role'() {
       this.refreshCaptcha()
-    },
+    }
   },
   methods: {
     maskPhone(phone) {
@@ -125,11 +220,11 @@ export default {
       return `${p.slice(0, 3)}****${p.slice(-4)}`
     },
     async refreshCaptcha() {
-      if (!this.role) return
+      if (!this.form.role) return
       this.captchaLoading = true
-      this.captchaInput = ""
+      this.form.captchaInput = ""
       try {
-        const res = await getForgotCaptcha(this.role)
+        const res = await getForgotCaptcha(this.form.role)
         if (res?.success && res.data) {
           this.captchaKey = res.data.captchaKey
           this.captchaSvg = res.data.captchaSvg
@@ -152,30 +247,23 @@ export default {
       }, 1000)
     },
     async handleSendCode() {
-      if (!this.role) {
-        this.$message.warning("请选择账号身份")
-        return
-      }
-      if (!isValidMobileCN(this.phone)) {
-        this.$message.warning("请输入11位有效中国大陆手机号")
-        return
-      }
-      if (!/^\d{4}$/.test(this.captchaInput)) {
-        this.$message.warning("请输入图中4位数字")
-        return
-      }
+      // 先验证表单
+      const valid = await this.$refs.step1FormRef.validateField(['role', 'phone', 'captchaInput'])
+      if (!valid) return
+
       this.sendingCode = true
       try {
-        const res = await sendForgotCode(this.role, {
-          phone: this.phone.trim(),
+        const res = await sendForgotCode(this.form.role, {
+          phone: this.form.phone.trim(),
           captchaKey: this.captchaKey,
-          captchaInput: this.captchaInput,
+          captchaInput: this.form.captchaInput,
         })
         if (res?.success) {
           this.demoHintVisible = true
           this.smsSent = true
-          this.maskedPhone = res.data?.maskedPhone || this.maskPhone(this.phone)
+          this.maskedPhone = res.data?.maskedPhone || this.maskPhone(this.form.phone)
           this.startCountdown()
+          this.$message.success('验证码已发送')
         } else if (res?.msg?.includes("图形验证码")) {
           await this.refreshCaptcha()
         }
@@ -186,30 +274,23 @@ export default {
       }
     },
     async goToStep2() {
-      if (!this.role) {
-        this.$message.warning("请选择账号身份")
-        return
-      }
-      if (!isValidMobileCN(this.phone)) {
-        this.$message.warning("请输入11位有效中国大陆手机号")
-        return
-      }
+      // 先验证表单
+      const valid = await this.$refs.step1FormRef.validate()
+      if (!valid) return
+
       if (!this.smsSent) {
         this.$message.warning("请先点击「获取验证码」")
         return
       }
-      if (!this.smsCode?.trim()) {
-        this.$message.warning("请输入短信验证码")
-        return
-      }
+
       this.verifying = true
       try {
-        const res = await verifyForgotSms(this.role, {
-          phone: this.phone.trim(),
-          smsCode: this.smsCode.trim(),
+        const res = await verifyForgotSms(this.form.role, {
+          phone: this.form.phone.trim(),
+          smsCode: this.form.smsCode.trim(),
         })
         if (res?.success) {
-          this.maskedPhone = this.maskedPhone || this.maskPhone(this.phone)
+          this.maskedPhone = this.maskedPhone || this.maskPhone(this.form.phone)
           this.step = 2
         }
       } finally {
@@ -218,129 +299,173 @@ export default {
     },
     backToStep1() {
       this.step = 1
-      this.newPassword = ""
-      this.confirmPassword = ""
+      this.form.newPassword = ""
+      this.form.confirmPassword = ""
+      this.$refs.step2FormRef?.resetFields()
     },
-    submitReset() {
-      if (!this.newPassword || this.newPassword.length < 6) {
-        this.$message.warning("新密码不能少于6位")
-        return
-      }
-      if (this.newPassword !== this.confirmPassword) {
-        this.$message.warning("两次输入的密码不一致")
-        return
-      }
+    async submitReset() {
+      // 先验证表单
+      const valid = await this.$refs.step2FormRef.validate()
+      if (!valid) return
+
       this.submitting = true
-      resetPasswordByPhone(this.role, {
-        phone: this.phone.trim(),
-        smsCode: this.smsCode.trim(),
-        newPassword: this.newPassword,
-      })
-        .then((res) => {
-          if (res?.success) {
-            this.$router.push("/login")
-          }
+      try {
+        const res = await resetPasswordByPhone(this.form.role, {
+          phone: this.form.phone.trim(),
+          smsCode: this.form.smsCode.trim(),
+          newPassword: this.form.newPassword,
         })
-        .finally(() => {
-          this.submitting = false
-        })
-    },
-  },
+        if (res?.success) {
+          this.$message.success('密码重置成功，请使用新密码登录')
+          this.$router.push("/login")
+        }
+      } finally {
+        this.submitting = false
+      }
+    }
+  }
 }
 </script>
 
 <style scoped>
+/* 登录页面背景（与登录页完全一致） */
 .login {
-  width: 100%;
-  height: 100%;
-  background: #FFFFFF;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+  position: relative;
 }
 
-.login-form {
-  width: 520px;
+.login-background {
   position: absolute;
-  left: 50%;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.login-background__circle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(64, 158, 255, 0.1), rgba(99, 102, 241, 0.05));
+  animation: float 20s ease-in-out infinite;
+}
+
+.login-background__circle--1 {
+  width: 600px;
+  height: 600px;
+  top: -200px;
+  right: -200px;
+  animation-delay: 0s;
+}
+
+.login-background__circle--2 {
+  width: 400px;
+  height: 400px;
+  bottom: -100px;
+  left: -100px;
+  animation-delay: -5s;
+}
+
+.login-background__circle--3 {
+  width: 300px;
+  height: 300px;
   top: 50%;
+  left: 20%;
+  animation-delay: -10s;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-30px) rotate(10deg);
+  }
+}
+
+/* 登录卡片（与登录页完全一致） */
+.login-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
+  width: 480px;
+  padding: 40px 50px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  animation: cardEnter 0.6s ease-out;
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* 卡片头部（与登录页完全一致） */
+.login-card__header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+  animation: logoBounce 2s ease-in-out infinite;
+}
+
+@keyframes logoBounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.login-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+  letter-spacing: 2px;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  color: #64748b;
   letter-spacing: 1px;
 }
 
-.login-form-header {
-  height: 20px;
-  padding-left: 40px;
-  padding-bottom: 72px;
+/* 卡片主体 */
+.login-card__body {
+  margin-bottom: 24px;
 }
 
-.login-form-text {
-  color: #000000;
-  font-weight: bold;
-  font-size: 30px;
-  padding-top: 15px;
+.step-content {
+  transition: all 0.3s ease;
 }
 
-.forgot-body {
-  color: #91949c;
-  font-weight: bolder;
-}
-
-.forgot-title {
-  margin: 0 0 6px;
-  color: #303133;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.forgot-sub {
-  margin: 0 0 16px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #909399;
-}
-
-.field-label {
-  margin: 12px 0 6px;
-  font-size: 14px;
-  color: #606266;
-  font-weight: 600;
-}
-
-.login-form-input {
-  margin-bottom: 4px;
-}
-
-.login-form-button {
-  border-radius: 3px;
-  width: 100%;
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: 2px;
-  height: 52px;
-  background: #5a84fd;
-  box-shadow: 0 5px 30px rgb(0 66 8.5%);
-  margin-top: 16px;
-  border: none;
-}
-
-.login-form-footer {
-  font-weight: bolder;
-  color: #91949c;
-  padding-top: 20px;
-  text-align: center;
-}
-
-.back-link {
-  color: #5a84fd;
-  font-size: 14px;
-  text-decoration: none;
-}
-
-:deep(.el-input__inner) {
-  height: 48px;
-}
-
+/* 步骤条样式 */
 .forgot-steps {
-  margin-bottom: 20px;
-  --el-color-primary: #5a84fd;
+  margin-bottom: 32px;
 }
 
 .forgot-steps :deep(.el-step__title) {
@@ -348,138 +473,255 @@ export default {
   font-weight: 600;
 }
 
-.forgot-steps :deep(.el-step__head.is-wait .el-step__icon),
-.forgot-steps :deep(.el-step__head.is-wait .el-step__icon.is-text) {
-  background: #f0f2f5 !important;
-  border-color: #dcdfe6 !important;
-  color: #909399 !important;
+/* 输入框样式（与登录页完全一致） */
+.login-card__body :deep(.el-input__wrapper) {
+  height: 52px;
+  border-radius: 12px;
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
 }
 
-.forgot-steps :deep(.el-step__head.is-wait .el-step__icon-inner) {
-  color: #909399 !important;
+.login-card__body :deep(.el-input__wrapper:hover) {
+  border-color: #93c5fd;
 }
 
-.forgot-steps :deep(.el-step__title.is-wait) {
-  color: #909399;
+.login-card__body :deep(.el-input__wrapper.is-focus) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
 }
 
-.forgot-steps :deep(.el-step__head.is-process .el-step__icon),
-.forgot-steps :deep(.el-step__head.is-process .el-step__icon.is-text),
-.forgot-steps :deep(.el-step__head.is-finish .el-step__icon),
-.forgot-steps :deep(.el-step__head.is-finish .el-step__icon.is-text) {
-  background: #5a84fd !important;
-  border-color: #5a84fd !important;
-  color: #fff !important;
+.login-card__body :deep(.el-input__inner) {
+  font-size: 15px;
+  padding-left: 8px;
 }
 
-.forgot-steps :deep(.el-step__head.is-process .el-step__icon-inner),
-.forgot-steps :deep(.el-step__head.is-finish .el-step__icon-inner) {
-  color: #fff !important;
+.login-card__body :deep(.el-select__wrapper) {
+  height: 52px;
+  border-radius: 12px;
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
 }
 
-.forgot-steps :deep(.el-step__title.is-process),
-.forgot-steps :deep(.el-step__title.is-finish) {
-  color: #5a84fd;
-  font-weight: 700;
+.login-card__body :deep(.el-select__wrapper:hover) {
+  border-color: #93c5fd;
 }
 
-.forgot-steps :deep(.el-step__head.is-finish .el-step__line) {
-  background-color: #5a84fd;
+.login-card__body :deep(.el-select__wrapper.is-focus) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
 }
 
-.btn-soft {
-  background-color: #f0f2f5 !important;
-  border: 1px solid #dcdfe6 !important;
-  color: #606266 !important;
-  font-weight: 600;
-}
-
-.btn-soft:hover:not(:disabled) {
-  background-color: #e8eaed !important;
-  border-color: #c0c4cc !important;
-  color: #303133 !important;
-}
-
-.captcha-row,
-.sms-row {
+/* 输入行布局 */
+.input-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 12px;
 }
 
-.captcha-img-wrap {
+.flex-1 {
+  flex: 1;
+}
+
+/* 验证码区域 */
+.captcha-box {
   width: 120px;
-  height: 40px;
-  border-radius: 4px;
+  height: 52px;
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  border: 1px solid #dcdfe6;
-  background: #f5f7fa;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.captcha-box:hover {
+  border-color: #93c5fd;
+}
+
+.captcha-box--loading {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .captcha-svg :deep(svg) {
   display: block;
   width: 120px;
-  height: 40px;
+  height: 52px;
 }
 
 .captcha-loading {
   font-size: 12px;
-  color: #909399;
+  color: #94a3b8;
 }
 
-.captcha-input {
-  flex: 1;
-  margin-bottom: 0 !important;
-}
-
-.sms-row .login-form-input {
-  flex: 1;
-  margin-bottom: 0 !important;
-}
-
-.sms-btn {
+.refresh-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
   flex-shrink: 0;
-  height: 48px;
-  white-space: nowrap;
+  transition: all 0.3s ease;
 }
 
+.refresh-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #409eff;
+}
+
+/* 短信验证码按钮 */
+.sms-btn {
+  width: 120px;
+  height: 52px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-weight: 500;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.sms-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #409eff;
+}
+
+.sms-btn:disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+}
+
+/* 演示提示 */
 .demo-alert {
-  margin: 10px 0;
+  margin: 16px 0;
+  border-radius: 12px;
 }
 
-.verified-phone {
+/* 验证成功提示 */
+.verified-badge {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 14px;
-  margin-bottom: 12px;
-  border-radius: 6px;
-  background: rgba(90, 132, 253, 0.08);
-  border: 1px solid rgba(90, 132, 253, 0.2);
-  color: #5a84fd;
-  font-size: 13px;
-  font-weight: 600;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #059669;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.step2-actions {
+.verified-icon {
+  font-size: 18px;
+}
+
+/* 按钮组 */
+.button-group {
   display: flex;
   gap: 12px;
-  margin-top: 16px;
 }
 
-.step2-back {
-  flex: 0 0 100px;
+.back-btn {
+  flex: 0 0 120px;
   height: 52px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-.step2-submit {
+.back-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+/* 提交按钮（与登录页完全一致） */
+.submit-btn {
   flex: 1;
-  margin-top: 0 !important;
+  height: 52px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  box-shadow: 0 8px 24px rgba(64, 158, 255, 0.3);
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(64, 158, 255, 0.4);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
+/* 卡片底部 */
+.login-card__footer {
+  text-align: center;
+}
+
+.back-link {
+  color: #409eff;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: #337ecc;
+}
+
+/* 响应式适配 */
+@media (max-width: 576px) {
+  .login-card {
+    width: 90%;
+    padding: 30px 24px;
+  }
+
+  .login-title {
+    font-size: 24px;
+  }
+
+  .login-subtitle {
+    font-size: 13px;
+  }
+
+  .input-row {
+    flex-wrap: wrap;
+  }
+
+  .captcha-box,
+  .refresh-btn,
+  .sms-btn {
+    width: calc(50% - 6px);
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .back-btn {
+    flex: none;
+    width: 100%;
+  }
 }
 </style>

@@ -24,20 +24,27 @@
       <div class="header-right">
         <el-dropdown trigger="click" placement="bottom-end">
           <button class="header-icon icon-button" type="button" aria-label="通知">
-            <span class="iconfont icon-tongzhi header-iconfont"></span>
+            <el-icon :size="20">
+              <Bell />
+            </el-icon>
             <el-badge is-dot class="badge-dot" />
           </button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item v-for="item in list" :key="item.id || item.content">{{ item.content
-              }}</el-dropdown-item>
-              <el-dropdown-item v-if="!list || list.length === 0">今日工作还没有上传</el-dropdown-item>
+              <el-dropdown-item v-for="item in list" :key="item.id || item.content">
+                {{ item.content }}
+              </el-dropdown-item>
+              <el-dropdown-item v-if="!list || list.length === 0">
+                今日工作还没有上传
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
         <el-tooltip content="厅有独钟 - 管理系统" placement="bottom">
           <button class="header-icon icon-button" type="button" aria-label="系统提醒">
-            <span class="iconfont icon-zhuyi header-iconfont"></span>
+            <el-icon :size="20">
+              <InfoFilled />
+            </el-icon>
           </button>
         </el-tooltip>
         <button class="avatar-trigger" type="button" aria-label="打开个人信息" @click="drawerVisible = true">
@@ -47,7 +54,7 @@
     </div>
 
     <el-drawer v-model="drawerVisible" direction="rtl" size="530px" :with-header="false" class="profile-drawer"
-      :class-name="'my-drawer'">
+      :close-on-click-modal="true">
       <div class="drawer-content">
         <div class="drawer-main">
           <div class="drawer-header">
@@ -80,37 +87,22 @@
 
             <template v-if="settingSubTab === 'profile'">
               <el-form :model="workerInfo" label-width="48px" class="drawer-form drawer-form--panel">
-                <el-form-item>
-                  <template #label>
-                    <i class="iconfont icon-yonghu" />
-                  </template>
+                <el-form-item label="用户名">
                   <el-input v-model="workerInfo.username" disabled placeholder="用户名" />
                 </el-form-item>
-                <el-form-item>
-                  <template #label>
-                    <i class="iconfont icon-nicheng drawer-icon-nickname" />
-                  </template>
+                <el-form-item label="昵称">
                   <el-input v-model="workerInfo.nickname" placeholder="请输入昵称" />
                 </el-form-item>
-                <el-form-item>
-                  <template #label>
-                    <i class="iconfont icon-shoujihao" />
-                  </template>
+                <el-form-item label="手机号">
                   <el-input v-model="workerInfo.phone" placeholder="请输入手机号" maxlength="11" />
                 </el-form-item>
-                <el-form-item>
-                  <template #label>
-                    <i class="iconfont icon-xingbie" />
-                  </template>
+                <el-form-item label="性别">
                   <el-select v-model="workerInfo.gender" placeholder="请选择性别" style="width: 100%">
                     <el-option label="男" value="男" />
                     <el-option label="女" value="女" />
                   </el-select>
                 </el-form-item>
-                <el-form-item>
-                  <template #label>
-                    <i class="iconfont icon-yuangongguanli" />
-                  </template>
+                <el-form-item label="部门">
                   <el-select v-model="workerInfo.department" placeholder="请选择部门" style="width: 100%">
                     <el-option label="客服部" value="客服部" />
                     <el-option label="运营部" value="运营部" />
@@ -122,99 +114,79 @@
                 </el-form-item>
               </el-form>
               <div class="drawer-actions drawer-actions--panel">
-                <el-button type="primary" class="drawer-save-button" @click="saveProfile">保存资料</el-button>
-                <el-button class="drawer-logout-button" @click="handleLogout">退出登录</el-button>
+                <el-button type="primary" class="drawer-save-button" @click="saveProfile">
+                  保存资料
+                </el-button>
+                <el-button class="drawer-logout-button" @click="handleLogout">
+                  退出登录
+                </el-button>
               </div>
             </template>
 
             <template v-else>
               <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef" label-width="48px"
                 class="drawer-form drawer-form--panel password-form" autocomplete="off">
-                <el-form-item>
-                  <template #label>
-                    <i class="iconfont icon-yonghu" />
-                  </template>
+                <el-form-item label="用户名">
                   <el-input v-model="workerInfo.username" disabled autocomplete="off" />
                 </el-form-item>
-                <el-form-item prop="oldPassword">
-                  <template #label>
-                    <i class="iconfont icon-suo" />
-                  </template>
+                <el-form-item label="当前密码" prop="oldPassword">
                   <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入当前密码" show-password
-                    autocomplete="off" name="profile-verify-pwd" :readonly="oldPasswordReadonly"
-                    @focus="oldPasswordReadonly = false" />
+                    autocomplete="off" />
                 </el-form-item>
-                <el-form-item prop="newPassword">
-                  <template #label>
-                    <i class="iconfont icon-suo" />
-                  </template>
+                <el-form-item label="新密码" prop="newPassword">
                   <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" show-password
                     autocomplete="new-password" />
                 </el-form-item>
-                <el-form-item prop="confirmPassword">
-                  <template #label>
-                    <i class="iconfont icon-suo" />
-                  </template>
+                <el-form-item label="确认密码" prop="confirmPassword">
                   <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password
                     autocomplete="new-password" />
                 </el-form-item>
               </el-form>
               <div class="drawer-actions drawer-actions--panel">
-                <el-button type="primary" class="drawer-save-button" @click="changePassword">修改密码</el-button>
+                <el-button type="primary" class="drawer-save-button" @click="changePassword">
+                  修改密码
+                </el-button>
               </div>
             </template>
           </div>
 
           <template v-else>
-            <el-form :model="adminInfo" label-width="48px" class="drawer-form">
-              <el-form-item>
-                <template #label>
-                  <i class="iconfont icon-nicheng drawer-icon-nickname" />
-                </template>
+            <el-form :model="adminInfo" label-width="80px" class="drawer-form">
+              <el-form-item label="昵称">
                 <el-input v-model="adminInfo.nickname" placeholder="请输入昵称" />
               </el-form-item>
-              <el-form-item>
-                <template #label>
-                  <i class="iconfont icon-shoujihao" />
-                </template>
+              <el-form-item label="手机号">
                 <el-input v-model="adminInfo.phone" placeholder="请输入手机号" />
               </el-form-item>
-              <el-form-item>
-                <template #label>
-                  <i class="iconfont icon-youxiang" />
-                </template>
+              <el-form-item label="邮箱">
                 <el-input v-model="adminInfo.email" placeholder="请输入邮箱" />
               </el-form-item>
-              <el-form-item>
-                <template #label>
-                  <i class="iconfont icon-shengri" />
-                </template>
+              <el-form-item label="生日">
                 <el-date-picker v-model="adminInfo.birthday" type="date" value-format="YYYY-MM-DD" placeholder="选择生日"
                   style="width: 100%" />
               </el-form-item>
-              <el-form-item>
-                <template #label>
-                  <i class="iconfont icon-xingbie" />
-                </template>
+              <el-form-item label="性别">
                 <el-select v-model="adminInfo.gender" placeholder="请选择性别" style="width: 100%">
                   <el-option label="男" value="男" />
                   <el-option label="女" value="女" />
                   <el-option label="保密" value="保密" />
                 </el-select>
               </el-form-item>
-              <el-form-item>
-                <template #label>
-                  <i class="iconfont icon-gerenjianjiexiao" />
-                </template>
-                <el-input v-model="adminInfo.info" type="textarea" :rows="3" placeholder="介绍一下自己" />
+              <el-form-item label="个人简介">
+                <el-input v-model="adminInfo.info" type="textarea" :rows="3" placeholder="介绍一下自己" maxlength="200"
+                  show-word-limit />
               </el-form-item>
             </el-form>
           </template>
         </div>
 
         <div v-if="!isWorkerLogin" class="drawer-actions">
-          <el-button type="primary" class="drawer-save-button" @click="saveProfile">保存资料</el-button>
-          <el-button class="drawer-logout-button" @click="handleLogout">退出登录</el-button>
+          <el-button type="primary" class="drawer-save-button" @click="saveProfile">
+            保存资料
+          </el-button>
+          <el-button class="drawer-logout-button" @click="handleLogout">
+            退出登录
+          </el-button>
         </div>
       </div>
     </el-drawer>
@@ -225,13 +197,13 @@
 import { ListDailyWork, FindWorkerById, UpdateWorker } from "@/api/worker";
 import { getCurrentAdmin, updateAdmin } from "@/api/admin";
 import { Login } from "@/api/user";
-import { Fold, Expand } from '@element-plus/icons-vue'
+import { Fold, Expand, Refresh, Bell, InfoFilled, User, Phone, Message, Location, Calendar, EditPen } from '@element-plus/icons-vue'
 import { clearWorkerPermissions } from '@/utils/workerPermissions'
 import config from "@/config";
 
 export default {
   name: "Header",
-  components: { Fold, Expand },
+  components: { Fold, Expand, Refresh, Bell, InfoFilled, User, Phone, Message, Location, Calendar, EditPen },
   props: { isCollapse: Boolean },
   data() {
     const validateConfirmPassword = (rule, value, callback) => {
@@ -270,7 +242,6 @@ export default {
         newPassword: '',
         confirmPassword: '',
       },
-      oldPasswordReadonly: true,
       passwordRules: {
         oldPassword: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
         newPassword: [
@@ -330,7 +301,7 @@ export default {
       if (this.isWorkerLogin) {
         return this.workerInfo.nickname || this.workerInfo.username || '员工'
       }
-      return this.adminInfo.username || this.userName
+      return this.adminInfo.nickname || this.adminInfo.username || this.userName
     },
     uploadAction() {
       return config.API_URL + '/upload'
@@ -384,7 +355,6 @@ export default {
         newPassword: '',
         confirmPassword: '',
       }
-      this.oldPasswordReadonly = true
       this.$refs.passwordFormRef?.resetFields()
     },
     async fetchProfileInfo() {
@@ -493,21 +463,22 @@ export default {
       }
       localStorage.setItem('avatar', url)
     }
-
   }
 }
 </script>
 
 <style scoped>
+/* 头部导航样式 */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 64px;
-  padding: 0 22px;
-  background: linear-gradient(180deg, #fbfcfe 0%, #f7f9fc 100%);
-  border-bottom: 1px solid #e8edf3;
+  padding: 0 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
   box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .header-left,
@@ -517,30 +488,30 @@ export default {
 }
 
 .header-left {
-  gap: 10px;
+  gap: 12px;
 }
 
 .header-right {
-  gap: 12px;
+  gap: 16px;
 }
 
 .header-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border: 0;
   background: transparent;
-  color: #667085;
+  color: #64748b;
   cursor: pointer;
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  border-radius: 10px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header-icon:hover {
-  background: #eef4ff;
-  color: #3b82f6;
+  background: #f1f5f9;
+  color: #409eff;
   transform: translateY(-1px);
 }
 
@@ -548,21 +519,21 @@ export default {
   position: relative;
 }
 
-.header-iconfont {
-  font-size: 20px;
-  line-height: 1;
-}
-
 .badge-dot {
   position: absolute;
-  top: 7px;
-  right: 7px;
+  top: 8px;
+  right: 8px;
 }
 
 .breadcrumb {
-  margin-left: 8px;
+  margin-left: 12px;
   font-size: 14px;
-  line-height: 32px;
+  color: #64748b;
+}
+
+.breadcrumb :deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
+  color: #334155;
+  font-weight: 600;
 }
 
 .avatar-trigger {
@@ -576,10 +547,17 @@ export default {
 }
 
 .user-avatar {
-  border: 2px solid #fff;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s ease;
 }
 
+.user-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 抽屉样式 */
 :deep(.profile-drawer.el-drawer) {
   background: transparent;
   box-shadow: none;
@@ -590,7 +568,7 @@ export default {
 }
 
 :deep(.profile-drawer .el-drawer__body) {
-  padding: 0;
+  padding: 0 !important;
   background: transparent;
 }
 
@@ -600,9 +578,9 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 22px;
+  padding: 24px;
   background:
-    linear-gradient(180deg, rgba(248, 251, 255, 0.58) 0%, rgba(238, 242, 247, 0.72) 100%),
+    linear-gradient(180deg, rgba(248, 251, 255, 0.9) 0%, rgba(238, 242, 247, 0.95) 100%),
     url('@/assets/img/background.png') center/cover no-repeat;
   overflow: hidden;
 }
@@ -612,9 +590,9 @@ export default {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 34%),
-    radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.12), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 34%);
+    radial-gradient(circle at top right, rgba(64, 158, 255, 0.15), transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1), transparent 35%),
+    radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.08), transparent 40%);
   pointer-events: none;
 }
 
@@ -627,7 +605,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 18px;
+  gap: 20px;
   min-height: 0;
   flex: 1;
 }
@@ -635,76 +613,64 @@ export default {
 .drawer-panel {
   display: flex;
   flex-direction: column;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 
 .setting-sub-tabs {
   display: flex;
-  gap: 6px;
-  padding: 14px 18px 0;
+  gap: 8px;
+  padding: 16px 20px 0;
   flex-shrink: 0;
 }
 
 .setting-sub-tab {
   flex: 1;
-  height: 36px;
-  border: 1px solid #e4e7ec;
+  height: 38px;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.88);
-  color: #667085;
-  font-size: 13px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #64748b;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .setting-sub-tab:hover:not(.setting-sub-tab--active) {
-  color: #344054;
-  border-color: #d0d5dd;
-  background: #fff;
+  color: #334155;
+  border-color: #cbd5e1;
+  background: #ffffff;
 }
 
 .setting-sub-tab--active {
-  color: #fff;
+  color: #ffffff;
   font-weight: 600;
-  background: #3b82f6;
-  border-color: #3b82f6;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.24);
-}
-
-.drawer-form--panel {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  max-height: calc(100vh - 420px);
-}
-
-.drawer-actions--panel {
-  margin-top: 0;
-  padding: 0 18px 18px;
+  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.25);
 }
 
 .drawer-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 18px 20px;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+  gap: 20px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .drawer-avatar {
-  border: 3px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.18);
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.2);
+  transition: all 0.3s ease;
 }
 
 .avatar-uploader {
@@ -712,20 +678,25 @@ export default {
   cursor: pointer;
 }
 
+.avatar-uploader:hover .drawer-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(64, 158, 255, 0.25);
+}
+
 .avatar-upload-tip {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 5px 0;
+  padding: 6px 0;
   border-radius: 0 0 36px 36px;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.72) 100%);
-  color: #fff;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+  color: #ffffff;
   font-size: 12px;
   text-align: center;
   opacity: 0;
   transform: translateY(4px);
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .avatar-uploader:hover .avatar-upload-tip {
@@ -738,9 +709,9 @@ export default {
 }
 
 .drawer-name {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  color: #101828;
+  color: #1e293b;
   line-height: 1.2;
   word-break: break-word;
 }
@@ -749,65 +720,79 @@ export default {
   display: inline-flex;
   align-items: center;
   margin-top: 8px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(64, 158, 255, 0.1);
+  color: #409eff;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .drawer-form {
   margin: 0;
-  padding: 18px 18px 10px;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+  padding: 20px 24px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   max-height: calc(100vh - 360px);
   overflow-y: auto;
   scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.drawer-form::-webkit-scrollbar {
+  width: 6px;
+}
+
+.drawer-form::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.drawer-form::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.drawer-form--panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  max-height: calc(100vh - 420px);
 }
 
 .drawer-form :deep(.el-form-item) {
   margin-bottom: 18px;
-  align-items: center;
 }
 
 .drawer-form :deep(.el-form-item__label) {
-  color: #344054;
-  line-height: 1.2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: normal;
-  text-align: center;
-  padding-right: 0;
+  color: #334155;
+  font-weight: 500;
 }
 
-.drawer-form :deep(.el-form-item__label .iconfont) {
-  color: #3b82f6;
-  flex-shrink: 0;
-  font-size: 18px;
-  width: 18px;
-  text-align: center;
-}
-
-.drawer-form :deep(.drawer-icon-nickname) {
-  margin-left: -20px;
-}
-
-.drawer-form :deep(.el-form-item__content) {
-  min-width: 0;
-  margin-left: 0 !important;
-}
-
+/* 统一输入框样式 */
 .drawer-form :deep(.el-input__wrapper),
 .drawer-form :deep(.el-select__wrapper),
 .drawer-form :deep(.el-textarea__inner) {
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  border-radius: 10px;
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.drawer-form :deep(.el-input__wrapper:hover),
+.drawer-form :deep(.el-select__wrapper:hover),
+.drawer-form :deep(.el-textarea__inner:hover) {
+  border-color: #93c5fd;
+}
+
+.drawer-form :deep(.el-input__wrapper.is-focus),
+.drawer-form :deep(.el-select__wrapper.is-focus),
+.drawer-form :deep(.el-textarea__inner:focus) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
 }
 
 .drawer-form :deep(.el-textarea__inner) {
@@ -816,42 +801,81 @@ export default {
 }
 
 .drawer-actions {
-  margin-top: 18px;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.drawer-actions--panel {
+  margin-top: 0;
+  padding: 0 24px 20px;
+}
+
+/* 统一按钮样式 */
+.el-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  box-shadow: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.25);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #337ecc 0%, #409eff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.35);
 }
 
 .drawer-save-button,
 .drawer-logout-button {
   width: 100%;
   height: 46px;
-  border-radius: 14px;
+  border-radius: 12px;
   font-weight: 600;
+  font-size: 15px;
 }
 
 .drawer-save-button {
-  box-shadow: 0 12px 26px rgba(59, 130, 246, 0.24);
+  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.25);
+}
+
+.drawer-save-button:hover {
+  background: linear-gradient(135deg, #337ecc 0%, #409eff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(64, 158, 255, 0.3);
 }
 
 .drawer-logout-button {
-  color: #d92d20;
-  border-color: rgba(217, 45, 32, 0.2);
-  background: rgba(255, 255, 255, 0.88);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .drawer-logout-button:hover {
-  color: #d92d20;
-  background: rgba(217, 45, 32, 0.06);
-  border-color: rgba(217, 45, 32, 0.35);
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
 }
 
 :deep(.el-button + .el-button) {
   margin-left: 0;
-}
-
-:deep(.profile-drawer .el-drawer__body) {
-  padding: 0 !important;
 }
 </style>
 

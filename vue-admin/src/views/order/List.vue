@@ -1,28 +1,34 @@
 <template>
   <div class="film-list">
-
-    <!-- 搜索区 -->
+    <!-- 搜索区 - 统一风格 -->
     <div class="page-header">
-      <div class="page-search-bar">
-        <div class="page-search-bar__title">
-          <div class="page-title">订单管理</div>
-          <div class="page-subtitle">支持按订单ID / 用户ID搜索，管理订单状态与异常上报</div>
-        </div>
-
-        <div class="search-form">
+      <div class="search-container">
+        <!-- 左侧：搜索筛选区域 -->
+        <div class="search-filters">
           <el-input v-model="searchKeyword" clearable placeholder="订单ID / 用户ID" class="search-item search-item--name"
             @keyup.enter="handleSearch" />
-          <el-button type="primary" class="search-submit-btn" @click="handleSearch">
-            <el-icon>
+        </div>
+
+        <!-- 右侧：操作按钮区域 -->
+        <div class="search-actions">
+          <el-button type="primary" class="btn-primary btn-search" @click="handleSearch">
+            <el-icon class="btn-icon">
               <Search />
             </el-icon>
             <span>搜索</span>
           </el-button>
-          <el-button class="search-reset-btn" @click="handleResetSearch">
-            <el-icon>
+          <el-button class="btn-secondary btn-reset" @click="handleResetSearch">
+            <el-icon class="btn-icon">
               <Refresh />
             </el-icon>
             <span>重置</span>
+          </el-button>
+          <div class="btn-divider"></div>
+          <el-button class="btn-secondary btn-export" @click="exportOrders">
+            <el-icon class="btn-icon">
+              <Download />
+            </el-icon>
+            <span>导出报表</span>
           </el-button>
         </div>
       </div>
@@ -33,55 +39,6 @@
       <el-table v-loading="loading" :data="orderList" class="film-table" stripe row-key="order.id"
         :header-cell-style="{ background: '#f8fafc', color: '#64748b', fontWeight: 700, fontSize: '15px', textAlign: 'center', height: '58px' }"
         :row-style="{ height: '72px' }" style="width: 100%">
-        <!-- 展开行 -->
-        <el-table-column type="expand" width="48">
-          <template #default="props">
-            <div class="expand-detail expand-detail--with-aside">
-              <div class="expand-detail__body">
-                <div class="expand-detail__grid">
-                  <div class="expand-detail__item">
-                    <span class="expand-detail__label">订单 ID</span>
-                    <span class="expand-detail__value">{{ formatCell(props.row.order?.id) }}</span>
-                  </div>
-                  <div class="expand-detail__item">
-                    <span class="expand-detail__label">用户 ID</span>
-                    <span class="expand-detail__value">{{ formatCell(props.row.user?.id) }}</span>
-                  </div>
-                  <div class="expand-detail__item">
-                    <span class="expand-detail__label">电影 ID</span>
-                    <span class="expand-detail__value">{{ formatCell(props.row.film?.id) }}</span>
-                  </div>
-                  <div class="expand-detail__item">
-                    <span class="expand-detail__label">场次 ID</span>
-                    <span class="expand-detail__value">{{ formatCell(props.row.arrangement?.id) }}</span>
-                  </div>
-                  <div class="expand-detail__item">
-                    <span class="expand-detail__label">电影名称</span>
-                    <span class="expand-detail__value">《{{ formatCell(props.row.film?.name) }}》</span>
-                  </div>
-                  <div class="expand-detail__item">
-                    <span class="expand-detail__label">座位号</span>
-                    <span class="expand-detail__value">{{ formatCell(props.row.order?.seats) }}</span>
-                  </div>
-                  <div class="expand-detail__item">
-                    <span class="expand-detail__label">订单金额</span>
-                    <span class="expand-detail__value expand-detail__value--money">{{ moneyText(props.row.order?.price)
-                    }}</span>
-                  </div>
-                  <div class="expand-detail__item">
-                    <span class="expand-detail__label">下单时间</span>
-                    <span class="expand-detail__value">{{ formatCell(props.row.order?.createAt) }}</span>
-                  </div>
-                  <div class="expand-detail__item">
-                    <span class="expand-detail__label">支付时间</span>
-                    <span class="expand-detail__value">{{ formatCell(props.row.order?.payAt) }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-
         <el-table-column label="订单 ID" min-width="220" show-overflow-tooltip prop="order.id" />
         <el-table-column label="订单金额" min-width="140" align="center">
           <template #default="scope">
@@ -90,21 +47,26 @@
         </el-table-column>
         <el-table-column label="订单状态" min-width="140" align="center">
           <template #default="scope">
-            <el-tag v-if="scope.row.order.status === 2" type="success" effect="light">支付成功</el-tag>
-            <el-tag v-else-if="scope.row.order.status === 0" type="info" effect="light">等待支付</el-tag>
-            <el-tag v-else-if="scope.row.order.status === 3" type="warning" effect="light">已被撤销</el-tag>
-            <el-tag v-else-if="scope.row.order.status === 1" type="danger" effect="light">支付失败</el-tag>
-            <el-tag v-else-if="scope.row.order.status === 4" type="info" effect="plain">已退款</el-tag>
-            <span v-else>{{ formatCell(scope.row.order.status) }}</span>
+            <el-tag :type="getOrderStatusType(scope.row.order?.status)" effect="light" :disable-transitions="true">
+              {{ getOrderStatusText(scope.row.order?.status) }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="280" align="center" fixed="right">
           <template #default="scope">
             <div class="action-buttons">
-              <el-button size="small" type="warning" plain :icon="RefreshRight"
-                :disabled="scope.row.order.status === 3 || scope.row.order.status === 4"
-                @click="handleRevokeOrder(scope.row)">
-                撤销订单
+              <el-button size="small" type="primary" plain @click="openDetailDialog(scope.row)">
+                <el-icon>
+                  <View />
+                </el-icon>
+                <span>详情</span>
+              </el-button>
+              <el-button size="small" type="warning" plain @click="handleRevokeOrder(scope.row)"
+                :disabled="scope.row.order?.status === 3 || scope.row.order?.status === 4">
+                <el-icon>
+                  <RefreshRight />
+                </el-icon>
+                <span>撤销订单</span>
               </el-button>
             </div>
           </template>
@@ -119,23 +81,171 @@
       </div>
     </div>
 
-    <el-dialog v-model="refundDialogVisible" title="确认退款" width="480px" align-center :close-on-click-modal="false"
-      @closed="resetRefundDialog">
-      <el-alert title="将通过支付宝沙箱原路退款，退款成功后订单状态变为「已退款」，座位将释放。" type="warning" :closable="false" show-icon
-        style="margin-bottom: 16px" />
-      <div v-if="refundTarget" class="refund-dialog__info">
-        <p><span>订单 ID</span>{{ refundTarget.order?.id }}</p>
-        <p><span>电影</span>《{{ formatCell(refundTarget.film?.name) }}》</p>
-        <p><span>座位</span>{{ formatCell(refundTarget.order?.seats) }}</p>
-        <p><span>放映</span>{{ formatCell(refundTarget.arrangement?.date) }} {{
-          formatCell(refundTarget.arrangement?.startTime) }}</p>
-        <p><span>用户 ID</span>{{ formatCell(refundTarget.user?.id) }}</p>
-        <p><span>支付时间</span>{{ formatCell(refundTarget.order?.payAt) }}</p>
-        <p><span>退款金额</span><em class="refund-dialog__price">{{ moneyText(refundTarget.order?.price) }}</em></p>
+    <!-- 订单详情对话框 -->
+    <el-dialog title="订单详情" v-model="detailDialogVisible" width="70%" align-center
+      class="film-dialog film-dialog--detail">
+      <div class="detail-layout">
+        <div class="detail-body full-width">
+          <div class="info-card">
+            <div class="info-card__header">
+              <span class="info-card__title">订单详细信息</span>
+              <el-tag :type="getOrderStatusType(currentOrder.order?.status)" effect="light" class="info-card__status">
+                {{ getOrderStatusText(currentOrder.order?.status) }}
+              </el-tag>
+            </div>
+            <div class="info-card__grid">
+              <div class="info-item">
+                <div class="info-item__label">
+                  <el-icon class="info-item__icon">
+                    <Document />
+                  </el-icon>
+                  <span>订单ID</span>
+                </div>
+                <div class="info-item__value">{{ formatCell(currentOrder.order?.id) }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item__label">
+                  <el-icon class="info-item__icon">
+                    <User />
+                  </el-icon>
+                  <span>用户ID</span>
+                </div>
+                <div class="info-item__value">{{ formatCell(currentOrder.user?.id) }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item__label">
+                  <el-icon class="info-item__icon">
+                    <Film />
+                  </el-icon>
+                  <span>电影ID</span>
+                </div>
+                <div class="info-item__value">{{ formatCell(currentOrder.film?.id) }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item__label">
+                  <el-icon class="info-item__icon">
+                    <VideoPlay />
+                  </el-icon>
+                  <span>场次ID</span>
+                </div>
+                <div class="info-item__value">{{ formatCell(currentOrder.arrangement?.id) }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item__label">
+                  <el-icon class="info-item__icon">
+                    <Film />
+                  </el-icon>
+                  <span>电影名称</span>
+                </div>
+                <div class="info-item__value">《{{ formatCell(currentOrder.film?.name) }}》</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item__label">
+                  <el-icon class="info-item__icon">
+                    <Tickets />
+                  </el-icon>
+                  <span>座位号</span>
+                </div>
+                <div class="info-item__value">{{ formatCell(currentOrder.order?.seats) }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item__label">
+                  <el-icon class="info-item__icon">
+                    <Money />
+                  </el-icon>
+                  <span>订单金额</span>
+                </div>
+                <div class="info-item__value info-item__value--money">{{ moneyText(currentOrder.order?.price) }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item__label">
+                  <el-icon class="info-item__icon">
+                    <Clock />
+                  </el-icon>
+                  <span>下单时间</span>
+                </div>
+                <div class="info-item__value">{{ formatCell(currentOrder.order?.createAt) }}</div>
+              </div>
+              <div class="info-item info-item--full">
+                <div class="info-item__label">
+                  <el-icon class="info-item__icon">
+                    <SuccessFilled />
+                  </el-icon>
+                  <span>支付时间</span>
+                </div>
+                <div class="info-item__value">{{ formatCell(currentOrder.order?.payAt) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
       <template #footer>
-        <el-button @click="refundDialogVisible = false">取消</el-button>
-        <el-button type="warning" :loading="refundSubmitting" @click="confirmAdminRefund">确定退款</el-button>
+        <span class="dialog-footer">
+          <el-button @click="detailDialogVisible = false">关闭</el-button>
+          <el-button type="warning" @click="handleRevokeOrder(currentOrder)"
+            :disabled="currentOrder.order?.status === 3 || currentOrder.order?.status === 4">
+            <el-icon>
+              <RefreshRight />
+            </el-icon>
+            撤销订单
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 退款确认对话框 -->
+    <el-dialog v-model="refundDialogVisible" title="确认退款" width="520px" align-center :close-on-click-modal="false"
+      @closed="resetRefundDialog" class="film-dialog film-dialog--refund">
+      <el-alert title="将通过支付宝沙箱原路退款，退款成功后订单状态变为「已退款」，座位将自动释放。" type="warning" :closable="false" show-icon
+        style="margin-bottom: 20px" />
+
+      <div class="refund-info-card">
+        <div class="refund-info-card__header">
+          <span class="refund-info-card__title">退款详情</span>
+        </div>
+        <div class="refund-info-card__grid">
+          <div class="refund-info-item">
+            <span class="refund-info-item__label">订单ID</span>
+            <span class="refund-info-item__value">{{ formatCell(refundTarget?.order?.id) }}</span>
+          </div>
+          <div class="refund-info-item">
+            <span class="refund-info-item__label">电影名称</span>
+            <span class="refund-info-item__value">《{{ formatCell(refundTarget?.film?.name) }}》</span>
+          </div>
+          <div class="refund-info-item">
+            <span class="refund-info-item__label">座位号</span>
+            <span class="refund-info-item__value">{{ formatCell(refundTarget?.order?.seats) }}</span>
+          </div>
+          <div class="refund-info-item">
+            <span class="refund-info-item__label">放映时间</span>
+            <span class="refund-info-item__value">{{ formatCell(refundTarget?.arrangement?.date) }} {{
+              formatCell(refundTarget?.arrangement?.startTime) }}</span>
+          </div>
+          <div class="refund-info-item">
+            <span class="refund-info-item__label">用户ID</span>
+            <span class="refund-info-item__value">{{ formatCell(refundTarget?.user?.id) }}</span>
+          </div>
+          <div class="refund-info-item">
+            <span class="refund-info-item__label">支付时间</span>
+            <span class="refund-info-item__value">{{ formatCell(refundTarget?.order?.payAt) }}</span>
+          </div>
+          <div class="refund-info-item refund-info-item--full">
+            <span class="refund-info-item__label">退款金额</span>
+            <span class="refund-info-item__value refund-info-item__value--price">{{
+              moneyText(refundTarget?.order?.price)
+              }}</span>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="refundDialogVisible = false">取消</el-button>
+          <el-button type="warning" :loading="refundSubmitting" @click="confirmAdminRefund">
+            确定退款
+          </el-button>
+        </span>
       </template>
     </el-dialog>
   </div>
@@ -143,11 +253,18 @@
 
 <script>
 import { listOrderPage, UpdateOrder, AdminRefundOrder } from "@/api/order";
-import { RefreshRight, CircleClose, Search, Refresh } from '@element-plus/icons-vue'
+import {
+  RefreshRight, Search, Refresh, Download, Document,
+  User, Film, VideoPlay, Tickets, Money, Clock, SuccessFilled, View
+} from '@element-plus/icons-vue'
+import { downloadCsv } from '@/utils/exportCsv'
 
 export default {
   name: 'OrderManage',
-  components: { RefreshRight, CircleClose, Search, Refresh },
+  components: {
+    RefreshRight, Search, Refresh, Download, Document,
+    User, Film, VideoPlay, Tickets, Money, Clock, SuccessFilled, View
+  },
   data() {
     return {
       loading: false,
@@ -156,12 +273,8 @@ export default {
       currentPage: 1,
       pageSize: 10,
       totalCount: 0,
-      dialogFormVisible: false,
-      exceptionForm: {
-        oid: '',
-        reviewer: '',
-        reason: '',
-      },
+      detailDialogVisible: false, // 详情对话框开关
+      currentOrder: {}, // 当前查看的订单信息
       refundDialogVisible: false,
       refundSubmitting: false,
       refundTarget: null,
@@ -182,6 +295,46 @@ export default {
       const n = Number(price)
       if (isNaN(n)) return String(price)
       return `¥${n.toFixed(2)}`
+    },
+    // 获取订单状态类型
+    getOrderStatusType(status) {
+      switch (status) {
+        case 0: return 'info'
+        case 1: return 'danger'
+        case 2: return 'success'
+        case 3: return 'warning'
+        case 4: return 'info'
+        default: return 'info'
+      }
+    },
+    // 获取订单状态文本
+    getOrderStatusText(status) {
+      switch (status) {
+        case 0: return '等待支付'
+        case 1: return '支付失败'
+        case 2: return '支付成功'
+        case 3: return '已被撤销'
+        case 4: return '已退款'
+        default: return String(status)
+      }
+    },
+    exportOrders() {
+      const rows = (this.orderList || []).map((item) => ([
+        item.order?.id ?? '—',
+        item.user?.id ?? '—',
+        item.film?.name ?? '—',
+        item.arrangement?.id ?? '—',
+        item.order?.seats ?? '—',
+        item.order?.price ?? '—',
+        this.getOrderStatusText(item.order?.status),
+        item.order?.createAt ?? '—',
+        item.order?.payAt ?? '—',
+      ]))
+      downloadCsv(
+        `订单列表_${new Date().toISOString().slice(0, 10)}.csv`,
+        ['订单ID', '用户ID', '电影名称', '场次ID', '座位号', '金额', '状态', '下单时间', '支付时间'],
+        rows
+      )
     },
     async loadOrders() {
       this.loading = true
@@ -237,6 +390,11 @@ export default {
       this.loadOrders()
     },
     async handleRevokeOrder(row) {
+      // 如果是从详情对话框点击的撤销，先关闭详情对话框
+      if (this.detailDialogVisible) {
+        this.detailDialogVisible = false
+      }
+
       const order = row.order
       if (!order) return
 
@@ -272,12 +430,10 @@ export default {
         }
       }
     },
-
     resetRefundDialog() {
       this.refundTarget = null
       this.refundSubmitting = false
     },
-
     async confirmAdminRefund() {
       if (!this.refundTarget?.order?.id) return
       this.refundSubmitting = true
@@ -293,21 +449,17 @@ export default {
         this.refundSubmitting = false
       }
     },
-
-    handleReportException(index, order) {
-      this.exceptionForm = {
-        oid: order.id,
-        reviewer: '',
-        reason: '',
-      }
-      this.dialogFormVisible = true
+    // 打开订单详情对话框
+    openDetailDialog(order) {
+      this.currentOrder = { ...order }
+      this.detailDialogVisible = true
     },
   }
 }
 </script>
 
 <style scoped>
-/* ===== 完全复用电影管理页面的全局样式 ===== */
+/* 整体布局 - 统一风格 */
 .film-list {
   height: 100vh;
   display: flex;
@@ -319,68 +471,144 @@ export default {
   background: rgb(250, 251, 252);
 }
 
+/* 搜索区整体容器 - 统一风格 */
 .page-header {
-  flex: 0 0 auto;
-  padding: 20px 22px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  margin-bottom: 0;
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
 }
 
-.page-search-bar {
+/* 搜索区域主容器 - 左右分栏 */
+.search-container {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 18px;
+  align-items: center;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
-.page-search-bar__title {
-  min-width: 220px;
-}
-
-.page-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: 0.2px;
-}
-
-.page-subtitle {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #64748b;
-}
-
-.search-form {
+/* 左侧搜索输入区域 */
+.search-filters {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
   flex: 1;
-  justify-content: flex-end;
+  min-width: 0;
 }
 
+/* 右侧操作按钮区域 */
+.search-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* 按钮分隔线 */
+.btn-divider {
+  width: 1px;
+  height: 32px;
+  background-color: #e2e8f0;
+  margin: 0 4px;
+}
+
+/* 搜索项样式统一 */
 .search-item {
-  width: 200px;
+  height: 40px;
 }
 
 .search-item--name {
-  width: 260px;
+  width: 280px;
 }
 
-.search-submit-btn,
-.search-reset-btn {
-  border-radius: 6px;
+/* 输入框和选择框样式优化 - 统一风格 */
+:deep(.el-input__wrapper) {
+  border-radius: 8px;
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
 }
 
+:deep(.el-input__wrapper:hover) {
+  border-color: #93c5fd;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+}
+
+/* 基础按钮样式 - 统一风格 */
+.el-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  box-shadow: none;
+}
+
+/* 按钮图标样式 */
+.btn-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* 主要按钮样式 */
+.btn-primary {
+  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.25);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #337ecc 0%, #409eff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.35);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(64, 158, 255, 0.3);
+}
+
+/* 次要按钮样式 */
+.btn-secondary {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* 表格卡片 */
 .table-card {
   flex: 1;
   min-height: 0;
   background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
   border-radius: 18px;
-  padding: 18px 18px 0px 18px;
+  padding: 18px 18px 0;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
   border: 1px solid rgba(148, 163, 184, 0.12);
   display: flex;
@@ -400,90 +628,37 @@ export default {
   border-bottom: 1px solid #e2e8f0;
   font-size: 15px;
   font-weight: 700;
-  letter-spacing: 0.2px;
   text-align: center;
   height: 58px;
 }
 
-/* 单元格居中（第一列展开列除外） */
+/* 单元格居中 */
 .film-table :deep(.cell) {
   text-align: center;
-}
-
-.film-table :deep(.el-table__cell:first-child .cell) {
-  text-align: left;
-}
-
-.film-table :deep(.el-table__expanded-cell .cell) {
-  text-align: left;
-}
-
-/* 行悬浮效果 */
-.film-table :deep(.el-table__row) {
-  transition: background-color 0.2s ease;
-}
-
-.film-table :deep(.el-table__body tr:hover > td) {
-  background-color: rgba(148, 163, 184, 0.14) !important;
-}
-
-/* 展开行内部样式 */
-.expand-detail--with-aside {
-  padding: 16px 24px;
-  background: #fbfdff;
-  border-radius: 16px;
-}
-
-.expand-detail__grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px 20px;
-}
-
-.expand-detail__item {
-  display: flex;
-  align-items: baseline;
-  font-size: 13px;
-  border-bottom: 1px dashed #edf2f7;
-  padding-bottom: 8px;
-}
-
-.expand-detail__label {
-  width: 90px;
-  font-weight: 600;
-  color: #64748b;
-  flex-shrink: 0;
-}
-
-.expand-detail__value {
-  flex: 1;
-  color: #1e293b;
-  word-break: break-word;
-}
-
-.expand-detail__value--money {
-  font-weight: 700;
-  color: #ef4444;
 }
 
 /* 操作按钮组 */
 .action-buttons {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 8px;
+  flex-wrap: nowrap;
 }
 
-.action-buttons .el-button {
+.action-buttons :deep(.el-button) {
   border-radius: 10px;
-  min-width: 92px;
+  min-width: 76px;
   height: 34px;
   font-size: 13px;
+  flex: 0 0 auto;
 }
 
 /* 金额展示 */
 .table-money {
   font-weight: 700;
   color: #ef4444;
+  font-size: 15px;
 }
 
 /* 分页样式 */
@@ -526,7 +701,7 @@ export default {
   color: #fff;
 }
 
-/* 对话框样式 */
+/* 对话框通用样式 */
 .film-dialog {
   border-radius: 18px;
   overflow: hidden;
@@ -545,11 +720,6 @@ export default {
   color: #0f172a;
 }
 
-.film-dialog :deep(.el-dialog__headerbtn) {
-  top: 18px;
-  right: 18px;
-}
-
 .film-dialog :deep(.el-dialog__body) {
   padding: 20px 24px 12px;
   background: #fbfdff;
@@ -559,16 +729,6 @@ export default {
   padding: 14px 22px 22px;
   background: #fbfdff;
   border-top: 1px solid #e2e8f0;
-}
-
-.film-dialog__form :deep(.el-form-item) {
-  margin-bottom: 18px;
-}
-
-.film-dialog__form :deep(.el-form-item__label) {
-  font-size: 14px;
-  font-weight: 700;
-  color: #334155;
 }
 
 .dialog-footer {
@@ -583,40 +743,216 @@ export default {
   border-radius: 10px;
 }
 
-/* 按钮图标与文字对齐 */
+/* 详情对话框布局 */
+.detail-layout {
+  display: flex;
+  gap: 24px;
+}
+
+.detail-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-body.full-width {
+  flex: 1 1 100%;
+}
+
+/* 信息卡片 */
+.info-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.info-card__header {
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.info-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.info-card__status {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+/* 信息网格布局 */
+.info-card__grid {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 24px;
+  flex: 1;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-item--full {
+  grid-column: 1 / -1;
+}
+
+.info-item__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.info-item__icon {
+  font-size: 14px;
+  color: #409eff;
+}
+
+.info-item__value {
+  font-size: 14px;
+  color: #1e293b;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.info-item__value--money {
+  font-weight: 700;
+  color: #ef4444;
+}
+
+/* 退款信息卡片 */
+.refund-info-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.refund-info-card__header {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-bottom: 1px solid #fcd34d;
+}
+
+.refund-info-card__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.refund-info-card__grid {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 16px;
+}
+
+.refund-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.refund-info-item--full {
+  grid-column: 1 / -1;
+}
+
+.refund-info-item__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.refund-info-item__value {
+  font-size: 14px;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.refund-info-item__value--price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #d97706;
+}
+
+/* 按钮内图标和文字对齐 */
 .el-button [class*="el-icon"]+span {
   margin-left: 6px;
 }
 
-.el-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* 响应式适配 */
+@media (max-width: 1200px) {
+  .search-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .search-filters {
+    justify-content: center;
+  }
+
+  .search-actions {
+    justify-content: center;
+  }
+
+  .info-card__grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.refund-dialog__info {
-  padding: 14px 16px;
-  background: #f8fafc;
-  border-radius: 10px;
-  font-size: 14px;
-  line-height: 2;
-  color: #475569;
+@media (max-width: 768px) {
+  .page-header {
+    padding: 16px;
+  }
+
+  .search-item--name {
+    width: 240px;
+  }
+
+  .btn-divider {
+    display: none;
+  }
+
+  .refund-info-card__grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.refund-dialog__info p {
-  margin: 0;
-}
+@media (max-width: 576px) {
+  .film-list {
+    padding: 12px;
+  }
 
-.refund-dialog__info span {
-  display: inline-block;
-  width: 72px;
-  color: #94a3b8;
-}
+  .search-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
 
-.refund-dialog__price {
-  font-style: normal;
-  font-size: 18px;
-  font-weight: 700;
-  color: #e6a23c;
+  .el-button {
+    width: 100%;
+    padding: 0 12px;
+    font-size: 13px;
+  }
 }
 </style>

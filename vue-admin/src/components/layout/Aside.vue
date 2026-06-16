@@ -25,10 +25,6 @@
               <i class="iconfont icon-paipian" style="margin-right: 8px; font-size: 18px;"></i>
               <template #title>院线排片</template>
             </el-menu-item>
-            <el-menu-item index="/film/add" @click="navigate('/film/add')">
-              <i class="iconfont icon-dianyingshipin" style="margin-right: 8px; font-size: 18px;"></i>
-              <template #title>新增电影</template>
-            </el-menu-item>
             <el-menu-item index="/film/poster" @click="navigate('/film/poster')">
               <i class="iconfont icon-haibaofenxiang" style="margin-right: 8px; font-size: 18px;"></i>
               <template #title>轮播海报</template>
@@ -92,10 +88,6 @@
             <el-menu-item index="/worker/daily" @click="navigate('/worker/daily')">
               <i class="iconfont icon-meirigongzuo" style="margin-right: 8px; font-size: 18px;"></i>
               <template #title>每日工作</template>
-            </el-menu-item>
-            <el-menu-item index="/worker/add" @click="navigate('/worker/add')">
-              <i class="iconfont icon-xinzengyuangong" style="margin-right: 8px; font-size: 18px;"></i>
-              <template #title>新增员工</template>
             </el-menu-item>
           </el-sub-menu>
 

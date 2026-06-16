@@ -1,25 +1,26 @@
 <template>
   <div class="arrange-page">
     <div class="page-header">
-      <div class="page-search-bar">
-        <div class="page-search-bar__title">
-          <div class="page-title">电影排片管理</div>
-          <div class="page-subtitle">支持修改排片信息、统计票房、按电影名称快速筛选</div>
-        </div>
-
-        <div class="search-form">
-          <el-input v-model="searchForm.name" clearable placeholder="输入电影名称搜索" class="search-item search-item--name" />
+      <div class="search-container">
+        <!-- 左侧：搜索筛选区域 -->
+        <div class="search-filters">
+          <el-input v-model="searchForm.name" clearable placeholder="输入电影名称搜索" class="search-item search-item--name"
+            @keyup.enter="handleSearch" />
           <el-date-picker v-model="searchForm.dateRange" type="daterange" unlink-panels range-separator="至"
             start-placeholder="开始日期" end-placeholder="结束日期" value-format="YYYY-MM-DD"
             class="search-item search-item--range" />
-          <el-button type="primary" class="search-submit-btn" @click="handleSearch">
-            <el-icon>
+        </div>
+
+        <!-- 右侧：操作按钮区域 -->
+        <div class="search-actions">
+          <el-button type="primary" class="search-btn btn-primary btn-search" @click="handleSearch">
+            <el-icon class="btn-icon">
               <Search />
             </el-icon>
             <span>搜索</span>
           </el-button>
-          <el-button class="search-reset-btn" @click="handleResetSearch">
-            <el-icon>
+          <el-button class="search-btn btn-secondary btn-reset" @click="handleResetSearch">
+            <el-icon class="btn-icon">
               <Refresh />
             </el-icon>
             <span>重置</span>
@@ -405,36 +406,131 @@ export default {
 }
 
 .page-header {
-  padding: 20px 22px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
 }
 
-.page-search-bar {
+/* 搜索区域主容器 - 左右分栏 */
+.search-container {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 18px;
+  align-items: center;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
-.page-search-bar__title {
-  min-width: 220px;
+/* 左侧搜索输入区域 */
+.search-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
-.page-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: 0.2px;
+/* 右侧操作按钮区域 */
+.search-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
-.page-subtitle {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #64748b;
+.search-item--name {
+  width: 280px;
+}
+
+.search-item--range {
+  width: 360px;
+}
+
+/* 输入框和选择框样式优化 */
+:deep(.el-input__wrapper),
+:deep(.el-date-editor .el-input__wrapper) {
+  border-radius: 8px;
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+:deep(.el-input__wrapper:hover),
+:deep(.el-date-editor .el-input__wrapper:hover) {
+  border-color: #93c5fd;
+}
+
+:deep(.el-input__wrapper.is-focus),
+:deep(.el-date-editor .el-input__wrapper.is-focus) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+}
+
+/* 基础按钮样式 */
+.search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 35px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  box-shadow: none;
+}
+
+/* 按钮图标样式 */
+.btn-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* 主要按钮样式 */
+.btn-primary {
+  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.25);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #337ecc 0%, #409eff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.35);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(64, 158, 255, 0.3);
+}
+
+/* 次要按钮样式 */
+.btn-secondary {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* 搜索按钮特殊样式 */
+.btn-search {
+  padding: 0 22px;
 }
 
 .search-form {

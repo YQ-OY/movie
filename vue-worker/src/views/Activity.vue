@@ -1,521 +1,801 @@
 <template>
-  <div class="film-list">
-
+  <div class="activity-page">
     <!-- 页面头部 -->
     <div class="page-header">
-      <div class="page-search-bar">
-        <div class="page-search-bar__title">
-          <div class="page-title">影院活动管理</div>
-          <div class="page-subtitle">管理影院活动，支持新增、删除活动安排</div>
+      <div class="header-left">
+        <div class="title-line">
+          <span class="title-icon">🎬</span>
+          <h1 class="page-title">影院活动管理</h1>
         </div>
-
-        <div class="search-form">
-          <el-button type="primary" class="search-submit-btn" @click="dialogFormVisible = true">
-            <el-icon>
-              <Plus />
-            </el-icon>添加影院活动
-          </el-button>
+        <p class="page-subtitle">统一管理营销活动，支持新增、删除与详情查看</p>
+      </div>
+      <div class="header-actions">
+        <!-- 统计小卡片 -->
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <span class="quick-stat__value">{{ totalCount }}</span>
+            <span class="quick-stat__label">活动总数</span>
+          </div>
+          <div class="quick-stat">
+            <span class="quick-stat__value">{{ upcomingCount }}</span>
+            <span class="quick-stat__label">即将开始</span>
+          </div>
         </div>
+        <el-button type="primary" class="btn-add" @click="openAddDialog">
+          <el-icon>
+            <Plus />
+          </el-icon>
+          <span>添加影院活动</span>
+        </el-button>
       </div>
     </div>
 
     <!-- 表格卡片 -->
-    <div class="table-card">
-      <el-table v-loading="loading" :data="paginatedList" class="film-table" stripe row-key="id"
-        :header-cell-style="{ background: '#f8fafc', color: '#64748b', fontWeight: 700, fontSize: '15px', textAlign: 'center', height: '58px' }"
-        :row-style="{ height: '72px' }" style="width: 100%">
-        <!-- 展开列 -->
+    <div class="table-card" v-loading="loading" element-loading-text="正在加载活动列表...">
+      <el-table :data="paginatedList" class="activity-table" stripe row-key="id" :header-cell-style="headerCellStyle"
+        :row-style="{ height: '78px' }" highlight-current-row>
+        <!-- 展开详情列 -->
         <el-table-column type="expand" width="48">
           <template #default="props">
-            <div class="expand-content">
-              <div class="expand-section">
-                <div class="expand-label">活动内容：</div>
-                <div class="expand-text">{{ props.row.content }}</div>
+            <div class="expand-panel">
+              <div class="expand-header">
+                <span class="expand-badge">活动详情</span>
               </div>
-              <!-- 可扩展其他信息，如活动详情、参与人数等 -->
-              <div class="expand-section" v-if="props.row.number">
-                <div class="expand-label">参加人数：</div>
-                <div class="expand-text">{{ props.row.number }} 人</div>
+              <div class="expand-grid">
+                <div class="expand-item">
+                  <span class="expand-label">活动内容</span>
+                  <span class="expand-text">{{ props.row.content }}</span>
+                </div>
+                <div class="expand-item" v-if="props.row.number !== undefined">
+                  <span class="expand-label">参与人数</span>
+                  <span class="expand-text highlight">{{ props.row.number }} 人</span>
+                </div>
               </div>
             </div>
           </template>
         </el-table-column>
 
-        <el-table-column label="开始时间" min-width="160" prop="startTime" align="center" />
-        <el-table-column label="结束时间" min-width="160" prop="endTime" align="center" />
-        <el-table-column label="活动内容" min-width="200" align="center">
+        <!-- 活动开始 -->
+        <el-table-column label="活动开始" min-width="160" prop="startTime" align="center">
           <template #default="scope">
-            <span class="activity-summary">
-              {{ scope.row.content.length > 30 ? scope.row.content.slice(0, 30) + '...' : scope.row.content }}
+            <div class="date-cell">
+              <el-icon class="date-icon">
+                <Calendar />
+              </el-icon>
+              <span>{{ scope.row.startTime }}</span>
+            </div>
+          </template>
+        </el-table-column>
+
+        <!-- 活动结束 -->
+        <el-table-column label="活动结束" min-width="160" prop="endTime" align="center">
+          <template #default="scope">
+            <div class="date-cell">
+              <el-icon class="date-icon">
+                <Clock />
+              </el-icon>
+              <span>{{ scope.row.endTime }}</span>
+            </div>
+          </template>
+        </el-table-column>
+
+        <!-- 活动简介 -->
+        <el-table-column label="活动简介" min-width="210" align="center">
+          <template #default="scope">
+            <span class="summary-text">
+              {{ scope.row.content.length > 28 ? scope.row.content.slice(0, 28) + '…' : scope.row.content }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="参加人数" min-width="120" prop="number" align="center" />
-        <el-table-column label="操作" width="120" align="center" fixed="right">
+
+        <!-- 参与人数 -->
+        <el-table-column label="参与人数" min-width="120" prop="number" align="center">
           <template #default="scope">
-            <el-button size="small" type="danger" plain @click="openDeleteDialog(scope.$index, scope.row)">
-              <el-icon>
-                <Delete />
-              </el-icon>删除
+            <el-tag type="info" effect="plain" round size="small" class="number-tag">
+              {{ scope.row.number ?? 0 }} 人
+            </el-tag>
+          </template>
+        </el-table-column>
+
+        <!-- 操作列 -->
+        <el-table-column label="操作" width="110" align="center" fixed="right">
+          <template #default="scope">
+            <el-button size="small" type="danger" plain :icon="Delete" @click="openDeleteDialog(scope.row)"
+              class="btn-delete">
+              删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <!-- 分页组件 -->
+      <!-- 分页 -->
       <div class="pagination-container" v-if="totalCount > 0">
         <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15, 20]"
           :total="totalCount" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
-          @current-change="handleCurrentChange" :pager-count="5" />
+          @current-change="handleCurrentChange" :pager-count="5" background />
       </div>
     </div>
 
-    <!-- 新增活动对话框 -->
-    <el-dialog title="新增活动" v-model="dialogFormVisible" width="40%" align-center class="film-dialog film-dialog--edit">
-      <el-form :model="form" label-width="100px" class="film-dialog__form">
+    <!-- 新增/编辑活动弹窗 -->
+    <el-dialog title="新增影院活动" v-model="dialogFormVisible" width="46%" align-center class="activity-dialog"
+      :close-on-click-modal="false" destroy-on-close>
+      <el-form :model="form" label-width="100px" class="dialog-form">
         <el-form-item label="开始日期">
-          <el-date-picker v-model="form.startTime" type="date" value-format="YYYY-MM-DD" placeholder="选择开始日期"
-            class="full-width-input" />
+          <el-date-picker v-model="form.startTime" type="date" value-format="YYYY-MM-DD" placeholder="请选择活动开始日期"
+            class="full-width-input" size="large" />
         </el-form-item>
         <el-form-item label="结束日期">
-          <el-date-picker v-model="form.endTime" type="date" value-format="YYYY-MM-DD" placeholder="选择结束日期"
-            class="full-width-input" />
+          <el-date-picker v-model="form.endTime" type="date" value-format="YYYY-MM-DD" placeholder="请选择活动结束日期"
+            class="full-width-input" size="large" />
         </el-form-item>
         <el-form-item label="活动内容">
-          <el-input v-model="form.content" type="textarea" :rows="6" placeholder="请输入活动内容" />
+          <el-input v-model="form.content" type="textarea" :rows="6" placeholder="详细填写活动规则、福利、参与方式等内容" maxlength="500"
+            show-word-limit size="large" class="content-textarea" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitActivity">确定保存</el-button>
-        </span>
+        <div class="dialog-footer">
+          <el-button size="large" @click="dialogFormVisible = false" class="btn-cancel">取消</el-button>
+          <el-button size="large" type="primary" @click="submitActivity" class="btn-submit">
+            <el-icon>
+              <Check />
+            </el-icon>
+            确认保存
+          </el-button>
+        </div>
       </template>
     </el-dialog>
 
-    <!-- 删除确认对话框 -->
-    <el-dialog title="删除活动" v-model="dialogDeleteVisible" width="28%" align-center
-      class="film-dialog film-dialog--delete">
-      <div class="delete-dialog-body">
-        <div class="delete-dialog-body__icon">
-          <el-icon>
+    <!-- 删除确认弹窗 -->
+    <el-dialog title="删除活动" v-model="dialogDeleteVisible" width="32%" align-center class="activity-dialog delete-dialog"
+      :close-on-click-modal="false">
+      <div class="delete-body">
+        <div class="delete-icon-wrap">
+          <el-icon size="26">
             <WarningFilled />
           </el-icon>
         </div>
-        <div class="delete-dialog-body__content">
-          <div class="delete-dialog-body__title">确认删除该活动？</div>
-          <div class="delete-dialog-body__desc">删除后将无法恢复，活动内容：<strong>{{ deleteTarget.content }}</strong></div>
+        <div class="delete-content">
+          <p class="delete-title">确定删除这条活动？</p>
+          <p class="delete-desc">
+            删除后将无法恢复，活动内容：<strong>{{ deleteTarget.content }}</strong>
+          </p>
         </div>
       </div>
       <template #footer>
-        <span class="dialog-footer dialog-footer--danger">
-          <el-button @click="dialogDeleteVisible = false">取消</el-button>
-          <el-button type="danger" @click="confirmDeleteActivity">确定删除</el-button>
-        </span>
+        <div class="dialog-footer">
+          <el-button size="large" @click="dialogDeleteVisible = false">取消</el-button>
+          <el-button size="large" type="danger" @click="confirmDeleteActivity" class="btn-danger">
+            永久删除
+          </el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
 </template>
 
-<script>
-import { CreateActivity, DeleteActivityById, ListAllActivity } from "@/api/activity";
-import { Plus, Delete, WarningFilled } from '@element-plus/icons-vue'
+<script setup>
+import { ref, reactive, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import {
+  Plus,
+  Delete,
+  WarningFilled,
+  Calendar,
+  Clock,
+  Check
+} from '@element-plus/icons-vue'
+import {
+  CreateActivity,
+  DeleteActivityById,
+  ListAllActivity
+} from '@/api/activity'
 
-export default {
-  name: 'ActivityManage',
-  components: { Plus, Delete, WarningFilled },
-  data() {
-    return {
-      loading: false,
-      allList: [],        // 全量数据
-      currentPage: 1,
-      pageSize: 10,
-      dialogFormVisible: false,
-      form: {
-        content: '',
-        startTime: '',
-        endTime: '',
-      },
-      dialogDeleteVisible: false,
-      deleteTarget: { id: null, content: '' }
-    }
-  },
-  computed: {
-    totalCount() {
-      return this.allList.length
-    },
-    paginatedList() {
-      const start = (this.currentPage - 1) * this.pageSize
-      return this.allList.slice(start, start + this.pageSize)
-    }
-  },
-  mounted() {
-    this.loadList()
-  },
-  methods: {
-    loadList() {
-      this.loading = true
-      ListAllActivity()
-        .then(res => {
-          if (!res?.success) return
-          this.allList = res.data || []
-          this.currentPage = 1
-        })
-        .catch(() => {})
-        .finally(() => {
-          this.loading = false
-        })
-    },
-    handleSizeChange(newSize) {
-      this.pageSize = newSize
-      this.currentPage = 1
-    },
-    handleCurrentChange(newPage) {
-      this.currentPage = newPage
-    },
-    submitActivity() {
-      if (!this.form.startTime) {
-        this.$message.warning('请选择开始日期')
-        return
-      }
-      if (!this.form.endTime) {
-        this.$message.warning('请选择结束日期')
-        return
-      }
-      if (!this.form.content) {
-        this.$message.warning('请填写活动内容')
-        return
-      }
-      CreateActivity(this.form)
-        .then(res => {
-          if (!res?.success) return
-          this.$message.success('保存成功')
-          this.dialogFormVisible = false
-          this.form = { content: '', startTime: '', endTime: '' }
-          this.loadList()
-        })
-        .catch(() => {})
-    },
-    openDeleteDialog(index, row) {
-      this.deleteTarget = {
-        id: row.id,
-        content: row.content
-      }
-      this.dialogDeleteVisible = true
-    },
-    confirmDeleteActivity() {
-      DeleteActivityById(this.deleteTarget.id)
-        .then(res => {
-          if (!res?.success) return
-          this.$message.success('删除成功')
-          this.dialogDeleteVisible = false
-          if (this.paginatedList.length === 1 && this.currentPage > 1) {
-            this.currentPage--
-          }
-          this.loadList()
-        })
-        .catch(() => {})
-    }
-  }
+// ---------- 状态 ----------
+const loading = ref(false)
+const allList = ref([])
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+// 新增弹窗
+const dialogFormVisible = ref(false)
+const form = reactive({
+  content: '',
+  startTime: '',
+  endTime: ''
+})
+
+// 删除弹窗
+const dialogDeleteVisible = ref(false)
+const deleteTarget = reactive({ id: null, content: '' })
+
+// ---------- 计算属性 ----------
+const totalCount = computed(() => allList.value.length)
+
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return allList.value.slice(start, start + pageSize.value)
+})
+
+// 即将开始的活动数量（根据日期简单判断）
+const upcomingCount = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return allList.value.filter(item => {
+    if (!item.startTime) return false
+    const start = new Date(item.startTime)
+    return start >= today
+  }).length
+})
+
+// 表头样式（保持统一）
+const headerCellStyle = {
+  background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
+  color: '#1e293b',
+  fontWeight: 700,
+  fontSize: '14px',
+  textAlign: 'center',
+  height: '56px',
+  borderBottom: '2px solid #e2e8f0'
 }
+
+// ---------- 方法 ----------
+function loadList() {
+  loading.value = true
+  ListAllActivity()
+    .then(res => {
+      if (!res?.success) return
+      allList.value = res.data || []
+      currentPage.value = 1
+    })
+    .catch(err => {
+      console.error('加载活动列表失败', err)
+      ElMessage.error('加载活动失败，请重试')
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+function handleSizeChange(newSize) {
+  pageSize.value = newSize
+  currentPage.value = 1
+}
+
+function handleCurrentChange(newPage) {
+  currentPage.value = newPage
+}
+
+function openAddDialog() {
+  form.content = ''
+  form.startTime = ''
+  form.endTime = ''
+  dialogFormVisible.value = true
+}
+
+function submitActivity() {
+  const start = form.startTime?.trim()
+  const end = form.endTime?.trim()
+  const content = form.content?.trim()
+
+  if (!start) return ElMessage.warning('请选择活动开始日期')
+  if (!end) return ElMessage.warning('请选择活动结束日期')
+  if (!content) return ElMessage.warning('请填写完整活动内容')
+
+  CreateActivity({ startTime: start, endTime: end, content })
+    .then(res => {
+      if (!res?.success) return
+      ElMessage.success('活动创建成功 🎉')
+      dialogFormVisible.value = false
+      loadList()
+    })
+    .catch(err => {
+      console.error('新增活动失败', err)
+      ElMessage.error('新增失败，请稍后重试')
+    })
+}
+
+function openDeleteDialog(row) {
+  deleteTarget.id = row.id
+  deleteTarget.content = row.content?.length > 20 ? row.content.slice(0, 20) + '…' : row.content
+  dialogDeleteVisible.value = true
+}
+
+function confirmDeleteActivity() {
+  DeleteActivityById(deleteTarget.id)
+    .then(res => {
+      if (!res?.success) return
+      ElMessage.success('活动已删除')
+      dialogDeleteVisible.value = false
+      // 当前页删掉最后一条，回退一页
+      if (paginatedList.value.length === 1 && currentPage.value > 1) {
+        currentPage.value--
+      }
+      loadList()
+    })
+    .catch(err => {
+      console.error('删除活动失败', err)
+      ElMessage.error('删除失败，请重试')
+    })
+}
+
+// ---------- 生命周期 ----------
+onMounted(() => {
+  loadList()
+})
 </script>
 
 <style scoped>
-/* ===== 整体布局（复用电影管理页面样式） ===== */
-.film-list {
+/* ==================== 整体布局 ==================== */
+.activity-page {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  overflow: hidden;
-  padding: 20px;
+  gap: 18px;
+  padding: 22px 24px;
   box-sizing: border-box;
-  background: rgb(250, 251, 252);
+  background: #f7f9fc;
+  background-image:
+    radial-gradient(ellipse at 15% 30%, rgba(99, 102, 241, 0.04) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 70%, rgba(59, 130, 246, 0.03) 0%, transparent 55%);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* ==================== 页面头部 ==================== */
 .page-header {
-  flex: 0 0 auto;
-  padding: 20px 22px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.12);
-}
-
-.page-search-bar {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  flex-wrap: wrap;
+  padding: 20px 26px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 28px rgba(15, 23, 42, 0.05),
+    0 2px 6px rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
-.page-search-bar__title {
-  min-width: 220px;
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.page-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: 0.2px;
-}
-
-.page-subtitle {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #64748b;
-}
-
-.search-form {
+.title-line {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
-  flex: 1;
-  justify-content: flex-end;
 }
 
-.search-submit-btn {
-  border-radius: 6px;
+.title-icon {
+  font-size: 28px;
+  filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.2));
 }
 
+.page-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+
+.page-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #64748b;
+  padding-left: 38px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* 统计小卡片 */
+.quick-stats {
+  display: flex;
+  gap: 10px;
+}
+
+.quick-stat {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 10px 18px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.quick-stat__value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.quick-stat__label {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* 添加按钮 */
+.btn-add {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: none;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-add:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+/* ==================== 表格卡片 ==================== */
 .table-card {
   flex: 1;
   min-height: 0;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-  border-radius: 18px;
-  padding: 18px 18px 0px 18px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 22px;
+  padding: 20px 22px 0;
+  box-shadow:
+    0 8px 28px rgba(15, 23, 42, 0.05),
+    0 2px 6px rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.film-table {
+.activity-table {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
   border-radius: 16px;
 }
 
-.film-table :deep(.el-table__header-wrapper th) {
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 15px;
+/* 表格细节 */
+.activity-table :deep(.el-table__header-wrapper th) {
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.activity-table :deep(.el-table__body tr:hover > td) {
+  background-color: rgba(241, 245, 249, 0.7) !important;
+}
+
+.activity-table :deep(.el-table__row--striped td) {
+  background-color: #fafbfd;
+}
+
+.activity-table :deep(.el-table__cell .cell) {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 展开行 */
+.expand-panel {
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-radius: 14px;
+  margin: 8px 0;
+  border: 1px solid #f1f5f9;
+}
+
+.expand-header {
+  margin-bottom: 14px;
+}
+
+.expand-badge {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.expand-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expand-item {
+  display: flex;
+  gap: 16px;
+}
+
+.expand-label {
+  width: 90px;
+  font-weight: 600;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.expand-text {
+  color: #1e293b;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.expand-text.highlight {
+  color: #2563eb;
   font-weight: 700;
-  letter-spacing: 0.2px;
-  text-align: center;
-  height: 58px;
 }
 
-.film-table :deep(.cell) {
-  text-align: center;
+/* 日期单元格 */
+.date-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.film-table :deep(.el-table__cell:first-child .cell) {
-  text-align: center;
+.date-icon {
+  font-size: 16px;
+  color: #94a3b8;
 }
 
-.film-table :deep(.el-table__row) {
-  transition: background-color 0.2s ease;
+/* 简介文本 */
+.summary-text {
+  color: #334155;
+  font-size: 14px;
 }
 
+/* 人数标签 */
+.number-tag {
+  font-weight: 600;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+/* 删除按钮 */
+.btn-delete {
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.btn-delete:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+/* 分页 */
 .pagination-container {
   flex-shrink: 0;
   margin-top: auto;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-top: 1px solid #e2e8f0;
-  padding: 15px;
+  border-top: 1px solid #e8edf2;
+  padding: 16px 8px;
 }
 
 .pagination-container :deep(.el-pagination) {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  width: 100%;
 }
 
-.pagination-container :deep(.el-pagination__total),
-.pagination-container :deep(.el-pagination__sizes),
-.pagination-container :deep(.el-pagination__jump) {
-  margin: 0;
-  color: #64748b;
-}
-
-.pagination-container :deep(.el-pager li),
-.pagination-container :deep(.btn-prev),
-.pagination-container :deep(.btn-next) {
-  border-radius: 8px;
-  min-width: 32px;
-  margin: 0 3px;
+.pagination-container :deep(.el-pager li) {
+  border-radius: 10px;
+  font-weight: 600;
+  min-width: 34px;
+  height: 34px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
 }
 
 .pagination-container :deep(.el-pager li.is-active) {
-  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: none;
   color: #fff;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.35);
 }
 
-/* 对话框样式（统一复用 film-dialog） */
-.film-dialog {
-  border-radius: 18px;
+/* ==================== 弹窗通用样式 ==================== */
+.activity-dialog {
+  border-radius: 24px !important;
   overflow: hidden;
 }
 
-.film-dialog :deep(.el-dialog__header) {
-  margin-right: 0;
-  padding: 18px 22px 14px;
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-  border-bottom: 1px solid #e2e8f0;
+.activity-dialog :deep(.el-dialog__header) {
+  padding: 24px 28px 18px;
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  border-bottom: 1px solid #eef2f7;
 }
 
-.film-dialog :deep(.el-dialog__title) {
-  font-size: 18px;
+.activity-dialog :deep(.el-dialog__title) {
+  font-size: 20px;
   font-weight: 800;
   color: #0f172a;
 }
 
-.film-dialog :deep(.el-dialog__headerbtn) {
-  top: 18px;
-  right: 18px;
-}
-
-.film-dialog :deep(.el-dialog__body) {
-  padding: 20px 24px 12px;
+.activity-dialog :deep(.el-dialog__body) {
+  padding: 22px 28px 12px;
   background: #fbfdff;
 }
 
-.film-dialog :deep(.el-dialog__footer) {
-  padding: 14px 22px 22px;
-  background: #fbfdff;
-  border-top: 1px solid #e2e8f0;
+.activity-dialog :deep(.el-dialog__footer) {
+  padding: 16px 28px 22px;
+  border-top: 1px solid #eef2f7;
 }
 
-.film-dialog__form :deep(.el-form-item) {
-  margin-bottom: 18px;
-}
-
-.film-dialog__form :deep(.el-form-item__label) {
-  font-size: 14px;
-  font-weight: 700;
+.dialog-form :deep(.el-form-item__label) {
+  font-weight: 600;
   color: #334155;
+}
+
+.full-width-input {
+  width: 100%;
+}
+
+.content-textarea :deep(.el-textarea__inner) {
+  border-radius: 12px;
+  background: #fafcfd;
+  transition: all 0.3s;
+}
+
+.content-textarea :deep(.el-textarea__inner:focus) {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-}
-
-.dialog-footer .el-button {
-  min-width: 92px;
-  height: 38px;
-  border-radius: 10px;
-}
-
-/* 删除对话框专用样式 */
-.film-dialog--delete :deep(.el-dialog__body) {
-  padding: 20px 22px 8px;
-}
-
-.delete-dialog-body {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-}
-
-.delete-dialog-body__icon {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fef2f2;
-  color: #ef4444;
-  font-size: 22px;
-}
-
-.delete-dialog-body__content {
-  flex: 1;
-  min-width: 0;
-}
-
-.delete-dialog-body__title {
-  font-size: 16px;
-  font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 8px;
-}
-
-.delete-dialog-body__desc {
-  font-size: 13px;
-  line-height: 1.7;
-  color: #64748b;
-}
-
-.dialog-footer--danger .el-button:last-child {
-  min-width: 108px;
-}
-
-/* 辅助类 */
-.full-width-input {
-  width: 100%;
-}
-
-.el-button [class*="el-icon"]+span {
-  margin-left: 6px;
-}
-
-.el-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 展开行样式 */
-.expand-content {
-  padding: 16px 20px;
-  background: #fbfdff;
-  border-radius: 12px;
-  margin: 8px 0;
-}
-
-.expand-section {
-  margin-bottom: 12px;
-  display: flex;
-  align-items: flex-start;
   gap: 12px;
 }
 
-.expand-label {
-  flex-shrink: 0;
-  width: 80px;
+.btn-cancel {
+  border-radius: 12px;
   font-weight: 600;
-  color: #64748b;
-  font-size: 13px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
 }
 
-.expand-text {
-  flex: 1;
-  color: #1e293b;
+.btn-submit {
+  border-radius: 12px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: none;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-submit:hover {
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+/* 删除弹窗 */
+.delete-dialog :deep(.el-dialog__body) {
+  padding: 24px 28px 10px;
+}
+
+.delete-body {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.delete-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.delete-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #0f172a;
+}
+
+.delete-desc {
+  margin: 0;
   font-size: 14px;
+  color: #64748b;
   line-height: 1.6;
-  word-break: break-word;
-  white-space: normal;
 }
 
-/* 活动内容摘要样式 */
-.activity-summary {
-  display: inline-block;
-  max-width: 100%;
-  color: #334155;
-  cursor: pointer;
-  transition: color 0.2s;
+.delete-desc strong {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.btn-danger {
+  border-radius: 12px;
+  font-weight: 600;
+  background: #ef4444;
+  border: none;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.35);
+}
+
+/* 滚动条美化 */
+.activity-table :deep(.el-table__body-wrapper::-webkit-scrollbar) {
+  width: 6px;
+}
+
+.activity-table :deep(.el-table__body-wrapper::-webkit-scrollbar-thumb) {
+  background: #dce1e8;
+  border-radius: 10px;
+}
+
+/* ==================== 响应式 ==================== */
+@media (max-width: 992px) {
+  .activity-page {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .activity-page {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .table-card {
+    padding: 14px 8px 0;
+  }
+
+  .activity-dialog {
+    width: 92% !important;
+  }
+
+  .delete-dialog {
+    width: 80% !important;
+  }
 }
 </style>

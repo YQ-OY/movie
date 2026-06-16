@@ -1,32 +1,30 @@
 <template>
   <div class="film-list">
-
-    <!-- 页面头部（与电影管理页面完全一致） -->
+    <!-- 页面头部 全站统一header样式 -->
     <div class="page-header">
       <div class="page-search-bar">
-        <div class="page-search-bar__title">
-          <div class="page-title">运营数据大屏</div>
-          <div class="page-subtitle">整合影片、订单、营收、用户、场次等核心指标，实时掌握经营趋势与转化效率。</div>
-        </div>
         <div class="search-form">
+          <div class="update-meta">
+            <span>数据更新时间</span>
+            <strong>{{ updatedAt || '暂未加载' }}</strong>
+          </div>
           <el-button type="primary" class="search-submit-btn" @click="exportReport">
             <el-icon>
               <Download />
-            </el-icon><span>导出报表</span>
+            </el-icon>
+            <span>导出运营报表</span>
           </el-button>
-          <div class="update-meta">
-            <span>更新时间</span>
-            <strong>{{ updatedAt || '未更新' }}</strong>
-          </div>
         </div>
       </div>
     </div>
 
-    <!-- KPI 卡片区域（复用 table-card 风格） -->
+    <!-- KPI指标卡片区域 -->
     <div class="stats-grid">
       <div v-for="item in kpiCards" :key="item.key" class="kpi-card" :class="`kpi-card--${item.color}`">
         <div class="kpi-card__label">
-          <i :class="item.icon"></i>
+          <el-icon :size="20">
+            <component :is="item.icon" />
+          </el-icon>
           <span>{{ item.label }}</span>
         </div>
         <div class="kpi-card__value">{{ item.value }}</div>
@@ -34,18 +32,18 @@
       </div>
     </div>
 
-    <!-- 图表卡片容器（复用 table-card 风格） -->
+    <!-- 图表主容器 复用全站table-card毛玻璃卡片 -->
     <div class="table-card">
       <div class="dashboard-grid">
-        <!-- 左侧列：票房 TOP10 + 漏斗 -->
+        <!-- 左列 -->
         <div class="dashboard-column dashboard-column--left">
           <div class="chart-card">
             <div class="chart-card__header">
               <div>
-                <h3>票房 TOP10</h3>
-                <p>按已支付订单聚合的影片票房排行</p>
+                <h3>票房TOP10影片</h3>
+                <p>依据已支付订单金额排行</p>
               </div>
-              <span class="chart-tag">Top 10</span>
+              <span class="chart-tag">TOP10</span>
             </div>
             <div ref="barRef" class="chart chart--bar" />
           </div>
@@ -53,7 +51,7 @@
             <div class="chart-card__header">
               <div>
                 <h3>购票转化漏斗</h3>
-                <p>从浏览到支付的关键转化路径</p>
+                <p>浏览-下单-支付完整转化链路</p>
               </div>
               <span class="chart-tag">Funnel</span>
             </div>
@@ -61,13 +59,13 @@
           </div>
         </div>
 
-        <!-- 中间列：订单+营收趋势 + 热力图 -->
+        <!-- 中间核心列 -->
         <div class="dashboard-column dashboard-column--center">
           <div class="chart-card chart-card--highlight">
             <div class="chart-card__header">
               <div>
-                <h3>近 7 天订单 + 营收</h3>
-                <p>双轴联动展示订单量与票房收入变化</p>
+                <h3>近7天订单&营收趋势</h3>
+                <p>双轴同步展示订单量与票房收入波动</p>
               </div>
               <span class="chart-tag chart-tag--accent">Trend</span>
             </div>
@@ -76,8 +74,8 @@
           <div class="chart-card">
             <div class="chart-card__header">
               <div>
-                <h3>当日时段购票热力图</h3>
-                <p>观察一天内购票高峰时段分布</p>
+                <h3>时段购票热力分布</h3>
+                <p>全天各时段购票热度高低</p>
               </div>
               <span class="chart-tag">Heatmap</span>
             </div>
@@ -85,13 +83,13 @@
           </div>
         </div>
 
-        <!-- 右侧列：影片类型营收 + 订单状态环形图 -->
+        <!-- 右侧占比图表 -->
         <div class="dashboard-column dashboard-column--right">
           <div class="chart-card">
             <div class="chart-card__header">
               <div>
-                <h3>影片类型营收</h3>
-                <p>按影片类型统计支付营收占比</p>
+                <h3>影片类型营收占比</h3>
+                <p>各分类影片实际支付营收</p>
               </div>
               <span class="chart-tag">Pie</span>
             </div>
@@ -100,8 +98,8 @@
           <div class="chart-card">
             <div class="chart-card__header">
               <div>
-                <h3>订单状态环形图</h3>
-                <p>全量订单状态分布概览</p>
+                <h3>订单状态环形分布</h3>
+                <p>全部订单状态数量占比</p>
               </div>
               <span class="chart-tag">Ring</span>
             </div>
@@ -116,10 +114,12 @@
 <script>
 import * as echarts from 'echarts'
 import { getDashboard } from '../../api/stats'
-import { Download } from '@element-plus/icons-vue'
+import { Download, Film, Clock, ShoppingCart, Money, User, DataLine } from '@element-plus/icons-vue'
+import { downloadCsv } from '@/utils/exportCsv'
 
 export default {
   name: 'StatsDashboard',
+  components: { Download, Film, Clock, ShoppingCart, Money, User, DataLine },
   data() {
     return {
       loading: false,
@@ -137,12 +137,12 @@ export default {
     kpiCards() {
       const s = this.stats || {}
       return [
-        { key: 'filmTotal', label: '总影片数', value: s.filmTotal ?? 0, hint: '当前入库影片总量', color: 'blue', icon: 'el-icon-film' },
-        { key: 'todayArrangementTotal', label: '今日场次', value: s.todayArrangementTotal ?? 0, hint: '今日新增/上映场次', color: 'cyan', icon: 'el-icon-time' },
-        { key: 'todayOrderTotal', label: '今日订单', value: s.todayOrderTotal ?? 0, hint: '今日创建订单数量', color: 'green', icon: 'el-icon-shopping-cart-2' },
-        { key: 'todayRevenueTotal', label: '今日营收', value: this.formatMoney(s.todayRevenueTotal ?? 0), hint: '今日已支付票房', color: 'orange', icon: 'el-icon-money' },
-        { key: 'userTotal', label: '总用户数', value: s.userTotal ?? 0, hint: '平台注册用户总量', color: 'purple', icon: 'el-icon-user' },
-        { key: 'revenueTotal', label: '累计营收', value: this.formatMoney(s.revenueTotal ?? 0), hint: '历史累计支付金额', color: 'pink', icon: 'el-icon-data-line' },
+        { key: 'filmTotal', label: '总影片数', value: s.filmTotal ?? 0, hint: '平台全部入库影片', color: 'blue', icon: 'Film' },
+        { key: 'todayArrangementTotal', label: '今日场次', value: s.todayArrangementTotal ?? 0, hint: '今日可放映排片', color: 'cyan', icon: 'Clock' },
+        { key: 'todayOrderTotal', label: '今日订单', value: s.todayOrderTotal ?? 0, hint: '今日创建订单总数', color: 'green', icon: 'ShoppingCart' },
+        { key: 'todayRevenueTotal', label: '今日营收', value: this.formatMoney(s.todayRevenueTotal ?? 0), hint: '今日已支付票房金额', color: 'orange', icon: 'Money' },
+        { key: 'userTotal', label: '注册用户', value: s.userTotal ?? 0, hint: '平台全部注册用户', color: 'purple', icon: 'User' },
+        { key: 'revenueTotal', label: '累计营收', value: this.formatMoney(s.revenueTotal ?? 0), hint: '历史全部支付总额', color: 'pink', icon: 'DataLine' },
       ]
     },
   },
@@ -176,21 +176,21 @@ export default {
     exportReport() {
       const payload = this.stats || {}
       const rows = [
-        ['指标', '数值'],
         ['总影片数', payload.filmTotal ?? 0],
         ['今日场次', payload.todayArrangementTotal ?? 0],
         ['今日订单', payload.todayOrderTotal ?? 0],
-        ['今日营收', this.formatMoney(payload.todayRevenueTotal ?? 0)],
-        ['总用户数', payload.userTotal ?? 0],
-        ['累计营收', this.formatMoney(payload.revenueTotal ?? 0)],
+        ['今日营收(元)', payload.todayRevenueTotal ?? 0],
+        ['注册用户总数', payload.userTotal ?? 0],
+        ['累计总营收(元)', payload.revenueTotal ?? 0],
+        ['近7天订单明细', (payload.ordersByDay || []).map(i => `${i.name}:${i.value}单`).join(' | ')],
+        ['近7天营收明细', (payload.revenueByDay || []).map(i => `${i.name}:¥${i.value}`).join(' | ')],
+        ['各类型影片营收', (payload.revenueByFilmType || []).map(i => `${i.name}:¥${i.value}`).join(' | ')],
       ]
-      const csv = rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
-      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = `运营数据报表_${new Date().toISOString().slice(0, 10)}.csv`
-      link.click()
-      URL.revokeObjectURL(link.href)
+      downloadCsv(
+        `运营数据报表_${new Date().toISOString().slice(0, 10)}.csv`,
+        ['统计指标', '数值'],
+        rows
+      )
     },
     resizeCharts() {
       this.barChart?.resize()
@@ -201,12 +201,8 @@ export default {
       this.statusPieChart?.resize()
     },
     disposeCharts() {
-      this.barChart?.dispose()
-      this.funnelChart?.dispose()
-      this.lineChart?.dispose()
-      this.heatmapChart?.dispose()
-      this.typePieChart?.dispose()
-      this.statusPieChart?.dispose()
+      const charts = [this.barChart, this.funnelChart, this.lineChart, this.heatmapChart, this.typePieChart, this.statusPieChart]
+      charts.forEach(c => c?.dispose())
       this.barChart = this.funnelChart = this.lineChart = this.heatmapChart = this.typePieChart = this.statusPieChart = null
     },
     initCharts() {
@@ -233,12 +229,12 @@ export default {
         yAxis: {
           type: 'category',
           inverse: true,
-          data: list.map((item) => item.name),
+          data: list.map(item => item.name),
           axisLabel: { color: '#334155', width: 110, overflow: 'truncate' },
         },
         series: [{
           type: 'bar',
-          data: list.map((item) => Number(item.value || 0)),
+          data: list.map(item => Number(item.value || 0)),
           barWidth: 14,
           itemStyle: {
             borderRadius: [0, 10, 10, 0],
@@ -254,6 +250,7 @@ export default {
     initFunnel() {
       const chart = echarts.init(this.$refs.funnelRef)
       const list = this.stats.purchaseFunnel || []
+      const colorArr = ['#60a5fa', '#34d399', '#f59e0b', '#a78bfa']
       chart.setOption({
         tooltip: { trigger: 'item', formatter: '{b}: {c}' },
         series: [{
@@ -263,14 +260,14 @@ export default {
           bottom: 10,
           width: '80%',
           min: 0,
-          max: Math.max(...list.map((i) => Number(i.value || 0)), 1),
+          max: Math.max(...list.map(i => Number(i.value || 0)), 1),
           sort: 'descending',
           label: { color: '#334155' },
           itemStyle: { borderColor: '#fff', borderWidth: 2 },
           data: list.map((item, index) => ({
             name: item.name,
             value: Number(item.value || 0),
-            itemStyle: { color: ['#60a5fa', '#34d399', '#f59e0b', '#a78bfa'][index % 4] },
+            itemStyle: { color: colorArr[index % colorArr.length] },
           })),
         }],
       })
@@ -286,7 +283,7 @@ export default {
         grid: { left: 48, right: 24, top: 42, bottom: 24, containLabel: true },
         xAxis: {
           type: 'category',
-          data: orders.map((item) => item.name),
+          data: orders.map(item => item.name),
           axisLabel: { color: '#64748b', rotate: 25 },
         },
         yAxis: [
@@ -299,7 +296,7 @@ export default {
             type: 'line',
             smooth: true,
             symbolSize: 8,
-            data: orders.map((item) => Number(item.value || 0)),
+            data: orders.map(item => Number(item.value || 0)),
             lineStyle: { width: 3, color: '#3b82f6' },
             itemStyle: { color: '#3b82f6' },
             areaStyle: { color: 'rgba(59,130,246,0.16)' },
@@ -310,7 +307,7 @@ export default {
             smooth: true,
             yAxisIndex: 1,
             symbolSize: 8,
-            data: revenue.map((item) => Number(item.value || 0)),
+            data: revenue.map(item => Number(item.value || 0)),
             lineStyle: { width: 3, color: '#f59e0b' },
             itemStyle: { color: '#f59e0b' },
             areaStyle: { color: 'rgba(245,158,11,0.12)' },
@@ -322,12 +319,13 @@ export default {
     initHeatmap() {
       const chart = echarts.init(this.$refs.heatmapRef)
       const source = this.stats.hourlyTicketHeatmap || []
-      const xData = source.map((item) => item.name)
+      const xData = source.map(item => item.name)
       const values = source.map((item, idx) => [idx, 0, Number(item.value || 0)])
+      const maxVal = Math.max(...source.map(item => Number(item.value || 0)), 1)
       chart.setOption({
         tooltip: {
           position: 'top',
-          formatter: (params) => `${xData[params.data[0]] || ''}<br/>购票数：${params.data[2]}`,
+          formatter: params => `${xData[params.data[0]] || ''}<br/>购票数：${params.data[2]}`,
         },
         grid: { left: 16, right: 16, top: 20, bottom: 36, containLabel: true },
         xAxis: {
@@ -344,7 +342,7 @@ export default {
         },
         visualMap: {
           min: 0,
-          max: Math.max(...source.map((item) => Number(item.value || 0)), 1),
+          max: maxVal,
           calculable: true,
           orient: 'horizontal',
           left: 'center',
@@ -356,12 +354,8 @@ export default {
           type: 'heatmap',
           data: values,
           label: { show: false },
-          emphasis: {
-            itemStyle: { shadowBlur: 8, shadowColor: 'rgba(0, 0, 0, 0.25)' },
-          },
-          itemStyle: {
-            borderRadius: 4,
-          },
+          emphasis: { itemStyle: { shadowBlur: 8, shadowColor: 'rgba(0,0,0,0.25)' } },
+          itemStyle: { borderRadius: 4 },
         }],
       })
       this.heatmapChart = chart
@@ -369,6 +363,7 @@ export default {
     initTypePie() {
       const chart = echarts.init(this.$refs.typePieRef)
       const list = this.stats.revenueByFilmType || []
+      const colorList = ['#60a5fa', '#34d399', '#f59e0b', '#f472b6', '#a78bfa', '#14b8a6']
       chart.setOption({
         tooltip: { trigger: 'item', formatter: '{b}<br/>营收：¥{c}<br/>占比：{d}%' },
         legend: { bottom: 0, textStyle: { color: '#64748b' } },
@@ -382,7 +377,7 @@ export default {
           data: list.map((item, index) => ({
             name: item.name,
             value: Number(item.value || 0),
-            itemStyle: { color: ['#60a5fa', '#34d399', '#f59e0b', '#f472b6', '#a78bfa', '#14b8a6'][index % 6] },
+            itemStyle: { color: colorList[index % colorList.length] },
           })),
         }],
       })
@@ -391,6 +386,7 @@ export default {
     initStatusPie() {
       const chart = echarts.init(this.$refs.statusPieRef)
       const list = this.stats.orderStatusPie || []
+      const colorList = ['#38bdf8', '#f97316', '#22c55e', '#ef4444', '#8b5cf6']
       chart.setOption({
         tooltip: { trigger: 'item', formatter: '{b}<br/>{c} 单<br/>{d}%' },
         legend: { bottom: 0, textStyle: { color: '#64748b' } },
@@ -404,7 +400,7 @@ export default {
           data: list.map((item, index) => ({
             name: item.name,
             value: Number(item.value || 0),
-            itemStyle: { color: ['#38bdf8', '#f97316', '#22c55e', '#ef4444', '#8b5cf6'][index % 5] },
+            itemStyle: { color: colorList[index % colorList.length] },
           })),
         }],
       })
@@ -415,7 +411,7 @@ export default {
 </script>
 
 <style scoped>
-/* ===== 整体布局（复用 List.vue 容器样式） ===== */
+/* 全局页面容器 全站统一布局基底 */
 .film-list {
   height: 100vh;
   display: flex;
@@ -424,142 +420,140 @@ export default {
   overflow: hidden;
   padding: 20px;
   box-sizing: border-box;
-  background: rgb(250, 251, 252);
+  background: #fafbfc;
 }
 
-/* 页面头部（与 List.vue 完全一致） */
+/* 顶部页面栏 与列表页完全统一样式 */
 .page-header {
   flex: 0 0 auto;
-  padding: 20px 22px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
 .page-search-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-
-.page-search-bar__title {
-  min-width: 220px;
-}
-
-.page-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: 0.2px;
-}
-
-.page-subtitle {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #64748b;
+  width: 100%;
 }
 
 .search-form {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  flex: 1;
   justify-content: flex-end;
-}
-
-.search-submit-btn {
-  border-radius: 6px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .update-meta {
   background: #f8fafc;
-  padding: 6px 16px;
-  border-radius: 40px;
+  padding: 8px 18px;
+  border-radius: 999px;
   border: 1px solid #e2e8f0;
   font-size: 13px;
   color: #334155;
 }
 
 .update-meta span {
-  margin-right: 6px;
+  margin-right: 8px;
   color: #64748b;
 }
 
-/* KPI 卡片网格 */
+/* 统一全站主按钮样式 */
+.search-submit-btn {
+  height: 42px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  background: linear-gradient(135deg, #409eff, #66b1ff);
+  box-shadow: 0 4px 14px rgba(64, 158, 255, 0.22);
+  transition: all 0.25s ease;
+}
+
+.search-submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(64, 158, 255, 0.28);
+}
+
+/* KPI指标卡片网格布局 */
 .stats-grid {
   flex: 0 0 auto;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 16px;
-  margin-bottom: 4px;
 }
 
 .kpi-card {
-  padding: 18px 16px;
+  padding: 20px 20px;
   border-radius: 20px;
-  color: #fff;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.09);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
 }
 
 .kpi-card__label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  opacity: 0.95;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.96;
 }
 
 .kpi-card__value {
-  margin-top: 18px;
-  font-size: 28px;
-  font-weight: 900;
+  margin-top: 20px;
+  font-size: 30px;
+  font-weight: 800;
   line-height: 1;
 }
 
 .kpi-card__hint {
-  margin-top: 14px;
+  margin-top: 16px;
   font-size: 12px;
-  opacity: 0.88;
+  opacity: 0.9;
 }
 
+/* KPI渐变配色 全站统一色系 */
 .kpi-card--blue {
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
 }
 
 .kpi-card--cyan {
-  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, #0891b2, #06b6d4);
 }
 
 .kpi-card--green {
-  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  background: linear-gradient(135deg, #16a34a, #22c55e);
 }
 
 .kpi-card--orange {
-  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  background: linear-gradient(135deg, #d97706, #f59e0b);
 }
 
 .kpi-card--purple {
-  background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
 }
 
 .kpi-card--pink {
-  background: linear-gradient(135deg, #db2777 0%, #f472b6 100%);
+  background: linear-gradient(135deg, #db2777, #f472b6);
 }
 
-/* 图表卡片容器（复用 table-card 风格） */
+/* 外层大卡片容器 复用table-card毛玻璃 */
 .table-card {
   flex: 1;
   min-height: 0;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-  border-radius: 18px;
-  padding: 18px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  border-radius: 16px;
+  padding: 20px;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   overflow-y: auto;
 }
 
@@ -574,18 +568,24 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-height: 0;
 }
 
+/* 单张图表卡片 */
 .chart-card {
   background: #ffffff;
   border: 1px solid #eef2f7;
   border-radius: 16px;
-  padding: 12px;
-  transition: box-shadow 0.2s;
+  padding: 16px;
+  transition: all 0.25s ease;
 }
 
 .chart-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.05);
+}
+
+.chart-card--highlight {
+  border-left: 4px solid #f59e0b;
 }
 
 .chart-card__header {
@@ -593,28 +593,28 @@ export default {
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
   border-bottom: 1px solid #eef2f7;
 }
 
 .chart-card__header h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: #1e293b;
 }
 
 .chart-card__header p {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   font-size: 12px;
   color: #64748b;
 }
 
 .chart-tag {
   flex-shrink: 0;
-  padding: 4px 10px;
-  border-radius: 40px;
+  padding: 4px 12px;
+  border-radius: 999px;
   background: #eef2ff;
   color: #3b82f6;
   font-size: 11px;
@@ -626,6 +626,7 @@ export default {
   color: #d97706;
 }
 
+/* 图表高度统一规范 */
 .chart {
   width: 100%;
 }
@@ -650,7 +651,7 @@ export default {
   height: 280px;
 }
 
-/* 响应式布局（与 List.vue 风格统一） */
+/* 响应式适配 阶梯缩小布局 */
 @media (max-width: 1400px) {
   .dashboard-grid {
     grid-template-columns: 1fr 1.2fr;
@@ -682,6 +683,11 @@ export default {
 @media (max-width: 768px) {
   .film-list {
     padding: 12px;
+    gap: 12px;
+  }
+
+  .page-header {
+    padding: 16px;
   }
 
   .stats-grid {
@@ -689,12 +695,12 @@ export default {
     gap: 12px;
   }
 
-  .page-header {
-    padding: 14px 16px;
+  .kpi-card {
+    padding: 16px 16px;
   }
 
-  .page-title {
-    font-size: 18px;
+  .kpi-card__value {
+    font-size: 24px;
   }
 
   .chart--bar,

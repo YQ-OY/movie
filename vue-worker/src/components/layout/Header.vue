@@ -39,15 +39,9 @@
       <div class="drawer-content">
         <div class="drawer-main">
           <div class="drawer-header">
-            <el-upload
-              v-if="settingSubTab === 'profile'"
-              class="avatar-uploader"
-              :show-file-list="false"
-              :before-upload="beforeAvatarUpload"
-              :on-success="handleAvatarSuccess"
-              :action="uploadAction"
-              :headers="uploadHeaders"
-            >
+            <el-upload v-if="settingSubTab === 'profile'" class="avatar-uploader" :show-file-list="false"
+              :before-upload="beforeAvatarUpload" :on-success="handleAvatarSuccess" :action="uploadAction"
+              :headers="uploadHeaders">
               <el-avatar class="drawer-avatar" :size="72" :src="worker.avatar || defaultAvatar" />
               <div class="avatar-upload-tip">点击更换头像</div>
             </el-upload>
@@ -60,20 +54,14 @@
 
           <div class="drawer-panel">
             <div class="setting-sub-tabs">
-              <button
-                type="button"
-                class="setting-sub-tab"
+              <button type="button" class="setting-sub-tab"
                 :class="{ 'setting-sub-tab--active': settingSubTab === 'profile' }"
-                @click="switchSettingSubTab('profile')"
-              >
+                @click="switchSettingSubTab('profile')">
                 个人资料
               </button>
-              <button
-                type="button"
-                class="setting-sub-tab"
+              <button type="button" class="setting-sub-tab"
                 :class="{ 'setting-sub-tab--active': settingSubTab === 'account' }"
-                @click="switchSettingSubTab('account')"
-              >
+                @click="switchSettingSubTab('account')">
                 账号设置
               </button>
             </div>
@@ -128,14 +116,8 @@
             </template>
 
             <template v-else>
-              <el-form
-                :model="passwordForm"
-                :rules="passwordRules"
-                ref="passwordFormRef"
-                label-width="48px"
-                class="drawer-form drawer-form--panel password-form"
-                autocomplete="off"
-              >
+              <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef" label-width="48px"
+                class="drawer-form drawer-form--panel password-form" autocomplete="off">
                 <el-form-item>
                   <template #label>
                     <i class="iconfont icon-yonghu" />
@@ -146,40 +128,23 @@
                   <template #label>
                     <i class="iconfont icon-suo" />
                   </template>
-                  <el-input
-                    v-model="passwordForm.oldPassword"
-                    type="password"
-                    placeholder="请输入当前密码"
-                    show-password
-                    autocomplete="off"
-                    name="profile-verify-pwd"
-                    :readonly="oldPasswordReadonly"
-                    @focus="oldPasswordReadonly = false"
-                  />
+                  <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入当前密码" show-password
+                    autocomplete="off" name="profile-verify-pwd" :readonly="oldPasswordReadonly"
+                    @focus="oldPasswordReadonly = false" />
                 </el-form-item>
                 <el-form-item prop="newPassword">
                   <template #label>
                     <i class="iconfont icon-suo" />
                   </template>
-                  <el-input
-                    v-model="passwordForm.newPassword"
-                    type="password"
-                    placeholder="请输入新密码"
-                    show-password
-                    autocomplete="new-password"
-                  />
+                  <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" show-password
+                    autocomplete="new-password" />
                 </el-form-item>
                 <el-form-item prop="confirmPassword">
                   <template #label>
                     <i class="iconfont icon-suo" />
                   </template>
-                  <el-input
-                    v-model="passwordForm.confirmPassword"
-                    type="password"
-                    placeholder="请再次输入新密码"
-                    show-password
-                    autocomplete="new-password"
-                  />
+                  <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password
+                    autocomplete="new-password" />
                 </el-form-item>
               </el-form>
               <div class="drawer-actions drawer-actions--panel">

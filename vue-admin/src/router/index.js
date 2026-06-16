@@ -36,10 +36,6 @@ const routes = [
                 component: () => import("@/views/film/Arrange")
             },
             {
-                path: '/film/add',
-                component: () => import("@/views/film/Add")
-            },
-            {
                 path: '/film/poster',
                 component: () => import("@/views/film/Poster")
             },
@@ -65,10 +61,6 @@ const routes = [
             {
                 path: '/worker/daily',
                 component: () => import("@/views/worker/Daily")
-            },
-            {
-                path: '/worker/add',
-                component: () => import("@/views/worker/Add")
             },
             {
                 path: '/api',
