@@ -113,40 +113,22 @@
 
       <!-- 分页组件 -->
       <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[5, 10, 15, 20]"
-          :total="totalCount"
-          layout="total, sizes, prev, pager, next, jumper"
-          :pager-count="5"
-          :disabled="loading"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15, 20]"
+          :total="totalCount" layout="total, sizes, prev, pager, next, jumper" :pager-count="5" :disabled="loading"
+          @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
     </div>
 
-    <el-dialog
-        v-model="refundDialogVisible"
-        title="确认退款"
-        width="480px"
-        align-center
-        :close-on-click-modal="false"
-        @closed="resetRefundDialog"
-    >
-      <el-alert
-          title="将通过支付宝沙箱原路退款，退款成功后订单状态变为「已退款」，座位将释放。"
-          type="warning"
-          :closable="false"
-          show-icon
-          style="margin-bottom: 16px"
-      />
+    <el-dialog v-model="refundDialogVisible" title="确认退款" width="480px" align-center :close-on-click-modal="false"
+      @closed="resetRefundDialog">
+      <el-alert title="将通过支付宝沙箱原路退款，退款成功后订单状态变为「已退款」，座位将释放。" type="warning" :closable="false" show-icon
+        style="margin-bottom: 16px" />
       <div v-if="refundTarget" class="refund-dialog__info">
         <p><span>订单 ID</span>{{ refundTarget.order?.id }}</p>
         <p><span>电影</span>《{{ formatCell(refundTarget.film?.name) }}》</p>
         <p><span>座位</span>{{ formatCell(refundTarget.order?.seats) }}</p>
-        <p><span>放映</span>{{ formatCell(refundTarget.arrangement?.date) }} {{ formatCell(refundTarget.arrangement?.startTime) }}</p>
+        <p><span>放映</span>{{ formatCell(refundTarget.arrangement?.date) }} {{
+          formatCell(refundTarget.arrangement?.startTime) }}</p>
         <p><span>用户 ID</span>{{ formatCell(refundTarget.user?.id) }}</p>
         <p><span>支付时间</span>{{ formatCell(refundTarget.order?.payAt) }}</p>
         <p><span>退款金额</span><em class="refund-dialog__price">{{ moneyText(refundTarget.order?.price) }}</em></p>
@@ -261,9 +243,9 @@ export default {
       if (order.status === 2) {
         try {
           await this.$confirm(
-              '确定要撤销该订单吗？支付成功的订单撤销后将进入退款流程。',
-              '撤销订单',
-              { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+            '确定要撤销该订单吗？支付成功的订单撤销后将进入退款流程。',
+            '撤销订单',
+            { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
           )
           this.refundTarget = row
           this.refundDialogVisible = true

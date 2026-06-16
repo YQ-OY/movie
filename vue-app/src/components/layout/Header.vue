@@ -8,13 +8,8 @@
 
       <div class="header-center">
         <nav class="header-nav" aria-label="主导航">
-          <router-link
-            v-for="item in navItems"
-            :key="item.label"
-            :to="item.to"
-            class="nav-link"
-            :class="{ 'nav-link--active': isNavActive(item) }"
-          >
+          <router-link v-for="item in navItems" :key="item.label" :to="item.to" class="nav-link"
+            :class="{ 'nav-link--active': isNavActive(item) }">
             {{ item.label }}
           </router-link>
         </nav>
@@ -25,17 +20,9 @@
               筛选
             </button>
             <span class="search-filter-divider" aria-hidden="true" />
-            <el-autocomplete
-              v-model="state"
-              class="search-autocomplete"
-              popper-class="header-search-popper"
-              :fetch-suggestions="querySearchAsync"
-              placeholder="搜索电影名称"
-              clearable
-              :trigger-on-focus="false"
-              @select="handleSelect"
-              @keyup.enter="handleSearch"
-            />
+            <el-autocomplete v-model="state" class="search-autocomplete" popper-class="header-search-popper"
+              :fetch-suggestions="querySearchAsync" placeholder="搜索电影名称" clearable :trigger-on-focus="false"
+              @select="handleSelect" @keyup.enter="handleSearch" />
             <button class="search-btn" type="button" @click="handleSearch">
               搜索
             </button>
@@ -47,25 +34,14 @@
         <router-link v-if="!isLogin" to="/login" class="login-link">
           登录
         </router-link>
-        <button
-          v-else
-          class="avatar-trigger"
-          type="button"
-          aria-label="打开个人中心"
-          @click="openProfileDrawer('setting')"
-        >
+        <button v-else class="avatar-trigger" type="button" aria-label="打开个人中心" @click="openProfileDrawer('setting')">
           <span class="header-name">{{ user.nickname }}</span>
           <el-avatar class="user-avatar" :size="42" :src="user.avatar || defaultAvatar" />
         </button>
       </div>
 
-      <ProfileDrawer
-        v-if="isLogin"
-        v-model="drawerVisible"
-        :initial-tab="drawerTab"
-        @logout="handleLogout"
-        @user-updated="handleUserUpdated"
-      />
+      <ProfileDrawer v-if="isLogin" v-model="drawerVisible" :initial-tab="drawerTab" @logout="handleLogout"
+        @user-updated="handleUserUpdated" />
     </div>
   </header>
 </template>
@@ -553,5 +529,9 @@ export default {
 .header-search-popper .el-autocomplete-suggestion li.highlighted {
   background: var(--app-primary-bg);
   color: var(--app-primary-dark);
+}
+
+.profile-drawer {
+  --el-drawer-padding-primary: 0px !important;
 }
 </style>

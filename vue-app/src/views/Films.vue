@@ -1,20 +1,12 @@
 <template>
   <div class="films-page">
     <div class="phase-tabs">
-      <button
-        type="button"
-        class="phase-tab"
-        :class="{ 'phase-tab--active': releasePhase === 'showing' }"
-        @click="switchPhase('showing')"
-      >
+      <button type="button" class="phase-tab" :class="{ 'phase-tab--active': releasePhase === 'showing' }"
+        @click="switchPhase('showing')">
         正在上映
       </button>
-      <button
-        type="button"
-        class="phase-tab"
-        :class="{ 'phase-tab--active': releasePhase === 'upcoming' }"
-        @click="switchPhase('upcoming')"
-      >
+      <button type="button" class="phase-tab" :class="{ 'phase-tab--active': releasePhase === 'upcoming' }"
+        @click="switchPhase('upcoming')">
         待上映
       </button>
     </div>
@@ -24,11 +16,7 @@
         <li class="tags-line">
           <div class="tags-title">类型 :</div>
           <ul class="tags">
-            <li
-              v-for="item in typeList"
-              :key="'t-' + item"
-              :class="selectType === item ? 'active' : ''"
-            >
+            <li v-for="item in typeList" :key="'t-' + item" :class="selectType === item ? 'active' : ''">
               <router-link :to="buildFilterLink(item, null)">{{ item }}</router-link>
             </li>
           </ul>
@@ -36,11 +24,7 @@
         <li class="tags-line">
           <div class="tags-title">地区 :</div>
           <ul class="tags">
-            <li
-              v-for="item in regionList"
-              :key="'r-' + item"
-              :class="selectRegion === item ? 'active' : ''"
-            >
+            <li v-for="item in regionList" :key="'r-' + item" :class="selectRegion === item ? 'active' : ''">
               <router-link :to="buildFilterLink(null, item)">{{ item }}</router-link>
             </li>
           </ul>
@@ -58,19 +42,10 @@
     </div>
 
     <div v-loading="loading" class="film-grid-section">
-      <el-empty
-        v-if="!loading && filmList.length === 0"
-        class="films-empty"
-        description="暂无符合条件的电影"
-      />
+      <el-empty v-if="!loading && filmList.length === 0" class="films-empty" description="暂无符合条件的电影" />
 
       <div v-else class="film-grid-wrap">
-        <router-link
-          v-for="item in filmList"
-          :key="item.id"
-          class="film-card-link"
-          :to="'/film/info?fid=' + item.id"
-        >
+        <router-link v-for="item in filmList" :key="item.id" class="film-card-link" :to="'/film/info?fid=' + item.id">
           <el-card class="film-card" shadow="hover">
             <div class="poster-frame">
               <img class="poster-img" :src="item.cover" :alt="item.name">
@@ -84,18 +59,10 @@
     </div>
 
     <div v-if="totalCount > 0" class="films-pagination">
-      <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :page-sizes="[16, 32, 48, 64]"
-        :total="totalCount"
-        :disabled="loading"
-        :pager-count="5"
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[16, 32, 48, 64]"
+        :total="totalCount" :disabled="loading" :pager-count="5" background
+        layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
+        @current-change="handleCurrentChange" />
     </div>
   </div>
 </template>
@@ -113,8 +80,7 @@ export default {
       releasePhase: RELEASE_PHASE.SHOWING,
       selectType: '全部',
       selectRegion: '全部',
-      typeList: ['全部', '爱情', '喜剧', '科幻', '动画', "惊悚",'恐怖', '悬疑', '冒险', '动作', '犯罪',
-  '历史', '古装', '战争', '纪录片', '家庭', '传记', '武侠', '儿童', '短片', '其他'],
+      typeList: ['全部', '爱情', '喜剧', '科幻', '动画', "惊悚", '恐怖', '悬疑', '冒险', '动作', '犯罪', '历史', '古装', '战争', '纪录片', '家庭', '传记', '武侠', '儿童', '短片', '其他'],
       regionList: ['全部', '中国大陆', '中国香港', '中国台湾', '美国', '韩国', '日本', '泰国', '印度', '法国', '英国', '德国', '其他'],
       filmList: [],
       avgByFid: {},

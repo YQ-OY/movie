@@ -2,7 +2,8 @@ server:
   port: 8888
 
 minio:
-  endpoint: http://172.26.192.208:9000
+#  endpoint: http://172.26.192.208:9000
+  endpoint: http://localhost:9000
   bucket-name: movie
   access-key: minioadmin
   secret-key: minioadmin

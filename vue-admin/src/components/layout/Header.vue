@@ -1,257 +1,224 @@
 <template>
-<div>
-  <div class="header">
-    <div class="header-left">
-      <button class="header-icon icon-button" @click="toggleCollapse" type="button" aria-label="切换侧边栏">
-        <el-icon :size="20">
-          <Fold v-if="!isCollapse" />
-          <Expand v-else />
-        </el-icon>
-      </button>
-      <button class="header-icon icon-button" @click="refreshPage" type="button" aria-label="刷新页面">
-        <el-icon :size="20">
-          <Refresh />
-        </el-icon>
-      </button>
-      <el-breadcrumb separator="/" class="breadcrumb">
-        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item v-for="(item, idx) in breadcrumbs" :key="idx">
-          {{ item }}
-        </el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>
-    <div class="header-right">
-      <el-dropdown trigger="click" placement="bottom-end">
-        <button class="header-icon icon-button" type="button" aria-label="通知">
-          <span class="iconfont icon-tongzhi header-iconfont"></span>
-          <el-badge is-dot class="badge-dot" />
+  <div>
+    <div class="header">
+      <!-- 左侧 -->
+      <div class="header-left">
+        <button class="header-icon icon-button" @click="toggleCollapse" type="button" aria-label="切换侧边栏">
+          <el-icon :size="20">
+            <Fold v-if="!isCollapse" />
+            <Expand v-else />
+          </el-icon>
         </button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item v-for="item in list" :key="item.id || item.content">{{ item.content }}</el-dropdown-item>
-            <el-dropdown-item v-if="!list || list.length === 0">今日工作还没有上传</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-      <el-tooltip content="厅有独钟 - 管理系统" placement="bottom">
-        <button class="header-icon icon-button" type="button" aria-label="系统提醒">
-          <span class="iconfont icon-zhuyi header-iconfont"></span>
+        <button class="header-icon icon-button" @click="refreshPage" type="button" aria-label="刷新页面">
+          <el-icon :size="20">
+            <Refresh />
+          </el-icon>
         </button>
-      </el-tooltip>
-      <button class="avatar-trigger" type="button" aria-label="打开个人信息" @click="drawerVisible = true">
-        <el-avatar class="user-avatar" :size="38" :src="avatarUrl" />
-      </button>
+        <el-breadcrumb separator="/" class="breadcrumb">
+          <el-breadcrumb-item v-for="(item, idx) in breadcrumbs" :key="idx">
+            {{ item }}
+          </el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+      <!-- 右侧 -->
+      <div class="header-right">
+        <el-dropdown trigger="click" placement="bottom-end">
+          <button class="header-icon icon-button" type="button" aria-label="通知">
+            <span class="iconfont icon-tongzhi header-iconfont"></span>
+            <el-badge is-dot class="badge-dot" />
+          </button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item v-for="item in list" :key="item.id || item.content">{{ item.content
+              }}</el-dropdown-item>
+              <el-dropdown-item v-if="!list || list.length === 0">今日工作还没有上传</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <el-tooltip content="厅有独钟 - 管理系统" placement="bottom">
+          <button class="header-icon icon-button" type="button" aria-label="系统提醒">
+            <span class="iconfont icon-zhuyi header-iconfont"></span>
+          </button>
+        </el-tooltip>
+        <button class="avatar-trigger" type="button" aria-label="打开个人信息" @click="drawerVisible = true">
+          <el-avatar class="user-avatar" :size="38" :src="avatarUrl" />
+        </button>
+      </div>
     </div>
-  </div>
 
-  <el-drawer v-model="drawerVisible" direction="rtl" size="530px" :with-header="false" class="profile-drawer"
-    :class-name="'my-drawer'">
-    <div class="drawer-content">
-      <div class="drawer-main">
-        <div class="drawer-header">
-          <el-upload
-            v-if="!isWorkerLogin || settingSubTab === 'profile'"
-            class="avatar-uploader"
-            :show-file-list="false"
-            :before-upload="beforeAvatarUpload"
-            :on-success="handleAvatarSuccess"
-            :action="uploadAction"
-            :headers="uploadHeaders"
-          >
-            <el-avatar class="drawer-avatar" :size="72" :src="profileAvatar" />
-            <div class="avatar-upload-tip">点击更换头像</div>
-          </el-upload>
-          <el-avatar v-else class="drawer-avatar" :size="72" :src="profileAvatar" />
-          <div class="drawer-user">
-            <div class="drawer-name">{{ profileName }}</div>
-            <div class="drawer-role">{{ userRoleText }}</div>
-          </div>
-        </div>
-
-        <div v-if="isWorkerLogin" class="drawer-panel">
-          <div class="setting-sub-tabs">
-            <button
-              type="button"
-              class="setting-sub-tab"
-              :class="{ 'setting-sub-tab--active': settingSubTab === 'profile' }"
-              @click="switchSettingSubTab('profile')"
-            >
-              个人资料
-            </button>
-            <button
-              type="button"
-              class="setting-sub-tab"
-              :class="{ 'setting-sub-tab--active': settingSubTab === 'account' }"
-              @click="switchSettingSubTab('account')"
-            >
-              账号设置
-            </button>
+    <el-drawer v-model="drawerVisible" direction="rtl" size="530px" :with-header="false" class="profile-drawer"
+      :class-name="'my-drawer'">
+      <div class="drawer-content">
+        <div class="drawer-main">
+          <div class="drawer-header">
+            <el-upload v-if="!isWorkerLogin || settingSubTab === 'profile'" class="avatar-uploader"
+              :show-file-list="false" :before-upload="beforeAvatarUpload" :on-success="handleAvatarSuccess"
+              :action="uploadAction" :headers="uploadHeaders">
+              <el-avatar class="drawer-avatar" :size="72" :src="profileAvatar" />
+              <div class="avatar-upload-tip">点击更换头像</div>
+            </el-upload>
+            <el-avatar v-else class="drawer-avatar" :size="72" :src="profileAvatar" />
+            <div class="drawer-user">
+              <div class="drawer-name">{{ profileName }}</div>
+              <div class="drawer-role">{{ userRoleText }}</div>
+            </div>
           </div>
 
-          <template v-if="settingSubTab === 'profile'">
-            <el-form :model="workerInfo" label-width="48px" class="drawer-form drawer-form--panel">
-              <el-form-item>
-                <template #label>
-                  <i class="iconfont icon-yonghu" />
-                </template>
-                <el-input v-model="workerInfo.username" disabled placeholder="用户名" />
-              </el-form-item>
+          <div v-if="isWorkerLogin" class="drawer-panel">
+            <div class="setting-sub-tabs">
+              <button type="button" class="setting-sub-tab"
+                :class="{ 'setting-sub-tab--active': settingSubTab === 'profile' }"
+                @click="switchSettingSubTab('profile')">
+                个人资料
+              </button>
+              <button type="button" class="setting-sub-tab"
+                :class="{ 'setting-sub-tab--active': settingSubTab === 'account' }"
+                @click="switchSettingSubTab('account')">
+                账号设置
+              </button>
+            </div>
+
+            <template v-if="settingSubTab === 'profile'">
+              <el-form :model="workerInfo" label-width="48px" class="drawer-form drawer-form--panel">
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-yonghu" />
+                  </template>
+                  <el-input v-model="workerInfo.username" disabled placeholder="用户名" />
+                </el-form-item>
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-nicheng drawer-icon-nickname" />
+                  </template>
+                  <el-input v-model="workerInfo.nickname" placeholder="请输入昵称" />
+                </el-form-item>
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-shoujihao" />
+                  </template>
+                  <el-input v-model="workerInfo.phone" placeholder="请输入手机号" maxlength="11" />
+                </el-form-item>
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-xingbie" />
+                  </template>
+                  <el-select v-model="workerInfo.gender" placeholder="请选择性别" style="width: 100%">
+                    <el-option label="男" value="男" />
+                    <el-option label="女" value="女" />
+                  </el-select>
+                </el-form-item>
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-yuangongguanli" />
+                  </template>
+                  <el-select v-model="workerInfo.department" placeholder="请选择部门" style="width: 100%">
+                    <el-option label="客服部" value="客服部" />
+                    <el-option label="运营部" value="运营部" />
+                    <el-option label="宣传部" value="宣传部" />
+                    <el-option label="策划部" value="策划部" />
+                    <el-option label="人事部" value="人事部" />
+                    <el-option label="监管部" value="监管部" />
+                  </el-select>
+                </el-form-item>
+              </el-form>
+              <div class="drawer-actions drawer-actions--panel">
+                <el-button type="primary" class="drawer-save-button" @click="saveProfile">保存资料</el-button>
+                <el-button class="drawer-logout-button" @click="handleLogout">退出登录</el-button>
+              </div>
+            </template>
+
+            <template v-else>
+              <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef" label-width="48px"
+                class="drawer-form drawer-form--panel password-form" autocomplete="off">
+                <el-form-item>
+                  <template #label>
+                    <i class="iconfont icon-yonghu" />
+                  </template>
+                  <el-input v-model="workerInfo.username" disabled autocomplete="off" />
+                </el-form-item>
+                <el-form-item prop="oldPassword">
+                  <template #label>
+                    <i class="iconfont icon-suo" />
+                  </template>
+                  <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入当前密码" show-password
+                    autocomplete="off" name="profile-verify-pwd" :readonly="oldPasswordReadonly"
+                    @focus="oldPasswordReadonly = false" />
+                </el-form-item>
+                <el-form-item prop="newPassword">
+                  <template #label>
+                    <i class="iconfont icon-suo" />
+                  </template>
+                  <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" show-password
+                    autocomplete="new-password" />
+                </el-form-item>
+                <el-form-item prop="confirmPassword">
+                  <template #label>
+                    <i class="iconfont icon-suo" />
+                  </template>
+                  <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password
+                    autocomplete="new-password" />
+                </el-form-item>
+              </el-form>
+              <div class="drawer-actions drawer-actions--panel">
+                <el-button type="primary" class="drawer-save-button" @click="changePassword">修改密码</el-button>
+              </div>
+            </template>
+          </div>
+
+          <template v-else>
+            <el-form :model="adminInfo" label-width="48px" class="drawer-form">
               <el-form-item>
                 <template #label>
                   <i class="iconfont icon-nicheng drawer-icon-nickname" />
                 </template>
-                <el-input v-model="workerInfo.nickname" placeholder="请输入昵称" />
+                <el-input v-model="adminInfo.nickname" placeholder="请输入昵称" />
               </el-form-item>
               <el-form-item>
                 <template #label>
                   <i class="iconfont icon-shoujihao" />
                 </template>
-                <el-input v-model="workerInfo.phone" placeholder="请输入手机号" maxlength="11" />
+                <el-input v-model="adminInfo.phone" placeholder="请输入手机号" />
+              </el-form-item>
+              <el-form-item>
+                <template #label>
+                  <i class="iconfont icon-youxiang" />
+                </template>
+                <el-input v-model="adminInfo.email" placeholder="请输入邮箱" />
+              </el-form-item>
+              <el-form-item>
+                <template #label>
+                  <i class="iconfont icon-shengri" />
+                </template>
+                <el-date-picker v-model="adminInfo.birthday" type="date" value-format="YYYY-MM-DD" placeholder="选择生日"
+                  style="width: 100%" />
               </el-form-item>
               <el-form-item>
                 <template #label>
                   <i class="iconfont icon-xingbie" />
                 </template>
-                <el-select v-model="workerInfo.gender" placeholder="请选择性别" style="width: 100%">
+                <el-select v-model="adminInfo.gender" placeholder="请选择性别" style="width: 100%">
                   <el-option label="男" value="男" />
                   <el-option label="女" value="女" />
+                  <el-option label="保密" value="保密" />
                 </el-select>
               </el-form-item>
               <el-form-item>
                 <template #label>
-                  <i class="iconfont icon-yuangongguanli" />
+                  <i class="iconfont icon-gerenjianjiexiao" />
                 </template>
-                <el-select v-model="workerInfo.department" placeholder="请选择部门" style="width: 100%">
-                  <el-option label="客服部" value="客服部" />
-                  <el-option label="运营部" value="运营部" />
-                  <el-option label="宣传部" value="宣传部" />
-                  <el-option label="策划部" value="策划部" />
-                  <el-option label="人事部" value="人事部" />
-                  <el-option label="监管部" value="监管部" />
-                </el-select>
+                <el-input v-model="adminInfo.info" type="textarea" :rows="3" placeholder="介绍一下自己" />
               </el-form-item>
             </el-form>
-            <div class="drawer-actions drawer-actions--panel">
-              <el-button type="primary" class="drawer-save-button" @click="saveProfile">保存资料</el-button>
-              <el-button class="drawer-logout-button" @click="handleLogout">退出登录</el-button>
-            </div>
-          </template>
-
-          <template v-else>
-            <el-form
-              :model="passwordForm"
-              :rules="passwordRules"
-              ref="passwordFormRef"
-              label-width="48px"
-              class="drawer-form drawer-form--panel password-form"
-              autocomplete="off"
-            >
-              <el-form-item>
-                <template #label>
-                  <i class="iconfont icon-yonghu" />
-                </template>
-                <el-input v-model="workerInfo.username" disabled autocomplete="off" />
-              </el-form-item>
-              <el-form-item prop="oldPassword">
-                <template #label>
-                  <i class="iconfont icon-suo" />
-                </template>
-                <el-input
-                  v-model="passwordForm.oldPassword"
-                  type="password"
-                  placeholder="请输入当前密码"
-                  show-password
-                  autocomplete="off"
-                  name="profile-verify-pwd"
-                  :readonly="oldPasswordReadonly"
-                  @focus="oldPasswordReadonly = false"
-                />
-              </el-form-item>
-              <el-form-item prop="newPassword">
-                <template #label>
-                  <i class="iconfont icon-suo" />
-                </template>
-                <el-input
-                  v-model="passwordForm.newPassword"
-                  type="password"
-                  placeholder="请输入新密码"
-                  show-password
-                  autocomplete="new-password"
-                />
-              </el-form-item>
-              <el-form-item prop="confirmPassword">
-                <template #label>
-                  <i class="iconfont icon-suo" />
-                </template>
-                <el-input
-                  v-model="passwordForm.confirmPassword"
-                  type="password"
-                  placeholder="请再次输入新密码"
-                  show-password
-                  autocomplete="new-password"
-                />
-              </el-form-item>
-            </el-form>
-            <div class="drawer-actions drawer-actions--panel">
-              <el-button type="primary" class="drawer-save-button" @click="changePassword">修改密码</el-button>
-            </div>
           </template>
         </div>
 
-        <template v-else>
-          <el-form :model="adminInfo" label-width="48px" class="drawer-form">
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-nicheng drawer-icon-nickname" />
-              </template>
-              <el-input v-model="adminInfo.nickname" placeholder="请输入昵称" />
-            </el-form-item>
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-shoujihao" />
-              </template>
-              <el-input v-model="adminInfo.phone" placeholder="请输入手机号" />
-            </el-form-item>
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-youxiang" />
-              </template>
-              <el-input v-model="adminInfo.email" placeholder="请输入邮箱" />
-            </el-form-item>
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-shengri" />
-              </template>
-              <el-date-picker v-model="adminInfo.birthday" type="date" value-format="YYYY-MM-DD" placeholder="选择生日"
-                style="width: 100%" />
-            </el-form-item>
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-xingbie" />
-              </template>
-              <el-select v-model="adminInfo.gender" placeholder="请选择性别" style="width: 100%">
-                <el-option label="男" value="男" />
-                <el-option label="女" value="女" />
-                <el-option label="保密" value="保密" />
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <template #label>
-                <i class="iconfont icon-gerenjianjiexiao" />
-              </template>
-              <el-input v-model="adminInfo.info" type="textarea" :rows="3" placeholder="介绍一下自己" />
-            </el-form-item>
-          </el-form>
-        </template>
+        <div v-if="!isWorkerLogin" class="drawer-actions">
+          <el-button type="primary" class="drawer-save-button" @click="saveProfile">保存资料</el-button>
+          <el-button class="drawer-logout-button" @click="handleLogout">退出登录</el-button>
+        </div>
       </div>
-
-      <div v-if="!isWorkerLogin" class="drawer-actions">
-        <el-button type="primary" class="drawer-save-button" @click="saveProfile">保存资料</el-button>
-        <el-button class="drawer-logout-button" @click="handleLogout">退出登录</el-button>
-      </div>
-    </div>
-  </el-drawer>
-</div>
+    </el-drawer>
+  </div>
 </template>
 
 <script>
@@ -596,16 +563,6 @@ export default {
   margin-left: 8px;
   font-size: 14px;
   line-height: 32px;
-}
-
-:deep(.el-breadcrumb__inner) {
-  color: #667085;
-  font-weight: 400;
-}
-
-:deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
-  color: #1d2939;
-  font-weight: 600;
 }
 
 .avatar-trigger {

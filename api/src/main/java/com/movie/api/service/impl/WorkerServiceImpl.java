@@ -81,11 +81,26 @@ public class WorkerServiceImpl implements WorkerService {
     @Override
     public void update(Worker worker) throws Exception {
         ValidationUtil.requireValidMobileCN(worker.getPhone(), "联系电话");
-        Worker one = workerMapper.selectOne(new QueryWrapper<Worker>().in("username", worker.getUsername()));
+
+        // 1. 先查出数据库中的原有记录
+        Worker existing = workerMapper.selectById(worker.getId());
+        if (existing == null) {
+            throw new Exception("员工不存在");
+        }
+
+        // 2. 检查用户名唯一性
+        Worker one = workerMapper.selectOne(new QueryWrapper<Worker>().eq("username", worker.getUsername()));
         if (one != null && !one.getId().equals(worker.getId())) {
             throw new Exception("已存在的用户名");
         }
-        worker.setPassword(bCryptPasswordEncoder.encode(worker.getPassword()));
+
+        // 3. 安全处理密码：只有传入明文新密码时才加密，否则保留原密码
+        if (StringUtils.hasText(worker.getPassword()) && !worker.getPassword().startsWith("$2")) {
+            worker.setPassword(bCryptPasswordEncoder.encode(worker.getPassword()));
+        } else {
+            worker.setPassword(existing.getPassword());
+        }
+
         worker.setUpdateAt(DataTimeUtil.getNowTimeString());
         workerMapper.updateById(worker);
     }

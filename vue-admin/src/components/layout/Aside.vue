@@ -169,18 +169,12 @@
           </el-sub-menu>
 
           <!-- 每日工作 -->
-          <el-menu-item index="/worker/daily" @click="navigate('/worker/daily')">
+          <el-menu-item index="/worker/daily" @click="navigate('/worker/daily')"
+            style="padding-left: 20px !important; margin: 0 !important;">
             <el-icon>
               <List />
             </el-icon>
             <span>每日工作</span>
-          </el-menu-item>
-
-          <el-menu-item index="/setting" @click="navigate('/setting')">
-            <el-icon>
-              <Setting />
-            </el-icon>
-            <span>个人设置</span>
           </el-menu-item>
         </template>
       </el-menu>
