@@ -17,6 +17,7 @@ import jakarta.annotation.Resource;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -157,6 +158,29 @@ public class MinioUtils {
             }
             log.warn("MinIO 删除对象失败: {}", objectName, e);
         }
+    }
+
+    /** 从 MinIO 对象名、代理 URL 或直链中解析 object key */
+    public String resolveObjectKey(String idOrUrl) {
+        if (idOrUrl == null || idOrUrl.isBlank()) {
+            return idOrUrl;
+        }
+        String value = idOrUrl.trim();
+        int keyIdx = value.indexOf("key=");
+        if (keyIdx >= 0) {
+            String encoded = value.substring(keyIdx + 4);
+            int amp = encoded.indexOf('&');
+            if (amp >= 0) {
+                encoded = encoded.substring(0, amp);
+            }
+            return URLDecoder.decode(encoded, StandardCharsets.UTF_8);
+        }
+        String bucketPrefix = "/" + bucketName + "/";
+        int bucketIdx = value.indexOf(bucketPrefix);
+        if (bucketIdx >= 0) {
+            return value.substring(bucketIdx + bucketPrefix.length());
+        }
+        return value;
     }
 
     private boolean isSafeObjectKey(String key) {
