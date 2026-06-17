@@ -1,7 +1,7 @@
 <template>
   <div class="app">
 
-    <el-carousel height="500px" indicator-position="outside">
+    <el-carousel height="600px" indicator-position="outside">
       <el-carousel-item v-for="(item, index) in posterList" :key="index">
         <div class="banner-slide">
           <img class="banner-slide__img" alt="" :src="item.url">

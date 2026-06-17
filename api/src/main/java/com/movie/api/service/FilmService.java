@@ -9,7 +9,7 @@ public interface FilmService {
 
     void save(Film film);
 
-    void deleteById(String id);
+    void deleteById(String id) throws Exception;
 
     List<Film> findAll();
 

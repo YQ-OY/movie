@@ -74,6 +74,7 @@
         title="申请退款"
         width="440px"
         align-center
+        class="refund-dialog-modal"
         :close-on-click-modal="false"
         @closed="resetRefundDialog"
     >
@@ -234,20 +235,61 @@ export default {
 <style scoped>
 @import "../../assets/css/ticket-item.css";
 
+:deep(.refund-dialog-modal .el-dialog__header) {
+  border-bottom: 1px solid var(--app-border);
+  margin-right: 0;
+  padding-bottom: 14px;
+}
+
+:deep(.refund-dialog-modal .el-dialog__title) {
+  color: var(--app-title);
+  font-weight: 600;
+}
+
+:deep(.refund-dialog-modal .el-dialog__body) {
+  color: var(--app-text);
+}
+
+:deep(.refund-dialog-modal .el-dialog__footer) {
+  border-top: 1px solid var(--app-border);
+  padding-top: 14px;
+}
+
+:deep(.refund-dialog-modal .el-alert--warning) {
+  background: rgba(255, 187, 0, 0.1);
+  border: 1px solid rgba(255, 187, 0, 0.28);
+}
+
+:deep(.refund-dialog-modal .el-alert__title) {
+  color: #ffd04a;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+:deep(.refund-dialog-modal .el-alert .el-alert__icon) {
+  color: #ffbb00;
+}
+
 .refund-dialog__info {
   margin-top: 20px;
   padding: 16px 18px;
-  background: #f5f7fa;
-  border-radius: 8px;
+  background: var(--app-surface-muted);
+  border: 1px solid var(--app-border-strong);
+  border-radius: 12px;
   font-size: 14px;
   line-height: 2;
-  color: var(--app-text-secondary);
+  color: var(--app-text);
+}
+
+.refund-dialog__info p {
+  margin: 0;
 }
 
 .refund-dialog__info span {
   display: inline-block;
   width: 48px;
-  color: var(--app-text-muted);
+  color: var(--app-text-secondary);
+  font-weight: 500;
 }
 
 .refund-dialog__price {

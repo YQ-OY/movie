@@ -5,7 +5,7 @@
       <div class="search-container">
         <!-- 左侧：搜索筛选区域 -->
         <div class="search-filters">
-          <el-input v-model="searchKeyword" clearable placeholder="用户名 / 部门" class="search-item search-item--name"
+          <el-input v-model="searchKeyword" clearable placeholder="用户名" class="search-item search-item--name"
             @keyup.enter="handleSearch" />
         </div>
 
@@ -49,14 +49,6 @@
         :row-style="{ height: '72px' }" style="width: 100%">
         <el-table-column label="员工 ID" min-width="200" show-overflow-tooltip prop="id" />
         <el-table-column label="用户名" min-width="120" prop="username" />
-        <el-table-column label="所在部门" min-width="120" align="center">
-          <template #default="scope">
-            <el-tag v-if="scope.row.department" type="primary" effect="light" :disable-transitions="true">
-              {{ scope.row.department }}
-            </el-tag>
-            <span v-else>—</span>
-          </template>
-        </el-table-column>
         <el-table-column label="联系电话" min-width="140" prop="phone" />
         <el-table-column label="入职时间" min-width="180" prop="createAt" />
         <el-table-column label="状态" min-width="140" align="center">
@@ -137,9 +129,6 @@
               </el-form-item>
               <el-form-item label="联系电话">
                 <el-input v-model="editForm.phone" placeholder="联系电话" maxlength="11" show-word-limit />
-              </el-form-item>
-              <el-form-item label="所在部门">
-                <el-input v-model="editForm.department" placeholder="部门名称" />
               </el-form-item>
               <el-form-item label="性别">
                 <el-select v-model="editForm.gender" placeholder="请选择性别" style="width: 100%">
@@ -358,7 +347,6 @@ export default {
         item.id ?? '—',
         item.username ?? '—',
         item.nickname ?? '—',
-        item.department ?? '—',
         item.phone ?? '—',
         item.gender ?? '—',
         item.entry ? '在职' : '离职',
@@ -366,7 +354,7 @@ export default {
       ]))
       downloadCsv(
         `员工列表_${new Date().toISOString().slice(0, 10)}.csv`,
-        ['ID', '用户名', '昵称', '部门', '电话', '性别', '状态', '入职时间'],
+        ['ID', '用户名', '昵称', '电话', '性别', '状态', '入职时间'],
         rows
       )
     },
@@ -403,13 +391,12 @@ export default {
       this.editForm = {
         id: '',
         username: '',
-        password: '',
+        password: '000000',
         nickname: '',
         gender: '保密',
         phone: '',
         avatar: '',
         entry: true,
-        department: '',
         createAt: '',
         updateAt: '',
       }

@@ -3,7 +3,9 @@ package com.movie.api.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.movie.api.mapper.ArrangementMapper;
 import com.movie.api.mapper.FilmMapper;
+import com.movie.api.model.entity.Arrangement;
 import com.movie.api.model.entity.Film;
 import com.movie.api.model.vo.PageResult;
 import com.movie.api.service.FilmService;
@@ -25,6 +27,9 @@ public class FilmServiceImpl implements FilmService {
     @Resource
     private FilmMapper filmMapper;
 
+    @Resource
+    private ArrangementMapper arrangementMapper;
+
     // 保存电影，默认热度为0
     @Override
     public void save(Film film) {
@@ -36,7 +41,12 @@ public class FilmServiceImpl implements FilmService {
     // 根据ID删除电影
     @CacheEvict
     @Override
-    public void deleteById(String id) {
+    public void deleteById(String id) throws Exception {
+        Long arrangementCount = arrangementMapper.selectCount(
+                new LambdaQueryWrapper<Arrangement>().eq(Arrangement::getFid, id));
+        if (arrangementCount != null && arrangementCount > 0) {
+            throw new Exception("该电影存在排片，无法删除");
+        }
         filmMapper.deleteById(id);
     }
 

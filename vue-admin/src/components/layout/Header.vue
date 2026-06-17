@@ -102,16 +102,6 @@
                     <el-option label="女" value="女" />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="部门">
-                  <el-select v-model="workerInfo.department" placeholder="请选择部门" style="width: 100%">
-                    <el-option label="客服部" value="客服部" />
-                    <el-option label="运营部" value="运营部" />
-                    <el-option label="宣传部" value="宣传部" />
-                    <el-option label="策划部" value="策划部" />
-                    <el-option label="人事部" value="人事部" />
-                    <el-option label="监管部" value="监管部" />
-                  </el-select>
-                </el-form-item>
               </el-form>
               <div class="drawer-actions drawer-actions--panel">
                 <el-button type="primary" class="drawer-save-button" @click="saveProfile">
@@ -235,7 +225,6 @@ export default {
         phone: '',
         gender: '',
         avatar: '',
-        department: '',
       },
       passwordForm: {
         oldPassword: '',

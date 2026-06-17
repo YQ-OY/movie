@@ -33,9 +33,6 @@ public class Worker implements Serializable {
     //入职
     private boolean entry;
 
-    //部门
-    private String department;
-
     private String createAt;
 
     private String updateAt;

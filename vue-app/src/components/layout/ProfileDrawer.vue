@@ -20,14 +20,14 @@
             :action="uploadAction"
             :headers="uploadHeaders"
           >
-            <el-avatar class="drawer-avatar" :size="72" :src="userInfo.avatar || defaultAvatar" />
+            <el-avatar class="drawer-avatar" :size="72" :src="displayAvatar" />
             <div class="avatar-upload-tip">点击更换头像</div>
           </el-upload>
           <el-avatar
             v-else
             class="drawer-avatar"
             :size="72"
-            :src="userInfo.avatar || defaultAvatar"
+            :src="displayAvatar"
           />
           <div class="drawer-user">
             <div class="drawer-name">{{ userInfo.nickname || '用户' }}</div>
@@ -357,6 +357,10 @@ export default {
       const token = localStorage.getItem('token')
       return token ? { Authorization: token } : {}
     },
+    displayAvatar() {
+      const avatar = this.profileEditing ? this.profileDraft.avatar : this.userInfo.avatar
+      return avatar || this.defaultAvatar
+    },
   },
   methods: {
     handleOpen() {
@@ -416,7 +420,10 @@ export default {
     saveProfile() {
       this.$refs.profileFormRef.validate(valid => {
         if (!valid) return
-        const { password, ...payload } = this.profileDraft
+        const { password, ...payload } = {
+          ...this.profileDraft,
+          avatar: this.profileDraft.avatar || this.userInfo.avatar,
+        }
         updateUser(payload, { silent: true }).then(res => {
           if (res.success) {
             const { password: _, ...profile } = res.data || {}
@@ -475,11 +482,14 @@ export default {
     handleAvatarSuccess(res) {
       const url = typeof res === 'string' ? res : (res?.data || '')
       if (!url) return
-      const { password, ...payload } = { ...this.userInfo, avatar: url }
-      updateUser(payload).then(res => {
+      this.profileDraft.avatar = url
+      this.userInfo = { ...this.userInfo, avatar: url }
+      const { password, ...payload } = { ...this.profileDraft, avatar: url }
+      updateUser(payload, { silent: true }).then(res => {
         if (res.success) {
           const { password: _, ...profile } = res.data || {}
           this.userInfo = { ...this.userInfo, ...profile, avatar: url }
+          this.profileDraft.avatar = url
           this.$message.success('头像上传成功')
           this.$emit('user-updated', this.userInfo)
         }

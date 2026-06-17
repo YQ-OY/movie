@@ -178,15 +178,16 @@ export default {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(145deg, #12141a 0%, #1e2636 42%, #3d2a5c 78%, #6c5ce7 100%);
+  background: url("../assets/img/login.jpg") center / cover no-repeat;
 }
 
 .auth-bg::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 75% 45% at 20% 0%, rgba(108, 92, 231, 0.35), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(90, 132, 253, 0.22), transparent 45%);
+  background:
+    linear-gradient(120deg, rgba(12, 16, 28, 0.62) 0%, rgba(18, 24, 42, 0.42) 45%, rgba(10, 14, 26, 0.55) 100%),
+    radial-gradient(ellipse 70% 50% at 85% 25%, rgba(108, 92, 231, 0.16), transparent 55%);
   pointer-events: none;
 }
 
@@ -251,26 +252,28 @@ export default {
   letter-spacing: 0.12em;
   position: relative;
   z-index: 1;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
 }
 
 .auth-brand__sub {
   margin: 0;
   font-size: 14px;
-  opacity: 0.9;
+  opacity: 0.92;
   letter-spacing: 0.08em;
   line-height: 1.6;
   position: relative;
   z-index: 1;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.66);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 20px;
-  padding: clamp(28px, 4vw, 40px) clamp(24px, 4vw, 36px);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  backdrop-filter: saturate(1.12) blur(20px);
-  -webkit-backdrop-filter: saturate(1.12) blur(20px);
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 22px;
+  padding: clamp(32px, 4.5vw, 44px) clamp(28px, 4.5vw, 40px);
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  backdrop-filter: saturate(1.18) blur(26px);
+  -webkit-backdrop-filter: saturate(1.18) blur(26px);
 }
 
 .auth-card__head {
@@ -287,52 +290,63 @@ export default {
 
 .auth-card__hint {
   margin: 0 0 20px;
-  font-size: 13px;
-  color: #909399;
+  font-size: 14px;
+  color: #4a5160;
+  font-weight: 500;
   letter-spacing: 0.04em;
 }
 
 .auth-form :deep(.el-form-item) {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .auth-form :deep(.el-form-item__label) {
-  color: #606266;
+  color: #4a4f5c;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 0.06em;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
 }
 
 .auth-input-icon {
-  color: #909399;
-  font-size: 18px;
+  color: #6c5ce7;
+  font-size: 19px;
+}
+
+.auth-form :deep(.el-input__prefix .el-icon),
+.auth-form :deep(.el-input__suffix .el-icon) {
+  color: #6c5ce7;
+  font-size: 19px;
 }
 
 .auth-form :deep(.el-input__wrapper) {
-  border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.82) !important;
-  box-shadow: 0 0 0 1px rgba(220, 223, 230, 0.95) inset !important;
-  padding-left: 12px;
+  border-radius: 14px;
+  min-height: 50px;
+  padding: 4px 14px;
+  background-color: rgba(255, 255, 255, 0.55) !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5) inset !important;
   transition: background-color 0.2s, box-shadow 0.2s;
 }
 
 .auth-form :deep(.el-input__wrapper:hover) {
-  background-color: #fff !important;
-  box-shadow: 0 0 0 1px #c0c4cc inset !important;
+  background-color: rgba(255, 255, 255, 0.68) !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.65) inset !important;
 }
 
 .auth-form :deep(.el-input__wrapper.is-focus) {
-  background-color: #fff !important;
-  box-shadow: 0 0 0 1px #6c5ce7 inset, 0 0 0 3px rgba(108, 92, 231, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.74) !important;
+  box-shadow: 0 0 0 1px #6c5ce7 inset, 0 0 0 4px rgba(108, 92, 231, 0.14) !important;
 }
 
 .auth-form :deep(.el-input__inner) {
   color: #303133 !important;
+  font-size: 15px;
+  height: 42px;
+  line-height: 42px;
 }
 
 .auth-form :deep(.el-input__inner::placeholder) {
-  color: #a8abb2 !important;
+  color: #8b93a1 !important;
 }
 
 .auth-form :deep(.el-input__count-inner) {
@@ -343,7 +357,7 @@ export default {
 .auth-form :deep(.el-input__inner:-webkit-autofill),
 .auth-form :deep(.el-input__inner:-webkit-autofill:hover),
 .auth-form :deep(.el-input__inner:-webkit-autofill:focus) {
-  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.92) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.72) inset !important;
   -webkit-text-fill-color: #303133 !important;
   caret-color: #303133;
   transition: background-color 5000s ease-in-out 0s;
@@ -372,9 +386,9 @@ export default {
 
 .auth-submit {
   width: 100%;
-  margin-top: 10px;
-  height: 48px;
-  border-radius: 12px;
+  margin-top: 12px;
+  height: 52px;
+  border-radius: 14px;
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -409,8 +423,9 @@ export default {
 }
 
 .auth-muted {
-  font-size: 13px;
-  color: #909399;
+  font-size: 14px;
+  color: #4a5160;
+  font-weight: 500;
   margin-right: 6px;
 }
 

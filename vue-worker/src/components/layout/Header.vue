@@ -48,7 +48,7 @@
             <el-avatar v-else class="drawer-avatar" :size="72" :src="worker.avatar || defaultAvatar" />
             <div class="drawer-user">
               <div class="drawer-name">{{ worker.username || '客服' }}</div>
-              <div class="drawer-role">{{ worker.department || '未设置部门' }}</div>
+              <div class="drawer-role">客服人员</div>
             </div>
           </div>
 
@@ -93,19 +93,6 @@
                   <el-select v-model="worker.gender" placeholder="请选择性别" style="width: 100%">
                     <el-option label="男" value="男" />
                     <el-option label="女" value="女" />
-                  </el-select>
-                </el-form-item>
-                <el-form-item>
-                  <template #label>
-                    <i class="iconfont icon-yuangongguanli" />
-                  </template>
-                  <el-select v-model="worker.department" placeholder="请选择部门" style="width: 100%">
-                    <el-option label="客服部" value="客服部" />
-                    <el-option label="运营部" value="运营部" />
-                    <el-option label="宣传部" value="宣传部" />
-                    <el-option label="策划部" value="策划部" />
-                    <el-option label="人事部" value="人事部" />
-                    <el-option label="监管部" value="监管部" />
                   </el-select>
                 </el-form-item>
               </el-form>
@@ -181,7 +168,6 @@ export default {
         phone: '',
         gender: '',
         avatar: '',
-        department: '',
       },
       defaultAvatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
       list: [],

@@ -149,15 +149,9 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="320" align="right" fixed="right">
+        <el-table-column label="操作" width="220" align="right" fixed="right">
           <template #default="scope">
             <div class="action-buttons">
-              <el-button size="small" type="success" plain @click="handleBoxOffice(scope.$index, scope.row)">
-                <el-icon>
-                  <Ticket />
-                </el-icon>
-                <span>统计票房</span>
-              </el-button>
               <el-button size="small" type="primary" plain @click="handleEdit(scope.$index, scope.row)">
                 <el-icon>
                   <Edit />
@@ -208,11 +202,11 @@
 <script>
 import { listArrangementPage, FindAllArrangement, DeleteArrangement, UpdateArrangement, ListAllFilm } from "@/api/film";
 import { computeEndTimeHms } from "@/utils/arrangementEnd";
-import { Ticket, Edit, Delete, WarningFilled, Search, Refresh } from '@element-plus/icons-vue'
+import { Edit, Delete, WarningFilled, Search, Refresh } from '@element-plus/icons-vue'
 
 export default {
   name: "Arrange",
-  components: { Ticket, Edit, Delete, WarningFilled, Search, Refresh },
+  components: { Edit, Delete, WarningFilled, Search, Refresh },
   data() {
     return {
       dialog: false,
@@ -349,22 +343,6 @@ export default {
       } catch (error) {
         console.error('删除排片失败', error)
       }
-    },
-
-    handleBoxOffice(index, row) {
-      this.$prompt('请输入此场次的票房', '票房统计', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPattern: /^\d+(\.\d+)?$/,
-        inputErrorMessage: '请输入不小于 0 的数字',
-      }).then(({ value }) => {
-        // ... 校验逻辑
-        const updatedRow = { ...row, boxOffice: value };
-        UpdateArrangement(updatedRow).then(() => {
-          this.$message.success('票房统计成功');
-          this.loadArrangementList();   // 刷新列表
-        });
-      }).catch(() => { /* 取消操作 */ });
     },
 
     async loadArrangementList() {

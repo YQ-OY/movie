@@ -76,7 +76,7 @@ public class FilmController {
     @DeleteMapping("/{id}")
     @Operation(summary = "根据id删除电影")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_FILM_MANAGE')")
-    public void deleteById(@PathVariable String id) {
+    public void deleteById(@PathVariable String id) throws Exception {
         filmService.deleteById(id);
     }
 

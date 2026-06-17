@@ -115,9 +115,7 @@ public class WorkerServiceImpl implements WorkerService {
     public PageResult<Worker> findByPage(Integer page, Integer size, String keyword) {
         LambdaQueryWrapper<Worker> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.hasText(keyword)) {
-            wrapper.and(w -> w.like(Worker::getUsername, keyword)
-                    .or()
-                    .like(Worker::getDepartment, keyword));
+            wrapper.like(Worker::getUsername, keyword);
         }
         wrapper.orderByDesc(Worker::getCreateAt);
         Page<Worker> pageParam = new Page<>(page, size);

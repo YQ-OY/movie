@@ -33,6 +33,9 @@ public class Admin implements Serializable {
     //性别
     private String gender;
 
+    //邮箱
+    private String email;
+
     //个人简介
     private String info;
 

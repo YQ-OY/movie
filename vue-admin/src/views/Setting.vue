@@ -22,16 +22,6 @@
         <el-form-item style="padding: 0" label="电话号码" prop="phone">
           <el-input v-model="worker.phone" maxlength="11" show-word-limit></el-input>
         </el-form-item>
-        <el-form-item label="*入职部门">
-          <el-radio-group style="width: 600px" v-model="worker.department">
-            <el-radio label="客服部"></el-radio>
-            <el-radio label="运营部"></el-radio>
-            <el-radio label="宣传部"></el-radio>
-            <el-radio label="策划部"></el-radio>
-            <el-radio label="人事部"></el-radio>
-            <el-radio label="监管部"></el-radio>
-          </el-radio-group>
-        </el-form-item>
         <el-form-item style="padding-top: 20px">
           <el-button type="primary" @click="onSubmit">更新基本信息</el-button>
         </el-form-item>
@@ -81,7 +71,6 @@ export default {
         phone: '',
         gender: '',
         avatar: '',
-        department: '',
       },
       rules: {
         phone: phoneFormRules

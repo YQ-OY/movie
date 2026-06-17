@@ -35,12 +35,14 @@
             <el-option label="中国大陆" value="中国大陆" />
             <el-option label="中国香港" value="中国香港" />
             <el-option label="中国台湾" value="中国台湾" />
-            <el-option label="日本" value="日本" />
             <el-option label="美国" value="美国" />
             <el-option label="韩国" value="韩国" />
-            <el-option label="英国" value="英国" />
-            <el-option label="法国" value="法国" />
+            <el-option label="日本" value="日本" />
+            <el-option label="泰国" value="泰国" />
             <el-option label="印度" value="印度" />
+            <el-option label="法国" value="法国" />
+            <el-option label="英国" value="英国" />
+            <el-option label="德国" value="德国" />
             <el-option label="其他" value="其他" />
           </el-select>
           <el-select v-model="searchForm.status" clearable placeholder="上架状态" class="search-item">
@@ -124,12 +126,14 @@
                   <el-option label="中国大陆" value="中国大陆" />
                   <el-option label="中国香港" value="中国香港" />
                   <el-option label="中国台湾" value="中国台湾" />
-                  <el-option label="日本" value="日本" />
                   <el-option label="美国" value="美国" />
                   <el-option label="韩国" value="韩国" />
-                  <el-option label="英国" value="英国" />
-                  <el-option label="法国" value="法国" />
+                  <el-option label="日本" value="日本" />
+                  <el-option label="泰国" value="泰国" />
                   <el-option label="印度" value="印度" />
+                  <el-option label="法国" value="法国" />
+                  <el-option label="英国" value="英国" />
+                  <el-option label="德国" value="德国" />
                   <el-option label="其他" value="其他" />
                 </el-select>
               </el-form-item>
